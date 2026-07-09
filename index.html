@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANA | All Nippon Airways — Japan's Airline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body>
+
+<!-- Announcement bar -->
+<div class="announce-bar" id="announceBar">
+  <div class="announce-wrap">
+    <span class="announce-bullet">✦</span>
+    <span class="announce-text" id="announceText"></span>
+    <button class="announce-close" id="announceClose">✕</button>
+  </div>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar" id="navbar" style="top:36px;">
+  <div class="nav-container">
+    <div class="nav-logo">
+      <img src="assets/ana-tail.png" class="ana-logo-img" alt="ANA All Nippon Airways">
+      <div class="logo-divider"></div>
+      <div class="sa-badge">
+        <svg class="sa-ring" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g transform="translate(16,16)"><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(72)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(72)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(144)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(144)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(216)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(216)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(288)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(288)"/></g></svg>
+        <div class="sa-text">
+          <span class="sa-name">star alliance</span>
+          <span class="sa-member">a star alliance member</span>
+        </div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="#" class="nav-link" data-en="Book" data-jp="予約">Book</a>
+      <a href="destinations.html" class="nav-link" data-en="Destinations" data-jp="目的地">Destinations</a>
+      <a href="fleet.html" class="nav-link" data-en="Our Fleet" data-jp="機材">Our Fleet</a>
+      <a href="news.html" class="nav-link" data-en="News" data-jp="ニュース">News</a>
+      <a href="#" class="nav-link" data-en="Experience" data-jp="サービス">Experience</a>
+      <a href="#" class="nav-link" data-en="Help" data-jp="ヘルプ">Help</a>
+    </div>
+    <div class="nav-actions">
+      <div class="currency-mount" id="currencyMount"></div>
+      <button class="lang-toggle" id="langToggle">
+        <span class="lang-option active" id="lang-en">EN</span>
+        <span class="lang-divider">|</span>
+        <span class="lang-option" id="lang-jp">日本語</span>
+      </button>
+      <a href="#" class="btn-book-nav" data-en="Book Now" data-jp="今すぐ予約">Book Now</a>
+    </div>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" id="mobileNavClose">✕</button>
+  <a href="index.html" class="mobile-nav-link" data-en="Book" data-jp="予約">Book</a>
+  <a href="destinations.html" class="mobile-nav-link" data-en="Destinations" data-jp="目的地">Destinations</a>
+  <a href="fleet.html" class="mobile-nav-link" data-en="Our Fleet" data-jp="機材">Our Fleet</a>
+  <a href="news.html" class="mobile-nav-link" data-en="News" data-jp="ニュース">News</a>
+  <a href="#" class="mobile-nav-link" data-en="Experience" data-jp="サービス">Experience</a>
+  <a href="#" class="mobile-nav-link" data-en="Help" data-jp="ヘルプ">Help</a>
+  <div class="mobile-nav-bottom">
+    <a href="#" class="mobile-nav-book" data-en="Book Now" data-jp="今すぐ予約">Book Now</a>
+  </div>
+</div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="hero-bg-slide" id="heroBgA"></div>
+    <div class="hero-bg-slide" id="heroBgB" style="opacity:0;"></div>
+    <div class="hero-overlay"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-text">
+      <p class="hero-tagline" data-en="ALL NIPPON AIRWAYS" data-jp="全日本空輸">ALL NIPPON AIRWAYS</p>
+      <h1 class="hero-title" data-en="All of Japan.<br>All of the World." data-jp="日本全域、<br>そして世界へ。">All of Japan.<br>All of the World.</h1>
+    </div>
+
+    <!-- Search Widget -->
+    <div class="search-widget">
+      <div class="search-tabs">
+        <button class="search-tab active" data-en="Round Trip" data-jp="往復">Round Trip</button>
+        <button class="search-tab" data-en="One Way" data-jp="片道">One Way</button>
+        <button class="search-tab" data-en="Multi-City" data-jp="マルチシティ">Multi-City</button>
+      </div>
+      <!-- Multi-City Form -->
+      <div id="mcForm" style="display:none;">
+        <div id="mcLegs"></div>
+        <div class="mc-controls">
+          <button class="mc-add-btn" id="mcAddBtn">+ Add another flight</button>
+          <button class="search-btn" id="mcSearchBtn">
+            <span>Search All Flights</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="search-form" id="normalForm">
+        <div class="search-row">
+          <div class="search-field" style="position:relative;">
+            <label data-en="FROM" data-jp="出発地">FROM</label>
+            <input type="text" id="input-from" data-placeholder-en="City or airport code" data-placeholder-jp="都市または空港コード" placeholder="City or airport code" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+            <div class="hub-depart-chips">
+              <span class="hub-depart-chip" id="chip-nrt" onclick="setDepartHub('NRT','Tokyo Hub (NRT)','chip-nrt')">&#9992; Tokyo NRT</span>
+              <span class="hub-depart-chip" id="chip-kix" onclick="setDepartHub('KIX','Osaka Hub (KIX)','chip-kix')">&#9992; Osaka KIX</span>
+            </div>
+            <div class="airport-dropdown" id="dropdown-from"></div>
+          </div>
+          <button class="swap-btn" id="swapBtn" title="Swap">⇄</button>
+          <div class="search-field" style="position:relative;">
+            <label data-en="TO" data-jp="目的地">TO</label>
+            <input type="text" id="input-to" data-placeholder-en="City or airport code" data-placeholder-jp="都市または空港コード" placeholder="City or airport code" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+            <div class="airport-dropdown" id="dropdown-to"></div>
+          </div>
+          <div class="search-field">
+            <label data-en="DEPART" data-jp="出発日">DEPART</label>
+            <input type="text" id="input-depart" placeholder="Select date" readonly class="date-input">
+          </div>
+          <div class="search-field" id="returnField">
+            <label data-en="RETURN" data-jp="帰国日">RETURN</label>
+            <input type="text" id="input-return" placeholder="Select date" readonly class="date-input">
+          </div>
+        </div>
+        <div class="search-row search-row-bottom">
+          <div style="display:flex;gap:12px;align-items:flex-end;">
+            <div class="cabin-class">
+              <label data-en="CABIN CLASS" data-jp="客室クラス">CABIN CLASS</label>
+              <select id="input-class">
+                <option data-en="Economy" data-jp="エコノミー">Economy</option>
+                <option data-en="Premium Economy" data-jp="プレミアムエコノミー">Premium Economy</option>
+                <option data-en="Business" data-jp="ビジネス">Business</option>
+                <option data-en="First Class" data-jp="ファースト">First Class</option>
+              </select>
+            </div>
+            <div class="cabin-class">
+              <label data-en="PASSENGERS" data-jp="旅客数">PASSENGERS</label>
+              <select id="input-pax">
+                <option>1 Adult</option>
+                <option>2 Adults</option>
+                <option>3 Adults</option>
+                <option>4 Adults</option>
+              </select>
+            </div>
+          </div>
+          <button class="search-btn" id="searchBtn">
+            <span data-en="Search Flights" data-jp="フライト検索">Search Flights</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </button>
+        </div>
+      </div><!-- end normalForm -->
+
+      <!-- Mini map preview -->
+      <div class="map-preview" id="mapPreview">
+        <div id="mini-map"></div>
+        <div class="map-route-info" id="mapRouteInfo"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Loading overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+  <div class="loading-inner">
+    <img src="assets/ana-tail.png" class="loading-logo" alt="ANA">
+    <div class="loading-tagline">Searching the world for you</div>
+    <div class="loading-track"><div class="loading-bar" id="loadingBar"></div></div>
+    <div class="loading-ad-slot" id="loadingAdSlot">
+      <span class="loading-ad-label">ADVERTISEMENT</span>
+    </div>
+  </div>
+</div>
+
+<!-- Hub Section -->
+<section class="hub-section">
+  <div class="container">
+    <div class="hub-content">
+      <div class="hub-text">
+        <span class="section-tag" data-en="THE ANA NETWORK" data-jp="ANAネットワーク">THE ANA NETWORK</span>
+        <h2 data-en="Japan's Airline,<br><strong>On Every Route</strong>" data-jp="日本の航空会社、<br><strong>あらゆる路線へ</strong>">Japan's Airline,<br><strong>On Every Route</strong></h2>
+        <p data-en="ANA operates high-frequency domestic services connecting Tokyo to Osaka, Fukuoka, Sapporo, Nagoya and Okinawa — alongside three optimised international banks each day linking Japan to North America, Europe, Asia and beyond. Whether you're on a quick business trip to Itami or a long-haul to New York, every ANA flight delivers the same standard of Japanese hospitality." data-jp="ANAは東京と大阪・福岡・札幌・名古屋・沖縄を結ぶ高頻度国内線を運航するとともに、毎日3回の国際線バンクで北米・欧州・アジアへ接続します。伊丹への出張から、ニューヨークへの長距離フライトまで、すべてのANAフライトに日本のおもてなしが息づいています。">ANA operates high-frequency domestic services connecting Tokyo to Osaka, Fukuoka, Sapporo, Nagoya and Okinawa — alongside three optimised international banks each day linking Japan to North America, Europe, Asia and beyond. Whether you're on a quick business trip to Itami or a long-haul to New York, every ANA flight delivers the same standard of Japanese hospitality.</p>
+        <div class="hub-stats">
+          <div class="stat">
+            <span class="stat-num">120+</span>
+            <span class="stat-label" data-en="Destinations" data-jp="目的地">Destinations</span>
+            <span class="stat-sub">domestic & international</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">47</span>
+            <span class="stat-label" data-en="Daily Domestic" data-jp="1日の国内便">Daily Domestic</span>
+            <span class="stat-sub">departures across Japan</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">54+</span>
+            <span class="stat-label" data-en="Countries" data-jp="国・地域">Countries</span>
+            <span class="stat-sub">served internationally</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">5</span>
+            <span class="stat-label" data-en="Runways" data-jp="滑走路">Runways</span>
+            <span class="stat-sub">simultaneous operations</span>
+          </div>
+        </div>
+      </div>
+      <div class="hub-visual">
+        <div class="hub-map-container" id="hubMap"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Popular Destinations -->
+<section class="destinations-section">
+  <div class="container">
+    <span class="section-tag" data-en="POPULAR DESTINATIONS" data-jp="人気目的地">POPULAR DESTINATIONS</span>
+    <h2 data-en="Where Will You Go?" data-jp="どこへ行きますか？">Where Will You Go?</h2>
+    <div class="destinations-grid">
+      <div class="dest-card" data-code="JFK">
+        <div class="dest-card-bg dest-nyc"></div>
+        <div class="dest-card-content">
+          <span class="dest-region" data-en="North America" data-jp="北米">North America</span>
+          <h3>New York</h3>
+          <span class="dest-code">JFK</span>
+        </div>
+      </div>
+      <div class="dest-card" data-code="SIN">
+        <div class="dest-card-bg dest-sin"></div>
+        <div class="dest-card-content">
+          <span class="dest-region" data-en="Southeast Asia" data-jp="東南アジア">Southeast Asia</span>
+          <h3>Singapore</h3>
+          <span class="dest-code">SIN</span>
+        </div>
+      </div>
+      <div class="dest-card" data-code="LHR">
+        <div class="dest-card-bg dest-lhr"></div>
+        <div class="dest-card-content">
+          <span class="dest-region" data-en="Europe" data-jp="ヨーロッパ">Europe</span>
+          <h3>London</h3>
+          <span class="dest-code">LHR</span>
+        </div>
+      </div>
+      <div class="dest-card" data-code="SYD">
+        <div class="dest-card-bg dest-syd"></div>
+        <div class="dest-card-content">
+          <span class="dest-region" data-en="Oceania" data-jp="オセアニア">Oceania</span>
+          <h3>Sydney</h3>
+          <span class="dest-code">SYD</span>
+        </div>
+      </div>
+      <div class="dest-card" data-code="DOH">
+        <div class="dest-card-bg dest-dxb"></div>
+        <div class="dest-card-content">
+          <span class="dest-region" data-en="Middle East" data-jp="中東">Middle East</span>
+          <h3>Doha</h3>
+          <span class="dest-code">DOH</span>
+        </div>
+      </div>
+      <div class="dest-card" data-code="HKG">
+        <div class="dest-card-bg dest-hkg"></div>
+        <div class="dest-card-content">
+          <span class="dest-region" data-en="Asia" data-jp="アジア">Asia</span>
+          <h3>Hong Kong</h3>
+          <span class="dest-code">HKG</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Cabin Classes -->
+<section class="cabins-section">
+  <div class="container">
+    <span class="section-tag" data-en="TRAVEL IN STYLE" data-jp="スタイルで旅する">TRAVEL IN STYLE</span>
+    <h2 data-en="Your Journey, Your Way" data-jp="あなたの旅、あなたのスタイルで">Your Journey, Your Way</h2>
+    <div class="cabins-grid">
+      <div class="cabin-card cabin-first">
+        <div class="cabin-bg"></div>
+        <div class="cabin-content">
+          <span class="cabin-tag" data-en="First Class" data-jp="ファーストクラス">First Class</span>
+          <h3 data-en="The Pinnacle<br>of Luxury" data-jp="贅沢の<br>頂点">The Pinnacle<br>of Luxury</h3>
+          <p data-en="1-1-1 configuration. Your private suite above the clouds." data-jp="1-1-1配置。雲の上のプライベートスイート。">1-1-1 configuration. Your private suite above the clouds.</p>
+        </div>
+      </div>
+      <div class="cabin-card cabin-business">
+        <div class="cabin-bg"></div>
+        <div class="cabin-content">
+          <span class="cabin-tag" data-en="Business" data-jp="ビジネス">Business</span>
+          <h3 data-en="Arrive<br>Refreshed" data-jp="すっきりと<br>到着">Arrive<br>Refreshed</h3>
+          <p data-en="Full lie-flat with direct aisle access." data-jp="フルフラットで直接通路アクセス。">Full lie-flat with direct aisle access.</p>
+        </div>
+      </div>
+      <div class="cabin-card cabin-premium">
+        <div class="cabin-bg"></div>
+        <div class="cabin-content">
+          <span class="cabin-tag" data-en="Premium Economy" data-jp="プレミアムエコノミー">Premium Economy</span>
+          <h3 data-en="More Space,<br>More You" data-jp="より広く、<br>より快適">More Space,<br>More You</h3>
+          <p data-en="Extra legroom, premium dining." data-jp="広い足元スペースとプレミアムダイニング。">Extra legroom, premium dining.</p>
+        </div>
+      </div>
+      <div class="cabin-card cabin-economy">
+        <div class="cabin-bg"></div>
+        <div class="cabin-content">
+          <span class="cabin-tag" data-en="Economy" data-jp="エコノミー">Economy</span>
+          <h3 data-en="Smart Value,<br>ANA Quality" data-jp="スマートな選択、<br>ANA品質">Smart Value,<br>ANA Quality</h3>
+          <p data-en="Award-winning service on every flight." data-jp="全フライトで受賞歴のあるサービス。">Award-winning service on every flight.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="logo-mark">ANA</div>
+          <div class="logo-text">
+            <span class="logo-en">All Nippon Airways</span>
+            <span class="logo-jp">全日本空輸</span>
+          </div>
+        </div>
+        <p data-en="Japan's airline. Connecting the world." data-jp="日本の航空会社。世界をつなぐ。">Japan's airline. Connecting the world.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4 data-en="Book" data-jp="予約">Book</h4>
+          <a href="#" data-en="Flights" data-jp="フライト">Flights</a>
+          <a href="#" data-en="Hotels" data-jp="ホテル">Hotels</a>
+          <a href="#" data-en="Packages" data-jp="パッケージ">Packages</a>
+        </div>
+        <div class="footer-col">
+          <h4 data-en="Explore" data-jp="探索">Explore</h4>
+          <a href="destinations.html" data-en="Destinations" data-jp="目的地">Destinations</a>
+          <a href="fleet.html" data-en="Our Fleet" data-jp="機材">Our Fleet</a>
+          <a href="#" data-en="Cabin Classes" data-jp="客室クラス">Cabin Classes</a>
+        </div>
+        <div class="footer-col">
+          <h4 data-en="Hub" data-jp="ハブ">Hub</h4>
+          <a href="#" data-en="Tokyo Mega Airport" data-jp="東京メガエアポート">Tokyo Mega Airport</a>
+          <a href="#" data-en="Transfer Guide" data-jp="乗継ガイド">Transfer Guide</a>
+          <a href="#" data-en="Terminal Map" data-jp="ターミナルマップ">Terminal Map</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p data-en="© 2026 ANA — All Nippon Airways." data-jp="© 2026 ANA — 全日本空輸。">© 2026 ANA — All Nippon Airways.</p>
+      <div class="footer-bottom-links">
+        <a href="#" data-en="Privacy" data-jp="プライバシー">Privacy</a>
+        <a href="#" data-en="Terms" data-jp="利用規約">Terms</a>
+        <a href="#" data-en="Accessibility" data-jp="アクセシビリティ">Accessibility</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/airports.js"></script>
+<script src="js/currencies.js"></script>
+<script src="js/flights.js"></script>
+<script src="js/map.js"></script>
+<script src="js/app.js"></script>
+<script src="js/nav.js"></script>
+</body>
+</html>

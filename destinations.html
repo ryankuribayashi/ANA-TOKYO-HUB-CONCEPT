@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANA | Destinations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+/* ── Page layout ───────────────────────────────────────────── */
+.dest-page-wrap { margin-top: 72px; }
+
+/* ── Filter bar (sticky) ────────────────────────────────────── */
+.dest-filter-bar {
+  position: sticky; top: 72px; z-index: 500;
+  background: rgba(0,10,32,0.97); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(201,168,76,0.2);
+  padding: 0 24px; display: flex; align-items: center; gap: 6px;
+  height: 52px; overflow-x: auto; white-space: nowrap;
+}
+.dest-filter-bar::-webkit-scrollbar { display: none; }
+.df-btn {
+  padding: 6px 18px; border: 1px solid rgba(255,255,255,0.2);
+  background: transparent; color: rgba(255,255,255,0.75);
+  font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0;
+  font-family: inherit; letter-spacing: 0.04em; border-radius: 2px;
+  transition: all 0.18s ease;
+}
+.df-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.df-btn.active { background: var(--gold); border-color: var(--gold); color: var(--navy-dark); }
+.df-btn-kix { border-color: rgba(11,61,145,0.5); color: rgba(147,197,253,0.9); }
+.df-btn-kix:hover { background: rgba(11,61,145,0.3); border-color: #60A5FA; color: #fff; }
+.df-btn-kix.active { background: #0B3D91; border-color: #0B3D91; color: #fff; }
+
+/* ── Map section ─────────────────────────────────────────────── */
+.dest-map-section {
+  background: #fff;
+  padding: 24px;
+  border-bottom: 1px solid #E5E7EB;
+}
+.dest-map-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px; flex-wrap: wrap; gap: 10px;
+}
+.dest-map-title { font-size: 17px; font-weight: 900; color: #0A1628; letter-spacing: -0.01em; }
+.dest-map-legend { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.dml-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #6B7280; font-weight: 500; }
+.dml-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+.dest-map-frame {
+  position: relative; border: 1.5px solid #D1D5DB; border-radius: 8px;
+  overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+}
+#dest-map { height: 480px; width: 100%; display: block; }
+
+.dest-map-vignette {
+  position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background: radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(0,0,0,0.14) 100%);
+}
+
+.dest-map-stats {
+  display: flex; margin-top: 16px;
+  border: 1px solid #E5E7EB; border-radius: 6px; overflow: hidden;
+}
+.dms-item {
+  flex: 1; padding: 13px 16px; text-align: center;
+  border-right: 1px solid #E5E7EB;
+}
+.dms-item:last-child { border-right: none; }
+.dms-num { font-size: 22px; font-weight: 900; color: #C9A84C; display: block; line-height: 1.2; }
+.dms-label { font-size: 9.5px; color: #9CA3AF; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; display: block; }
+
+/* ── Info panel (fixed overlay) ──────────────────────────────── */
+.dest-panel {
+  position: fixed; top: 124px; right: -380px; bottom: 0;
+  width: 360px; z-index: 600;
+  background: #fff; border-left: 1px solid #E5E7EB;
+  box-shadow: -8px 0 40px rgba(0,0,0,0.2);
+  transition: right 0.3s cubic-bezier(0.4,0,0.2,1);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.dest-panel.open { right: 0; }
+.dp-header {
+  background: linear-gradient(135deg,#000C24 0%,#0B2E6B 100%);
+  padding: 20px 20px 16px; position: relative; flex-shrink: 0;
+}
+.dp-close {
+  position: absolute; top: 14px; right: 14px;
+  background: rgba(255,255,255,0.12); border: none;
+  color: #fff; width: 28px; height: 28px; border-radius: 2px;
+  cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;
+}
+.dp-close:hover { background: rgba(255,255,255,0.22); }
+.dp-flag { font-size: 32px; margin-bottom: 8px; }
+.dp-code { font-size: 28px; font-weight: 900; color: var(--gold); letter-spacing: 0.06em; }
+.dp-city { font-size: 17px; font-weight: 800; color: #fff; margin-top: 2px; }
+.dp-airport { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 3px; }
+.dp-body { flex: 1; overflow-y: auto; }
+.dp-body::-webkit-scrollbar { width: 4px; }
+.dp-body::-webkit-scrollbar-thumb { background: #CBD5E0; }
+.dp-section { padding: 14px 20px; border-bottom: 1px solid #F3F4F6; }
+.dp-kix-section { background: #F0F4FF; border-top: 2px solid #0B3D91; padding: 12px 20px 4px; }
+.dp-kix-label { font-size: 9px; font-weight: 800; letter-spacing: 0.14em; color: #0B3D91; text-transform: uppercase; margin-bottom: 8px; }
+.dp-section-label { font-size: 9px; font-weight: 800; letter-spacing: 0.16em; color: #9CA3AF; text-transform: uppercase; margin-bottom: 6px; }
+.dp-section-val { font-size: 13px; font-weight: 600; color: #1A1A2E; line-height: 1.5; }
+.dp-section-val.gold { color: var(--navy); font-size: 18px; font-weight: 900; }
+.dp-banks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.dp-bank-chip { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 2px; border: 1px solid rgba(11,61,145,0.15); background: #EEF2FF; color: var(--navy); }
+.dp-bank-chip.morning { background: #FFF7ED; color: #92400E; border-color: rgba(146,64,14,0.15); }
+.dp-bank-chip.afternoon { background: #F0FDF4; color: #065F46; border-color: rgba(6,95,70,0.15); }
+.dp-bank-chip.night { background: #1A1A2E; color: #C9A84C; border-color: rgba(201,168,76,0.2); }
+.dp-cabins { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.dp-cabin { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #374151; }
+.dp-cabin-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dp-ac-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.dp-ac-chip { font-size: 11px; font-weight: 700; background: #F9FAFB; border: 1px solid #E5E7EB; padding: 3px 8px; color: #374151; border-radius: 2px; }
+.dp-via-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.3); padding: 5px 10px; border-radius: 2px; font-size: 11px; font-weight: 700; color: #92400E; }
+.dp-footer { padding: 16px 20px; border-top: 1px solid #E5E7EB; flex-shrink: 0; }
+.dp-book-btn { width: 100%; padding: 13px; background: var(--navy); color: #fff; border: none; font-family: inherit; font-size: 13px; font-weight: 800; letter-spacing: 0.05em; cursor: pointer; border-radius: 2px; transition: background 0.2s; }
+.dp-book-btn:hover { background: var(--navy-dark); }
+.dest-popup-inner { font-family:'Inter',sans-serif; font-size:12px; font-weight:600; color:#fff; text-align:center; }
+
+/* ── Routes section ──────────────────────────────────────────── */
+.routes-section { background: #F4F6FA; padding: 40px 24px 72px; }
+
+.routes-section-header {
+  max-width: 1440px; margin: 0 auto 20px;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+}
+.routes-section-title { font-size: 22px; font-weight: 900; color: #0A1628; letter-spacing: -0.02em; }
+.routes-section-sub { font-size: 11.5px; color: #9CA3AF; font-weight: 500; margin-top: 4px; }
+
+/* Jump nav */
+.rt-jumps {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  max-width: 1440px; margin: 0 auto 28px;
+}
+.rt-jump {
+  font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+  border: 1px solid #D1D5DB; color: #374151; background: #fff;
+  text-decoration: none; transition: all 0.14s ease; white-space: nowrap;
+}
+.rt-jump:hover { background: #0B3D91; color: #fff; border-color: #0B3D91; }
+
+/* Category block */
+.rt-category { max-width: 1440px; margin: 0 auto 36px; scroll-margin-top: 132px; }
+.rt-cat-hdr {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0 10px 14px; margin-bottom: 8px;
+  border-left: 4px solid;
+}
+.rt-cat-name { font-size: 11px; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; }
+.rt-cat-ct { font-size: 11px; color: #9CA3AF; font-weight: 500; }
+
+/* Table */
+.rt-table {
+  width: 100%; border-collapse: collapse; background: #fff;
+  border: 1px solid #E5E7EB; border-radius: 6px; overflow: hidden;
+}
+.rt-table th {
+  background: #F9FAFB; padding: 9px 11px;
+  text-align: left; font-size: 9px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: #9CA3AF;
+  border-bottom: 1px solid #E5E7EB; white-space: nowrap;
+}
+.rt-row { border-bottom: 1px solid #F3F4F6; cursor: pointer; transition: background 0.1s; }
+.rt-row:last-child { border-bottom: none; }
+.rt-row:hover { background: #EFF6FF; }
+.rt-row td { padding: 9px 11px; vertical-align: middle; font-size: 12px; color: #1F2937; }
+
+/* KIX sub-row */
+.rt-kix-row { border-bottom: 1px solid #EDE9FF; background: #FAF8FF; cursor: pointer; }
+.rt-kix-row:last-child { border-bottom: none; }
+.rt-kix-row:hover { background: #EDE9FF; }
+.rt-kix-row td { padding: 5px 11px; vertical-align: middle; font-size: 11px; color: #374151; }
+
+/* Destination cell */
+.rt-dc { display: flex; align-items: center; gap: 8px; }
+.rt-flag-c { font-size: 17px; flex-shrink: 0; }
+.rt-di { display: flex; flex-direction: column; }
+.rt-iata { font-size: 13px; font-weight: 800; color: #0A1628; letter-spacing: 0.03em; line-height: 1.2; }
+.rt-cname { font-size: 10px; color: #9CA3AF; font-weight: 500; max-width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Hub tags */
+.hub-tag { display: inline-block; font-size: 8.5px; font-weight: 800; padding: 2px 6px; border-radius: 2px; letter-spacing: 0.05em; white-space: nowrap; }
+.hub-nrt { background: #C9A84C; color: #fff; }
+.hub-kix { background: #0B3D91; color: #fff; }
+
+/* Via badge */
+.rt-via-badge { display: inline-block; font-size: 8px; font-weight: 800; padding: 1px 5px; border-radius: 2px; background: #FEF3C7; color: #92400E; letter-spacing: 0.05em; text-transform: uppercase; flex-shrink: 0; }
+.rt-kix-via-lbl { font-size: 8.5px; font-weight: 800; color: #6D28D9; letter-spacing: 0.05em; text-transform: uppercase; }
+
+/* Time chips */
+.rt-tc { display: inline-block; background: #EEF2FF; color: #3730A3; font-size: 9.5px; font-weight: 700; padding: 2px 5px; border-radius: 3px; margin: 1px 2px 1px 0; letter-spacing: 0.02em; }
+.rt-tc-kix { background: #EDE9FF; color: #5B21B6; }
+
+/* Cell content styles */
+.rt-acft-c { font-size: 11px; color: #374151; line-height: 1.5; }
+.rt-dur-c { font-size: 12px; font-weight: 700; color: #0A1628; white-space: nowrap; }
+.rt-via-note { font-size: 9px; color: #9CA3AF; font-weight: 500; display: block; }
+.rt-freq-c { font-size: 11px; font-weight: 600; color: #374151; white-space: nowrap; }
+.rt-price-c { font-size: 12px; font-weight: 700; color: #0A1628; white-space: nowrap; }
+.rt-null { color: #D1D5DB; }
+.rt-pname { font-size: 10px; font-weight: 700; color: #065F46; background: #F0FDF4; padding: 2px 6px; border-radius: 2px; display: inline-block; white-space: nowrap; }
+.rt-pno { font-size: 10px; color: #9CA3AF; display: block; margin-top: 2px; white-space: nowrap; }
+.rt-freedom { font-size: 10px; font-weight: 700; color: #92400E; background: #FEF3C7; padding: 2px 6px; border-radius: 2px; display: inline-block; }
+
+/* ── Mobile ───────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  #dest-map { height: 320px; }
+  .dest-map-section { padding: 12px; }
+  .dms-item { padding: 10px 8px; }
+  .dms-num { font-size: 18px; }
+  .routes-section { padding: 24px 10px 40px; }
+  .dest-panel { top: 102px; right: -100vw; width: 100%; bottom: 0; }
+  .dest-panel.open { right: 0; }
+  th.rt-h-flight, td.rt-c-flight,
+  th.rt-h-partner, td.rt-c-partner { display: none; }
+}
+@media (max-width: 520px) {
+  th.rt-h-deps, td.rt-c-deps,
+  th.rt-h-biz,  td.rt-c-biz  { display: none; }
+  .rt-jumps { display: none; }
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo" style="text-decoration:none;">
+      <img src="assets/ana-tail.png" class="ana-logo-img" alt="ANA">
+      <div class="logo-divider"></div>
+      <div class="sa-badge">
+        <svg class="sa-ring" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g transform="translate(16,16)"><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(72)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(72)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(144)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(144)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(216)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(216)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(288)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(288)"/></g></svg>
+        <div class="sa-text">
+          <span class="sa-name">star alliance</span>
+          <span class="sa-member">a star alliance member</span>
+        </div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Book</a>
+      <a href="destinations.html" class="nav-link" style="color:var(--gold);font-weight:700;">Destinations</a>
+      <a href="fleet.html" class="nav-link">Our Fleet</a>
+      <a href="news.html" class="nav-link">News</a>
+      <a href="#" class="nav-link">Experience</a>
+    </div>
+    <div class="nav-actions">
+      <a href="index.html" class="btn-book-nav">Book Now</a>
+    </div>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" id="mobileNavClose">✕</button>
+  <a href="index.html" class="mobile-nav-link">Book</a>
+  <a href="destinations.html" class="mobile-nav-link" style="color:var(--gold);">Destinations</a>
+  <a href="fleet.html" class="mobile-nav-link">Our Fleet</a>
+  <a href="news.html" class="mobile-nav-link">News</a>
+  <a href="#" class="mobile-nav-link">Experience</a>
+  <div class="mobile-nav-bottom">
+    <a href="index.html" class="mobile-nav-book">Book Now</a>
+  </div>
+</div>
+
+<!-- ── Page wrapper (below fixed nav) ──────────────────────────── -->
+<div class="dest-page-wrap">
+
+  <!-- Filter bar -->
+  <div class="dest-filter-bar">
+    <button class="df-btn active" data-region="all">All Destinations</button>
+    <button class="df-btn" data-region="domestic">Domestic</button>
+    <button class="df-btn df-btn-kix" data-region="kix">✦ Osaka Hub KIX</button>
+    <button class="df-btn" data-region="asia">Asia</button>
+    <button class="df-btn" data-region="na">North America</button>
+    <button class="df-btn" data-region="europe">Europe</button>
+    <button class="df-btn" data-region="me">Middle East</button>
+    <button class="df-btn" data-region="africa">Africa</button>
+    <button class="df-btn" data-region="oceania">Oceania</button>
+  </div>
+
+  <!-- ── Map section ── -->
+  <section class="dest-map-section">
+    <div class="dest-map-header">
+      <div>
+        <div class="dest-map-title">Route Network</div>
+      </div>
+      <div class="dest-map-legend">
+        <div class="dml-item"><div class="dml-dot" style="background:#C9A84C;box-shadow:0 0 6px #C9A84C80;"></div>Tokyo Hub (NRT)</div>
+        <div class="dml-item"><div class="dml-dot" style="background:#0B3D91;box-shadow:0 0 6px #0B3D9180;"></div>Osaka Hub (KIX)</div>
+        <div class="dml-item"><div class="dml-dot" style="background:#F59E0B;"></div>Asia</div>
+        <div class="dml-item"><div class="dml-dot" style="background:#3B82F6;"></div>Americas</div>
+        <div class="dml-item"><div class="dml-dot" style="background:#10B981;"></div>Europe</div>
+        <div class="dml-item"><div class="dml-dot" style="background:#EC4899;"></div>Domestic</div>
+      </div>
+    </div>
+
+    <div class="dest-map-frame">
+      <div id="dest-map"></div>
+      <div class="dest-map-vignette"></div>
+    </div>
+
+    <div class="dest-map-stats">
+      <div class="dms-item">
+        <span class="dms-num" id="dsbTotal">0</span>
+        <span class="dms-label">Destinations</span>
+      </div>
+      <div class="dms-item">
+        <span class="dms-num">3</span>
+        <span class="dms-label">Daily Banks</span>
+      </div>
+      <div class="dms-item">
+        <span class="dms-num">5</span>
+        <span class="dms-label">Continents</span>
+      </div>
+      <div class="dms-item">
+        <span class="dms-num" id="dsbCountries">0</span>
+        <span class="dms-label">Countries &amp; Territories</span>
+      </div>
+      <div class="dms-item">
+        <span class="dms-num">2</span>
+        <span class="dms-label">Hubs</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Routes list section ── -->
+  <section class="routes-section">
+    <div class="routes-section-header">
+      <div>
+        <div class="routes-section-title">Full Route Network</div>
+        <div class="routes-section-sub">Schedules, aircraft, pricing & codeshare for all ANA destinations</div>
+      </div>
+    </div>
+
+    <!-- Jump-to navigation -->
+    <div class="rt-jumps">
+      <a class="rt-jump" href="#rt-domestic">Domestic</a>
+      <a class="rt-jump" href="#rt-eastasia">East Asia &amp; Pacific</a>
+      <a class="rt-jump" href="#rt-seastasia">Southeast Asia</a>
+      <a class="rt-jump" href="#rt-southasia">South &amp; Central Asia</a>
+      <a class="rt-jump" href="#rt-na">North America</a>
+      <a class="rt-jump" href="#rt-europe">Europe</a>
+      <a class="rt-jump" href="#rt-me">Middle East</a>
+      <a class="rt-jump" href="#rt-africa">Africa</a>
+      <a class="rt-jump" href="#rt-oceania">Oceania</a>
+    </div>
+
+    <div id="routeTableContainer"></div>
+  </section>
+
+</div><!-- /.dest-page-wrap -->
+
+<!-- ── Destination info panel (fixed overlay) ── -->
+<div class="dest-panel" id="destPanel">
+  <div class="dp-header">
+    <button class="dp-close" id="dpClose">✕</button>
+    <div id="dpFlag" class="dp-flag"></div>
+    <div id="dpCode" class="dp-code"></div>
+    <div id="dpCity" class="dp-city"></div>
+    <div id="dpAirport" class="dp-airport"></div>
+  </div>
+  <div class="dp-body" id="dpBody"></div>
+  <div class="dp-footer">
+    <button class="dp-book-btn" id="dpBookBtn">Search Flights →</button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/airports.js"></script>
+<script src="js/flights.js?v=10"></script>
+<script>
+/* ─── Shared data ─────────────────────────────────────────── */
+const DEST_REGIONS = {
+  asia:    ['PEK','PVG','HKG','ICN','SIN','TPE','TSA','BKK','MNL','CGK','KUL','SGN','HAN','DEL','BOM','BLR','HYD','GUM',
+            'CAN','SZX','MFM','HGH','GMP','PUS','TSN','DAC','KHI','CTU','XIY','CEB','SUB','TAE','KWJ','CJU','HKT','KHH',
+            'RGN','KTM','MLE','CMB','ULN','PNH','VTE'],
+  domestic:['OKA','FUK','ITM','NGO','CTS'],
+  na:      ['JFK','LAX','SFO','ORD','SEA','IAH','BOS','IAD','DEN','DTW','ATL','DFW','MSP','SAN','HNL','EWR','AUS',
+            'YVR','YYZ','YYC','YUL','MEX','PHL','LAS','SLC','PHX','CLT','PDX','MTY','SJC','PTY','MIA','MCO','IND','STL','MCI','ANC'],
+  europe:  ['LHR','CDG','FRA','MUC','IST','BRU','ZRH','VIE','FCO','ARN','HEL','WAW','GVA','MXP',
+            'AMS','DUB','CPH','OSL','LIS','MAD','BCN','ATH','BUD','ZAG','PRG','BER'],
+  me:      ['DOH','AUH','DXB'],
+  africa:  ['CAI','ADD','JNB'],
+  oceania: ['SYD','MEL','BNE','PER','AKL','CNS'],
+};
+const REGION_COLORS = {
+  asia:'#F59E0B',na:'#3B82F6',europe:'#10B981',me:'#8B5CF6',africa:'#EF4444',oceania:'#06B6D4',domestic:'#EC4899',
+};
+const FLAGS = {
+  'Japan':'🇯🇵','USA':'🇺🇸','Canada':'🇨🇦','Mexico':'🇲🇽','Costa Rica':'🇨🇷','Panama':'🇵🇦',
+  'China':'🇨🇳','Hong Kong':'🇭🇰','Macau':'🇲🇴','South Korea':'🇰🇷','Taiwan':'🇹🇼',
+  'Singapore':'🇸🇬','Thailand':'🇹🇭','Philippines':'🇵🇭','Indonesia':'🇮🇩',
+  'Malaysia':'🇲🇾','Vietnam':'🇻🇳','Myanmar':'🇲🇲','Cambodia':'🇰🇭','Laos':'🇱🇦',
+  'India':'🇮🇳','Pakistan':'🇵🇰','Bangladesh':'🇧🇩','Nepal':'🇳🇵','Sri Lanka':'🇱🇰',
+  'Maldives':'🇲🇻','Mongolia':'🇲🇳','Guam':'🇬🇺',
+  'UK':'🇬🇧','France':'🇫🇷','Germany':'🇩🇪','Austria':'🇦🇹','Switzerland':'🇨🇭',
+  'Italy':'🇮🇹','Spain':'🇪🇸','Portugal':'🇵🇹','Netherlands':'🇳🇱','Belgium':'🇧🇪',
+  'Ireland':'🇮🇪','Denmark':'🇩🇰','Norway':'🇳🇴','Sweden':'🇸🇪','Finland':'🇫🇮',
+  'Poland':'🇵🇱','Greece':'🇬🇷','Hungary':'🇭🇺','Croatia':'🇭🇷','Czech Republic':'🇨🇿','Turkey':'🇹🇷',
+  'Qatar':'🇶🇦','UAE':'🇦🇪','Egypt':'🇪🇬','Ethiopia':'🇪🇹','South Africa':'🇿🇦',
+  'Australia':'🇦🇺','New Zealand':'🇳🇿',
+};
+const ACFT_NAME = {1:'Boeing 777-9',2:'Airbus A350-1000',3:'Boeing 787-9',4:'Airbus A350-900',5:'Boeing 787-8',6:'Airbus A350-900',7:'Boeing 787-8'};
+const ACFT_SHORT = {1:'B777-9',2:'A350-1000',3:'B787-9',4:'A350-900',5:'B787-8',6:'A350-900',7:'B787-8'};
+
+function toHH(m) { const n=((m%1440)+1440)%1440; return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0'); }
+function bankLabel(mins) {
+  if (mins>=360&&mins<690) return ['morning','☀ Morning'];
+  if (mins>=690&&mins<1020) return ['afternoon','🌤 Afternoon'];
+  return ['night','🌙 Night'];
+}
+
+/* ─── Map ─────────────────────────────────────────────────── */
+const dMap = L.map('dest-map', {
+  zoomControl: true, scrollWheelZoom: true, attributionControl: false,
+  maxBounds: [[-78,-30],[78,335]],
+  maxBoundsViscosity: 1.0,
+  minZoom: 2, zoomSnap: 0.5,
+  worldCopyJump: false,
+}).setView([18,152],2.5);
+
+L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  { maxZoom:18 }
+).addTo(dMap);
+
+function pacificLng(lng) { return lng < -10 ? lng + 360 : lng; }
+dMap.zoomControl.setPosition('bottomleft');
+
+/* NRT hub marker */
+const nrtIcon = L.divIcon({
+  className:'',
+  html:`<div style="position:relative;display:flex;align-items:center;justify-content:center;width:28px;height:28px;">
+    <div style="position:absolute;width:28px;height:28px;border-radius:50%;border:2px solid rgba(201,168,76,0.5);animation:hubRingPulse 2.2s ease-out infinite;"></div>
+    <div style="position:absolute;width:28px;height:28px;border-radius:50%;border:2px solid rgba(201,168,76,0.3);animation:hubRingPulse 2.2s ease-out 1.1s infinite;"></div>
+    <div style="width:14px;height:14px;border-radius:50%;background:#C9A84C;border:2.5px solid #fff;box-shadow:0 0 14px rgba(201,168,76,0.9);position:relative;z-index:1;"></div>
+  </div>`,
+  iconSize:[28,28],iconAnchor:[14,14],
+});
+L.marker([35.7647,140.3865],{icon:nrtIcon,zIndexOffset:2000}).addTo(dMap)
+  .bindTooltip('Tokyo Hub (NRT)',{permanent:false,className:'map-label map-label-hub',direction:'top',offset:[0,-10]});
+
+/* KIX hub marker */
+const kixIcon = L.divIcon({
+  className:'',
+  html:`<div style="position:relative;display:flex;align-items:center;justify-content:center;width:22px;height:22px;">
+    <div style="position:absolute;width:22px;height:22px;border-radius:50%;border:2px solid rgba(11,61,145,0.5);animation:hubRingPulse 2.6s ease-out infinite;"></div>
+    <div style="position:absolute;width:22px;height:22px;border-radius:50%;border:2px solid rgba(11,61,145,0.3);animation:hubRingPulse 2.6s ease-out 1.3s infinite;"></div>
+    <div style="width:11px;height:11px;border-radius:50%;background:#0B3D91;border:2px solid #fff;box-shadow:0 0 10px rgba(11,61,145,0.8);position:relative;z-index:1;"></div>
+  </div>`,
+  iconSize:[22,22],iconAnchor:[11,11],
+});
+L.marker([34.4347,135.2440],{icon:kixIcon,zIndexOffset:1900}).addTo(dMap)
+  .bindTooltip('Osaka Hub (KIX)',{permanent:false,className:'map-label map-label-hub',direction:'top',offset:[0,-8]});
+
+/* Destination markers */
+let allMarkers={}, activeRouteLine=null, currentCode=null;
+let totalDests=0; const countrySet=new Set();
+
+for (const [region,codes] of Object.entries(DEST_REGIONS)) {
+  codes.forEach(code=>{
+    const ap=AIRPORTS[code]; if(!ap) return;
+    totalDests++;
+    if(ap.country && region!=='domestic') countrySet.add(ap.country);
+    const color=REGION_COLORS[region];
+    const icon=L.divIcon({
+      className:'',
+      html:`<div style="width:9px;height:9px;border-radius:50%;background:${color};border:1.5px solid rgba(255,255,255,0.8);box-shadow:0 0 6px ${color}80;"></div>`,
+      iconSize:[9,9],iconAnchor:[4.5,4.5],
+    });
+    const mk=L.marker([ap.lat,pacificLng(ap.lng)],{icon,zIndexOffset:100}).addTo(dMap);
+    mk.bindTooltip(`<div class="dest-popup-inner"><strong>${code}</strong><br>${ap.city}</div>`,
+      {permanent:false,className:'map-label',direction:'top',offset:[0,-7]});
+    mk.on('click',()=>showDestInfo(code,color));
+    allMarkers[code]={marker:mk,region,color};
+  });
+}
+document.getElementById('dsbTotal').textContent = totalDests;
+document.getElementById('dsbCountries').textContent = countrySet.size+'+';
+
+/* ─── Info panel ──────────────────────────────────────────── */
+function showDestInfo(code, color) {
+  currentCode=code;
+  const ap=AIRPORTS[code];
+  const s=SCHEDULE?SCHEDULE[code]:null;
+  const v=VIA_CONNECTIONS?VIA_CONNECTIONS[code]:null;
+  const flag=FLAGS[ap.country]||'🌍';
+  document.getElementById('dpFlag').textContent=flag;
+  document.getElementById('dpCode').textContent=code;
+  document.getElementById('dpCity').textContent=ap.city;
+  document.getElementById('dpAirport').textContent=ap.name;
+
+  let html='';
+  if(s){
+    const WEEKLY_4_5=new Set(['PHL','LAS','SLC','PHX','CLT','PDX','MTY','SJC','PTY','IND','STL','MCI','ANC','AUS','TAE','KWJ','CJU','HKT','KHH','RGN','KTM','MLE','CMB','ULN','PNH','VTE','CNS']);
+    const freq=s.outDeps.length>=3?s.outDeps.length+'× Daily':s.outDeps.length===2?'2× Daily':WEEKLY_4_5.has(code)?'4–5× Weekly':'Daily';
+    html+=`<div class="dp-section"><div class="dp-section-label">Service Frequency</div><div class="dp-section-val">${freq}</div></div>`;
+    html+=`<div class="dp-section"><div class="dp-section-label">NRT Departures</div><div class="dp-banks">`;
+    s.outDeps.forEach(dep=>{const[cls,lbl]=bankLabel(dep);html+=`<span class="dp-bank-chip ${cls}">${lbl} ${toHH(dep)} JST</span>`;});
+    html+=`</div></div>`;
+    const acSet=[...new Set(s.ac)];
+    html+=`<div class="dp-section"><div class="dp-section-label">Aircraft</div><div class="dp-ac-chips">`;
+    acSet.forEach(a=>{html+=`<span class="dp-ac-chip">${ACFT_NAME[a]}</span>`;});
+    html+=`</div></div>`;
+    const isDomestic=s.domestic===true;
+    const hasFC=!isDomestic&&s.ac.some(a=>[1,2,4].includes(a));
+    html+=`<div class="dp-section"><div class="dp-section-label">Cabin Classes</div><div class="dp-cabins">`;
+    if(hasFC) html+=`<div class="dp-cabin"><div class="dp-cabin-dot" style="background:#C9A84C;"></div>First Class</div>`;
+    if(!isDomestic) html+=`<div class="dp-cabin"><div class="dp-cabin-dot" style="background:#0B3D91;"></div>Business</div>`;
+    if(isDomestic) html+=`<div class="dp-cabin"><div class="dp-cabin-dot" style="background:#7C3AED;"></div>ANA Premium Class</div>`;
+    if(!isDomestic) html+=`<div class="dp-cabin"><div class="dp-cabin-dot" style="background:#60A5FA;"></div>Premium Economy</div>`;
+    html+=`<div class="dp-cabin"><div class="dp-cabin-dot" style="background:#9CA3AF;"></div>Economy</div>`;
+    html+=`</div></div>`;
+    if(s.prices?.e) html+=`<div class="dp-section"><div class="dp-section-label">Economy from</div><div class="dp-section-val gold">¥${s.prices.e.toLocaleString()}</div></div>`;
+    if(s.prices?.bc) html+=`<div class="dp-section"><div class="dp-section-label">${isDomestic?'ANA Premium Class from':'Business from'}</div><div class="dp-section-val gold" style="font-size:15px;">¥${s.prices.bc.toLocaleString()}</div></div>`;
+    if(s.partner) html+=`<div class="dp-section"><div class="dp-section-label">Codeshare</div><div class="dp-section-val">${s.partner} · ${s.partnerNo}</div></div>`;
+    html+=`<div class="dp-section"><div class="dp-section-label">Return Arrivals at NRT</div><div class="dp-banks">`;
+    s.inArrs.forEach(arr=>{html+=`<span class="dp-bank-chip" style="background:#F9FAFB;color:#374151;border-color:#E5E7EB;">${toHH(arr)} JST</span>`;});
+    html+=`</div></div>`;
+  } else if(v){
+    const viaAp=AIRPORTS[v.viaCode];
+    html+=`<div class="dp-section"><div class="dp-section-label">Service Type</div><div class="dp-via-badge">✦ ${v.note.toUpperCase()}</div></div>`;
+    html+=`<div class="dp-section"><div class="dp-section-label">Connecting Hub</div><div class="dp-section-val">${viaAp?.city||v.viaCode} (${v.viaCode})</div></div>`;
+    html+=`<div class="dp-section"><div class="dp-section-label">Operated by</div><div class="dp-section-val">${v.partner}</div></div>`;
+    html+=`<div class="dp-section"><div class="dp-section-label">Partner Flight</div><div class="dp-section-val">${v.partnerNo}</div></div>`;
+    const vs=SCHEDULE?SCHEDULE[v.viaCode]:null;
+    if(vs){
+      html+=`<div class="dp-section"><div class="dp-section-label">NRT → ${v.viaCode} Departures</div><div class="dp-banks">`;
+      vs.outDeps.forEach(dep=>{const[cls,lbl]=bankLabel(dep);html+=`<span class="dp-bank-chip ${cls}">${lbl} ${toHH(dep)} JST</span>`;});
+      html+=`</div></div>`;
+      if(vs.prices?.e) html+=`<div class="dp-section"><div class="dp-section-label">Economy from (to hub)</div><div class="dp-section-val gold">¥${vs.prices.e.toLocaleString()}</div></div>`;
+    }
+  } else {
+    html+=`<div class="dp-section"><div class="dp-section-label">Service</div><div class="dp-section-val">Contact ANA for details</div></div>`;
+  }
+
+  /* KIX section */
+  const ks=typeof KIX_SCHEDULE!=='undefined'?KIX_SCHEDULE[code]:null;
+  const kpo=typeof KIX_PARTNER_OPS!=='undefined'?KIX_PARTNER_OPS[code]:null;
+  if(ks||kpo){
+    html+=`<div class="dp-kix-section"><div class="dp-kix-label">✦ Also served from Osaka Hub (KIX)</div>`;
+    if(ks){
+      const kFreq=ks.days?'4–5× Weekly':ks.outDeps.length>=3?ks.outDeps.length+'× Daily':ks.outDeps.length===2?'2× Daily':'Daily';
+      html+=`<div class="dp-section" style="background:transparent;border-color:rgba(11,61,145,0.1);"><div class="dp-section-label">KIX Frequency</div><div class="dp-section-val">${kFreq}</div></div>`;
+      html+=`<div class="dp-section" style="background:transparent;border-color:rgba(11,61,145,0.1);"><div class="dp-section-label">KIX Departures</div><div class="dp-banks">`;
+      ks.outDeps.forEach(dep=>{const[cls,lbl]=bankLabel(dep);html+=`<span class="dp-bank-chip ${cls}">${lbl} ${toHH(dep)} JST</span>`;});
+      html+=`</div></div>`;
+      if(ks.prices?.e) html+=`<div class="dp-section" style="background:transparent;border-color:rgba(11,61,145,0.1);"><div class="dp-section-label">Economy from KIX</div><div class="dp-section-val gold">¥${ks.prices.e.toLocaleString()}</div></div>`;
+    }
+    if(kpo) html+=`<div class="dp-section" style="background:transparent;border:none;padding-top:4px;padding-bottom:12px;font-size:11px;color:#6B7280;">+ ${kpo.name} own service from KIX</div>`;
+    html+=`</div>`;
+  }
+
+  document.getElementById('dpBody').innerHTML=html;
+  document.getElementById('destPanel').classList.add('open');
+
+  /* Draw arc from NRT */
+  if(activeRouteLine){activeRouteLine.forEach(l=>{try{dMap.removeLayer(l);}catch(e){}});activeRouteLine=null;}
+  const HUBlat=35.7647,HUBlng=140.3865;
+  let toLng=pacificLng(ap.lng);
+  const diff=toLng-HUBlng;
+  if(diff>180) toLng-=360;
+  if(diff<-180) toLng+=360;
+  const pts=[],n=80,arcH=Math.abs(toLng-HUBlng)*0.12;
+  for(let i=0;i<=n;i++){const t=i/n;pts.push([HUBlat+(ap.lat-HUBlat)*t+Math.sin(Math.PI*t)*arcH,HUBlng+(toLng-HUBlng)*t]);}
+  const line=L.polyline(pts,{color,weight:2.5,opacity:0.9,dashArray:'8 5'}).addTo(dMap);
+  activeRouteLine=[line];
+  if(ks||kpo){
+    const KIXlat=34.4347,KIXlng=135.2440;
+    let kLng=pacificLng(ap.lng);
+    const kd=kLng-KIXlng;
+    if(kd>180) kLng-=360;
+    if(kd<-180) kLng+=360;
+    const kPts=[],kArcH=Math.abs(kLng-KIXlng)*0.12;
+    for(let i=0;i<=n;i++){const t=i/n;kPts.push([KIXlat+(ap.lat-KIXlat)*t+Math.sin(Math.PI*t)*kArcH,KIXlng+(kLng-KIXlng)*t]);}
+    activeRouteLine.push(L.polyline(kPts,{color:'#0B3D91',weight:2,opacity:0.75,dashArray:'6 4'}).addTo(dMap));
+  }
+}
+
+/* ─── Filter buttons ──────────────────────────────────────── */
+document.querySelectorAll('.df-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.df-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const region=btn.dataset.region;
+    let visible=0;
+    for(const[code,info] of Object.entries(allMarkers)){
+      const kixCodes=typeof KIX_SCHEDULE!=='undefined'
+        ?new Set([...Object.keys(KIX_SCHEDULE),...Object.keys(KIX_PARTNER_OPS)])
+        :new Set();
+      const show=region==='all'?true:region==='kix'?kixCodes.has(code):info.region===region;
+      if(show){info.marker.addTo(dMap);visible++;}
+      else{dMap.removeLayer(info.marker);}
+    }
+    document.getElementById('dsbTotal').textContent=visible;
+    const views={domestic:[[33,136],5],kix:[[30,162],2.5],asia:[[15,118],3],na:[[42,262],3],europe:[[52,15],3],me:[[24,50],4],africa:[[0,25],3],oceania:[[-25,150],3],all:[[18,152],2.5]};
+    const[center,zoom]=views[region]||views.all;
+    dMap.flyTo(center,zoom,{duration:1.2});
+    document.getElementById('destPanel').classList.remove('open');
+    if(activeRouteLine){activeRouteLine.forEach(l=>{try{dMap.removeLayer(l);}catch(e){}});activeRouteLine=null;}
+    /* Scroll map back into view when filter is used */
+    document.querySelector('.dest-map-section').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+
+document.getElementById('dpClose').addEventListener('click',()=>{
+  document.getElementById('destPanel').classList.remove('open');
+  if(activeRouteLine){activeRouteLine.forEach(l=>{try{dMap.removeLayer(l);}catch(e){}});activeRouteLine=null;}
+});
+document.getElementById('dpBookBtn').addEventListener('click',()=>{
+  if(currentCode) sessionStorage.setItem('preselect-to',JSON.stringify({code:currentCode,city:AIRPORTS[currentCode]?.city}));
+  window.location.href='index.html';
+});
+
+/* ─── Route table ─────────────────────────────────────────── */
+const WEEKLY_4_5_SET = new Set(['PHL','LAS','SLC','PHX','CLT','PDX','MTY','SJC','PTY','IND','STL','MCI','ANC','AUS','TAE','KWJ','CJU','HKT','KHH','RGN','KTM','MLE','CMB','ULN','PNH','VTE','CNS']);
+
+const RT_CATEGORIES = [
+  { id:'domestic',  label:'Domestic Routes',        color:'#EC4899', codes:['OKA','FUK','ITM','NGO','CTS'] },
+  { id:'eastasia',  label:'East Asia & Pacific',    color:'#F59E0B', codes:['ICN','GMP','PUS','TAE','KWJ','CJU','PEK','PVG','HGH','TSN','CTU','XIY','CAN','SZX','MFM','HKG','TPE','TSA','KHH','GUM','ULN'] },
+  { id:'seastasia', label:'Southeast Asia',          color:'#F97316', codes:['BKK','HKT','MNL','CEB','SIN','KUL','CGK','SUB','HAN','SGN','PNH','VTE','RGN'] },
+  { id:'southasia', label:'South & Central Asia',   color:'#A78BFA', codes:['DEL','BOM','BLR','HYD','DAC','KHI','KTM','CMB','MLE'] },
+  { id:'na',        label:'North America',           color:'#3B82F6', codes:['HNL','ANC','JFK','EWR','LAX','SFO','SEA','ORD','BOS','IAH','IAD','DTW','DFW','ATL','MSP','DEN','SAN','YVR','YYZ','YYC','YUL','MEX','PHL','LAS','SLC','PHX','CLT','PDX','MTY','SJC','PTY','MIA','MCO','IND','STL','MCI','AUS'] },
+  { id:'europe',    label:'Europe',                  color:'#10B981', codes:['LHR','CDG','FRA','MUC','IST','BRU','ARN','MXP','WAW','VIE','ZRH','GVA','FCO','DUB','CPH','HEL','OSL','BER','PRG','LIS','MAD','BCN','ATH','BUD','ZAG','AMS'] },
+  { id:'me',        label:'Middle East',             color:'#8B5CF6', codes:['DOH','AUH','DXB'] },
+  { id:'africa',    label:'Africa',                  color:'#EF4444', codes:['CAI','ADD','JNB'] },
+  { id:'oceania',   label:'Oceania',                 color:'#06B6D4', codes:['AKL','SYD','MEL','BNE','PER','CNS'] },
+];
+
+function freqLabel(s, code) {
+  if (!s) return '—';
+  if (s.days) return `${s.days.length}× Weekly`;
+  if (s.outDeps.length >= 3) return `${s.outDeps.length}× Daily`;
+  if (s.outDeps.length === 2) return '2× Daily';
+  return WEEKLY_4_5_SET.has(code) ? '4–5× Weekly' : 'Daily';
+}
+
+function depChips(deps, kix, max) {
+  const show = max ? deps.slice(0, max) : deps;
+  const cls = kix ? 'rt-tc rt-tc-kix' : 'rt-tc';
+  let html = show.map(d => `<span class="${cls}">${toHH(d)}</span>`).join('');
+  if (max && deps.length > max) html += `<span class="rt-tc" style="background:#F3F4F6;color:#9CA3AF;">+${deps.length-max}</span>`;
+  return html;
+}
+
+function priceCell(p) {
+  return p ? `<span class="rt-price-c">¥${(p/1000).toFixed(0)}k</span>` : `<span class="rt-null">—</span>`;
+}
+
+function buildRouteRow(code, catColor) {
+  const ap = AIRPORTS[code];
+  if (!ap) return '';
+  const flag = FLAGS[ap.country] || '🌍';
+  const s   = (typeof SCHEDULE         !== 'undefined') ? SCHEDULE[code]         : null;
+  const v   = (typeof VIA_CONNECTIONS  !== 'undefined') ? VIA_CONNECTIONS[code]  : null;
+  const ks  = (typeof KIX_SCHEDULE     !== 'undefined') ? KIX_SCHEDULE[code]     : null;
+  const kpo = (typeof KIX_PARTNER_OPS  !== 'undefined') ? KIX_PARTNER_OPS[code]  : null;
+
+  const destCell = (extra) => `<div class="rt-dc">
+    <span class="rt-flag-c">${flag}</span>
+    <div class="rt-di"><span class="rt-iata">${code}</span><span class="rt-cname">${ap.city}</span></div>
+    ${extra||''}
+  </div>`;
+
+  let rows = '';
+
+  if (s) {
+    /* ── NRT main row ── */
+    const acUniq = [...new Set(s.ac)];
+    const acHtml = acUniq.map(a => ACFT_SHORT[a]).join('<br>');
+    const maxDeps = s.outDeps.length > 6 ? 6 : 0;
+    const partnerHtml = s.partner
+      ? `<span class="rt-pname">${s.partner}</span><span class="rt-pno">${s.partnerNo}</span>`
+      : `<span class="rt-null">—</span>`;
+
+    rows += `<tr class="rt-row" onclick="showDestInfo('${code}','${catColor}')">
+      <td class="rt-c-dest">${destCell()}</td>
+      <td class="rt-c-hub"><span class="hub-tag hub-nrt">NRT</span></td>
+      <td class="rt-c-flight">${s.nos[0]||'—'}</td>
+      <td><span class="rt-acft-c">${acHtml}</span></td>
+      <td><span class="rt-dur-c">${durStr(s.dur)}</span></td>
+      <td class="rt-c-freq"><span class="rt-freq-c">${freqLabel(s,code)}</span></td>
+      <td class="rt-c-deps">${depChips(s.outDeps,false,maxDeps)}</td>
+      <td>${priceCell(s.prices?.e)}</td>
+      <td class="rt-c-biz">${priceCell(s.prices?.bc)}</td>
+      <td class="rt-c-partner">${partnerHtml}</td>
+    </tr>`;
+
+    /* ── KIX sub-row (if applicable) ── */
+    if (ks || kpo) {
+      let kAcHtml='—', kDurHtml='—', kFreqHtml='—', kDepHtml='—';
+      let kEco='—', kBiz='—', kFlight='—', kPartner='<span class="rt-null">—</span>';
+
+      if (ks) {
+        const kAcUniq=[...new Set(ks.ac)];
+        kAcHtml = kAcUniq.map(a=>ACFT_SHORT[a]).join('<br>');
+        kDurHtml = durStr(ks.dur);
+        kFreqHtml = freqLabel(ks, code);
+        kDepHtml = depChips(ks.outDeps, true, ks.outDeps.length>6?6:0);
+        kEco = priceCell(ks.prices?.e);
+        kBiz = priceCell(ks.prices?.bc);
+        kFlight = ks.nos[0]||'—';
+        if (ks.partner) kPartner = `<span class="rt-pname">${ks.partner}</span><span class="rt-pno">${ks.partnerNo}</span>`;
+      } else if (kpo) {
+        kAcHtml = kpo.acName||'—';
+        kDurHtml = kpo.dur ? durStr(kpo.dur) : '—';
+        kFreqHtml = 'Daily';
+        kDepHtml = depChips(kpo.outDeps, true, 0);
+        kEco = priceCell(kpo.prices?.e);
+        kBiz = priceCell(kpo.prices?.bc);
+        kFlight = kpo.nos[0]||'—';
+        kPartner = `<span class="rt-pname">${kpo.name}</span>`;
+      }
+
+      rows += `<tr class="rt-kix-row" onclick="showDestInfo('${code}','${catColor}')">
+        <td class="rt-c-dest"><div class="rt-dc" style="padding-left:4px;"><span class="rt-kix-via-lbl">✦ via KIX</span></div></td>
+        <td class="rt-c-hub"><span class="hub-tag hub-kix">KIX</span></td>
+        <td class="rt-c-flight">${kFlight}</td>
+        <td><span class="rt-acft-c">${kAcHtml}</span></td>
+        <td><span class="rt-dur-c" style="font-size:11px;">${kDurHtml}</span></td>
+        <td class="rt-c-freq"><span class="rt-freq-c">${kFreqHtml}</span></td>
+        <td class="rt-c-deps">${kDepHtml}</td>
+        <td>${kEco}</td>
+        <td class="rt-c-biz">${kBiz}</td>
+        <td class="rt-c-partner">${kPartner}</td>
+      </tr>`;
+    }
+
+  } else if (v) {
+    /* ── Freedom / Via connection ── */
+    const vs = SCHEDULE ? SCHEDULE[v.viaCode] : null;
+    const viaAp = AIRPORTS[v.viaCode];
+    const totalDur = vs ? (vs.dur + 75 + v.dur) : v.dur;
+    const ecoPrice = vs?.prices?.e ? Math.round(vs.prices.e * 1.18) : null;
+    const bizPrice = vs?.prices?.bc ? Math.round(vs.prices.bc * 1.18) : null;
+    const acHtml = vs ? [...new Set(vs.ac)].map(a=>ACFT_SHORT[a]).join('<br>') : '—';
+
+    rows += `<tr class="rt-row" onclick="showDestInfo('${code}','${catColor}')">
+      <td class="rt-c-dest">${destCell('<span class="rt-via-badge">VIA</span>')}</td>
+      <td class="rt-c-hub"><span class="hub-tag hub-nrt">NRT</span></td>
+      <td class="rt-c-flight">${v.partnerNo}</td>
+      <td><span class="rt-acft-c">${acHtml}</span></td>
+      <td><span class="rt-dur-c">${durStr(totalDur)}</span><span class="rt-via-note">via ${viaAp?.city||v.viaCode}</span></td>
+      <td class="rt-c-freq"><span class="rt-freq-c">${vs ? freqLabel(vs,v.viaCode) : '—'}</span></td>
+      <td class="rt-c-deps">${vs ? depChips(vs.outDeps,false,0) : '—'}</td>
+      <td>${priceCell(ecoPrice)}<span style="font-size:9px;color:#9CA3AF;display:block;">from hub+</span></td>
+      <td class="rt-c-biz">${priceCell(bizPrice)}<span style="font-size:9px;color:#9CA3AF;display:block;">from hub+</span></td>
+      <td class="rt-c-partner"><span class="rt-freedom">Freedom Flight</span><span class="rt-pno">via ${viaAp?.city||v.viaCode}</span></td>
+    </tr>`;
+
+  } else if (ks || kpo) {
+    /* ── KIX-only (no NRT ANA service) ── */
+    const svc = ks || kpo;
+    const acHtml = ks ? [...new Set(ks.ac)].map(a=>ACFT_SHORT[a]).join('<br>') : (kpo.acName||'—');
+    const durVal = ks ? ks.dur : kpo?.dur;
+    const deps   = ks ? ks.outDeps : kpo.outDeps;
+    const prices = ks ? ks.prices  : kpo?.prices;
+    const nos    = ks ? ks.nos     : kpo.nos;
+    const partner = ks ? (ks.partner||null) : kpo.name;
+
+    rows += `<tr class="rt-row" onclick="showDestInfo('${code}','${catColor}')">
+      <td class="rt-c-dest">${destCell()}</td>
+      <td class="rt-c-hub"><span class="hub-tag hub-kix">KIX</span></td>
+      <td class="rt-c-flight">${nos[0]||'—'}</td>
+      <td><span class="rt-acft-c">${acHtml}</span></td>
+      <td><span class="rt-dur-c">${durVal?durStr(durVal):'—'}</span></td>
+      <td class="rt-c-freq"><span class="rt-freq-c">${deps.length>1?`${deps.length}× Daily`:'Daily'}</span></td>
+      <td class="rt-c-deps">${depChips(deps,true,0)}</td>
+      <td>${priceCell(prices?.e)}</td>
+      <td class="rt-c-biz">${priceCell(prices?.bc)}</td>
+      <td class="rt-c-partner">${partner?`<span class="rt-pname">${partner}</span>`:'<span class="rt-null">ANA</span>'}</td>
+    </tr>`;
+  }
+
+  return rows;
+}
+
+function buildRouteTable() {
+  const TABLE_HEADER = `<table class="rt-table"><thead><tr>
+    <th style="min-width:150px;">Destination</th>
+    <th>Hub</th>
+    <th class="rt-h-flight">Flight</th>
+    <th style="min-width:90px;">Aircraft</th>
+    <th>Duration</th>
+    <th style="min-width:90px;">Frequency</th>
+    <th class="rt-h-deps" style="min-width:140px;">Departures (JST)</th>
+    <th>Economy from</th>
+    <th class="rt-h-biz">Business from</th>
+    <th class="rt-h-partner" style="min-width:130px;">Codeshare / Partner</th>
+  </tr></thead><tbody>`;
+
+  let html = '';
+
+  RT_CATEGORIES.forEach(cat => {
+    const rowCount = cat.codes.filter(c => AIRPORTS[c]).length;
+    html += `<div class="rt-category" id="rt-${cat.id}">
+      <div class="rt-cat-hdr" style="border-left-color:${cat.color}">
+        <span class="rt-cat-name" style="color:${cat.color}">${cat.label}</span>
+        <span class="rt-cat-ct">${rowCount} destination${rowCount!==1?'s':''}</span>
+      </div>
+      ${TABLE_HEADER}`;
+
+    cat.codes.forEach(code => {
+      html += buildRouteRow(code, cat.color);
+    });
+
+    html += `</tbody></table></div>`;
+  });
+
+  document.getElementById('routeTableContainer').innerHTML = html;
+}
+
+buildRouteTable();
+</script>
+<script src="js/nav.js"></script>
+</body>
+</html>

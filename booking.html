@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANA | Select Return Flight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+/* ── Booking-page specific ─────────────────────────────────────────────── */
+.booking-steps {
+  background: var(--white);
+  border-bottom: 1px solid #E5E7EB;
+  padding: 0;
+}
+.booking-steps-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+.bstep {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px 14px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #9CA3AF;
+  position: relative;
+}
+.bstep + .bstep { border-left: 1px solid #E5E7EB; padding-left: 28px; }
+.bstep.done  { color: #059669; }
+.bstep.active { color: var(--navy); }
+.bstep-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800;
+  background: #E5E7EB; color: #9CA3AF; flex-shrink: 0;
+}
+.bstep.done  .bstep-num { background: #059669; color: #fff; }
+.bstep.active .bstep-num { background: var(--navy); color: #fff; }
+
+/* Outbound summary banner */
+.outbound-banner {
+  background: linear-gradient(135deg, #0B3D91 0%, #1a5276 100%);
+  color: #fff;
+  padding: 18px 0;
+}
+.outbound-banner-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.ob-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: #C9A84C; margin-bottom: 4px;
+}
+.ob-route {
+  font-size: 20px; font-weight: 800; letter-spacing: 0.02em;
+  display: flex; align-items: center; gap: 10px;
+}
+.ob-arrow { color: #C9A84C; }
+.ob-via {
+  font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.7);
+  padding: 2px 8px; border: 1px solid rgba(255,255,255,0.25); border-radius: 20px;
+}
+.ob-meta {
+  display: flex; gap: 18px; margin-top: 6px; flex-wrap: wrap;
+}
+.ob-meta-item { font-size: 12px; color: rgba(255,255,255,0.85); }
+.ob-meta-item span { color: #fff; font-weight: 600; }
+.ob-check {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(5,150,105,0.2); border: 1px solid #059669;
+  border-radius: 8px; padding: 8px 16px;
+  font-size: 13px; font-weight: 700; color: #6ee7b7;
+  white-space: nowrap;
+}
+
+/* Return section header */
+.return-header {
+  background: #F9FAFB;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 18px 0;
+}
+.return-header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.return-title {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #6B7280; margin-bottom: 8px;
+}
+.return-route-display {
+  display: flex; align-items: center; gap: 12px;
+}
+.rr-code { font-size: 28px; font-weight: 900; color: var(--navy); }
+.rr-arrow {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  color: #C9A84C;
+}
+.rr-arrow-line { width: 40px; height: 2px; background: #C9A84C; }
+.rr-hub {
+  font-size: 11px; font-weight: 600; color: #6B7280;
+  padding: 2px 8px; background: #F3F4F6; border-radius: 4px;
+}
+.rr-city { font-size: 14px; color: #6B7280; font-weight: 500; }
+
+/* Confirm modal */
+.confirm-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+}
+.confirm-overlay.open { display: flex; }
+.confirm-modal {
+  background: #fff; border-radius: 16px;
+  max-width: 560px; width: 90%; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(30px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+.confirm-modal-head {
+  background: linear-gradient(135deg, #0B3D91, #1a5276);
+  color: #fff; padding: 24px 28px; border-radius: 16px 16px 0 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.confirm-modal-title { font-size: 18px; font-weight: 800; }
+.confirm-close {
+  background: none; border: none; color: rgba(255,255,255,0.7);
+  font-size: 22px; cursor: pointer; line-height: 1; padding: 0;
+}
+.confirm-body { padding: 24px 28px; }
+.confirm-leg {
+  padding: 14px 0; border-bottom: 1px solid #E5E7EB;
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.confirm-leg:last-of-type { border-bottom: none; }
+.confirm-leg-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--navy); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.confirm-leg-route { font-size: 16px; font-weight: 800; color: var(--navy); }
+.confirm-leg-detail { font-size: 12px; color: #6B7280; margin-top: 3px; }
+.confirm-leg-detail strong { color: #374151; }
+.confirm-total {
+  background: #F0F4FF; border-radius: 10px; padding: 14px 16px;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 16px;
+}
+.confirm-total-label { font-size: 13px; font-weight: 600; color: #6B7280; }
+.confirm-total-price { font-size: 22px; font-weight: 900; color: var(--navy); }
+.confirm-total-note { font-size: 10px; color: #9CA3AF; margin-top: 2px; }
+.confirm-book-btn {
+  width: 100%; margin-top: 18px;
+  padding: 14px; border-radius: 10px;
+  background: linear-gradient(135deg, #0B3D91, #1565C0);
+  color: #fff; font-size: 15px; font-weight: 800;
+  border: none; cursor: pointer; letter-spacing: 0.04em;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.confirm-book-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(11,61,145,0.4); }
+.booked-state { display: none; text-align: center; padding: 32px 28px; }
+.booked-icon { font-size: 56px; margin-bottom: 12px; }
+.booked-title { font-size: 22px; font-weight: 900; color: var(--navy); margin-bottom: 8px; }
+.booked-ref { font-size: 14px; color: #6B7280; margin-bottom: 6px; }
+.booked-ref strong { color: var(--navy); font-size: 18px; letter-spacing: 0.1em; }
+.booked-sub { font-size: 12px; color: #9CA3AF; }
+</style>
+</head>
+<body class="results-page">
+
+<!-- Navbar -->
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo" style="text-decoration:none;">
+      <img src="assets/ana-tail.png" class="ana-logo-img" alt="ANA All Nippon Airways">
+      <div class="logo-divider"></div>
+      <div class="sa-badge">
+        <svg class="sa-ring" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g transform="translate(16,16)"><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(72)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(72)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(144)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(144)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(216)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(216)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(288)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(288)"/></g></svg>
+        <div class="sa-text">
+          <span class="sa-name">star alliance</span>
+          <span class="sa-member">a star alliance member</span>
+        </div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Book</a>
+      <a href="#" class="nav-link">Destinations</a>
+      <a href="fleet.html" class="nav-link">Our Fleet</a>
+      <a href="#" class="nav-link">Experience</a>
+    </div>
+    <div class="nav-actions">
+      <div class="currency-mount" id="currencyMount"></div>
+      <button class="lang-toggle" id="langToggle">
+        <span class="lang-option active" id="lang-en">EN</span>
+        <span class="lang-divider">|</span>
+        <span class="lang-option" id="lang-jp">日本語</span>
+      </button>
+      <a href="index.html" class="btn-book-nav">New Search</a>
+    </div>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" id="mobileNavClose">✕</button>
+  <a href="index.html" class="mobile-nav-link">Book</a>
+  <a href="destinations.html" class="mobile-nav-link">Destinations</a>
+  <a href="fleet.html" class="mobile-nav-link">Our Fleet</a>
+  <a href="#" class="mobile-nav-link">Experience</a>
+  <div class="mobile-nav-bottom">
+    <a href="index.html" class="mobile-nav-book">New Search</a>
+  </div>
+</div>
+
+<!-- Booking steps -->
+<div class="booking-steps">
+  <div class="booking-steps-inner">
+    <div class="bstep done">
+      <div class="bstep-num">✓</div>
+      <span>Outbound Flight</span>
+    </div>
+    <div class="bstep active">
+      <div class="bstep-num">2</div>
+      <span>Return Flight</span>
+    </div>
+    <div class="bstep">
+      <div class="bstep-num">3</div>
+      <span>Confirm &amp; Book</span>
+    </div>
+  </div>
+</div>
+
+<!-- Outbound confirmed banner -->
+<div class="outbound-banner">
+  <div class="outbound-banner-inner">
+    <div>
+      <div class="ob-label">✓ &nbsp;Outbound Selected</div>
+      <div class="ob-route">
+        <span id="obFrom">—</span>
+        <span class="ob-arrow">→</span>
+        <span class="ob-via">via Tokyo Hub</span>
+        <span class="ob-arrow">→</span>
+        <span id="obTo">—</span>
+      </div>
+      <div class="ob-meta">
+        <div class="ob-meta-item">Flights <span id="obFlights">—</span></div>
+        <div class="ob-meta-item">Departs <span id="obDep">—</span></div>
+        <div class="ob-meta-item">Arrives <span id="obArr">—</span></div>
+        <div class="ob-meta-item">Duration <span id="obDur">—</span></div>
+        <div class="ob-meta-item">Cabin <span id="obCabin">—</span></div>
+      </div>
+    </div>
+    <div class="ob-check">✅ &nbsp;Confirmed — select your return</div>
+  </div>
+</div>
+
+<!-- Return journey header -->
+<div class="return-header">
+  <div class="return-header-inner">
+    <div class="return-title">Step 2 — Select Return Journey</div>
+    <div class="return-route-display">
+      <div>
+        <div class="rr-code" id="retFrom">—</div>
+        <div class="rr-city" id="retFromCity">—</div>
+      </div>
+      <div class="rr-arrow">
+        <div class="rr-arrow-line"></div>
+        <div class="rr-hub">via NRT</div>
+        <div class="rr-arrow-line"></div>
+      </div>
+      <div>
+        <div class="rr-code" id="retTo">—</div>
+        <div class="rr-city" id="retToCity">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Results body (reused layout) -->
+<div class="results-body">
+  <div class="flights-section">
+    <h3>Available Return Flights</h3>
+    <div id="flightList"></div>
+  </div>
+  <div class="map-panel">
+    <div class="map-panel-header"><h3>Return Route</h3></div>
+    <div id="results-map"></div>
+    <div class="map-legend">
+      <div class="legend-item">
+        <div class="legend-dot legend-dot-hub"></div>
+        <span>Tokyo Hub (NRT)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot legend-dot-city"></div>
+        <span>Your cities</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm & Book modal -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-modal">
+    <div class="confirm-modal-head">
+      <span class="confirm-modal-title">Booking Summary</span>
+      <button class="confirm-close" id="confirmClose">✕</button>
+    </div>
+    <div class="confirm-body" id="confirmBody">
+      <!-- filled by JS -->
+    </div>
+    <div class="booked-state" id="bookedState">
+      <div class="booked-icon">✅</div>
+      <div class="booked-title">Booking Confirmed!</div>
+      <div class="booked-ref">Booking Reference <strong id="bookingRef">—</strong></div>
+      <div class="booked-sub">A confirmation will be sent to your registered email address.</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/airports.js"></script>
+<script src="js/currencies.js"></script>
+<script src="js/flights.js"></script>
+<script src="js/map.js"></script>
+<script src="js/booking.js"></script>
+<script src="js/nav.js"></script>
+</body>
+</html>

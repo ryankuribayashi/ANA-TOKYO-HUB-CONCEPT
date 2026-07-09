@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANA | Newsroom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+.news-page { background: #F2F4FA; min-height: 100vh; }
+
+/* ── Hero ── */
+.news-hero {
+  padding: 120px 0 56px;
+  background:
+    radial-gradient(ellipse at 70% 40%, rgba(11,61,145,0.07) 0%, transparent 55%),
+    linear-gradient(160deg, #E8ECF7 0%, #DDE3F0 45%, #D8E0EE 100%);
+  border-bottom: 1px solid rgba(11,61,145,0.08);
+}
+.news-hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.news-hero-tag {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+  color: var(--navy); text-transform: uppercase; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.news-hero-tag::before { content:''; width: 28px; height: 2px; background: var(--gold); }
+.news-hero-title {
+  font-size: clamp(36px, 4.5vw, 58px); font-weight: 900;
+  color: var(--navy-dark); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 12px;
+}
+.news-hero-sub { font-size: 15px; color: #4B5563; max-width: 480px; line-height: 1.7; }
+
+/* ── Category pills ── */
+.cat-pill {
+  display: inline-flex; align-items: center;
+  border-radius: 20px; padding: 3px 11px;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.cat-ops     { background: rgba(16,185,129,0.12);  color: #065F46; }
+.cat-fleet   { background: rgba(11,61,145,0.10);   color: #1E40AF; }
+.cat-routes  { background: rgba(59,130,246,0.12);  color: #1D4ED8; }
+.cat-awards  { background: rgba(201,168,76,0.15);  color: #92711F; }
+.cat-partner { background: rgba(139,92,246,0.12);  color: #6D28D9; }
+
+/* ── Featured article ── */
+.news-featured { max-width: 1200px; margin: 0 auto; padding: 48px 24px 0; }
+.featured-card {
+  position: relative; border-radius: 12px; overflow: hidden;
+  min-height: 460px; display: flex; align-items: flex-end;
+  box-shadow: 0 8px 40px rgba(11,61,145,0.13);
+  transition: box-shadow 0.25s;
+}
+.featured-card:hover { box-shadow: 0 20px 64px rgba(11,61,145,0.22); }
+.featured-bg { position: absolute; inset: 0; }
+.featured-img {
+  width: 100%; height: 100%; object-fit: cover; object-position: center 35%;
+  transition: transform 0.45s ease;
+}
+.featured-card:hover .featured-img { transform: scale(1.03); }
+.featured-overlay {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(to top, rgba(0,5,22,0.93) 0%, rgba(0,5,22,0.52) 45%, transparent 72%),
+    linear-gradient(to right, rgba(0,5,22,0.3) 0%, transparent 55%);
+}
+.featured-content {
+  position: relative; z-index: 2;
+  padding: 44px 48px; max-width: 800px;
+}
+.featured-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.featured-date { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 500; }
+.featured-title {
+  font-size: clamp(22px, 2.8vw, 36px); font-weight: 900; color: #fff;
+  letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 14px;
+}
+.featured-excerpt {
+  font-size: 14px; color: rgba(255,255,255,0.62); line-height: 1.72;
+  max-width: 580px; margin-bottom: 22px;
+}
+.featured-read {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 800; color: var(--gold);
+  letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none;
+  transition: gap 0.15s;
+}
+.featured-read:hover { gap: 12px; }
+.featured-read::after { content: '→'; }
+
+/* ── News body layout ── */
+.news-body { max-width: 1200px; margin: 0 auto; padding: 24px 24px 80px; }
+.news-row { display: grid; gap: 20px; margin-bottom: 20px; }
+.news-row-2 { grid-template-columns: repeat(2, 1fr); }
+.news-row-3 { grid-template-columns: repeat(3, 1fr); }
+
+/* ── News card ── */
+.news-card {
+  background: #fff; border-radius: 8px; overflow: hidden;
+  border: 1.5px solid #E5E7EB;
+  transition: box-shadow 0.22s, transform 0.22s;
+  display: flex; flex-direction: column;
+}
+.news-card:hover {
+  box-shadow: 0 12px 44px rgba(11,61,145,0.12);
+  transform: translateY(-3px);
+}
+.nc-img-wrap { overflow: hidden; }
+.nc-img { width: 100%; height: 186px; object-fit: cover; display: block; transition: transform 0.4s ease; }
+.news-card:hover .nc-img { transform: scale(1.04); }
+.nc-color {
+  width: 100%; height: 186px; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+}
+.ncb-awards {
+  background: linear-gradient(140deg, #0B1E52 0%, #0B3D91 60%, #1A56C8 100%);
+  flex-direction: column; gap: 10px;
+}
+.ncb-ops {
+  background: linear-gradient(140deg, #042A1F 0%, #065F46 60%, #059669 100%);
+}
+
+/* Award icon */
+.nc-award-icon {
+  font-size: 36px; letter-spacing: 0; line-height: 1;
+  filter: drop-shadow(0 4px 12px rgba(201,168,76,0.5));
+}
+.nc-award-stat {
+  font-size: 28px; font-weight: 900; color: var(--gold); letter-spacing: -0.03em;
+}
+.nc-award-lbl {
+  font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.55);
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+.nc-lounge-stat {
+  font-size: 28px; font-weight: 900; color: #34D399; letter-spacing: -0.03em;
+}
+.nc-lounge-lbl {
+  font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.55);
+  letter-spacing: 0.12em; text-transform: uppercase; margin-top: 4px;
+}
+
+.nc-body { padding: 18px 20px 22px; flex: 1; display: flex; flex-direction: column; }
+.nc-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.nc-date { font-size: 11px; color: #9CA3AF; font-weight: 500; }
+.nc-title {
+  font-size: 15px; font-weight: 800; color: #0F172A;
+  letter-spacing: -0.01em; line-height: 1.38; margin-bottom: 9px;
+}
+.nc-excerpt { font-size: 12px; color: #6B7280; line-height: 1.65; flex: 1; }
+.nc-read {
+  display: inline-flex; align-items: center; gap: 5px; margin-top: 14px;
+  font-size: 10px; font-weight: 800; color: var(--navy);
+  letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none;
+  transition: gap 0.15s;
+}
+.nc-read:hover { gap: 8px; color: #1a56c8; }
+.nc-read::after { content: '→'; }
+
+/* ── Press release strip ── */
+.press-section { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+.press-title {
+  font-size: 11px; font-weight: 800; letter-spacing: 0.18em;
+  text-transform: uppercase; color: #B0B8C9; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.press-title::after { content: ''; flex: 1; height: 1px; background: #E5E7EB; }
+.press-list { display: flex; flex-direction: column; gap: 0; }
+.press-row {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 0; border-bottom: 1px solid #EEF0F8;
+}
+.press-row:first-child { border-top: 1px solid #EEF0F8; }
+.press-date { font-size: 11px; color: #9CA3AF; font-weight: 600; min-width: 80px; flex-shrink: 0; }
+.press-cat { flex-shrink: 0; }
+.press-headline { font-size: 13px; font-weight: 600; color: #1E293B; flex: 1; }
+.press-link {
+  font-size: 10px; font-weight: 800; color: var(--navy);
+  letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none;
+  flex-shrink: 0; transition: color 0.15s;
+}
+.press-link:hover { color: #1a56c8; }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .news-row-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .news-row-2, .news-row-3 { grid-template-columns: 1fr; }
+  .featured-content { padding: 28px 24px; }
+  .news-hero { padding: 80px 0 36px; }
+  .news-hero-title { font-size: clamp(28px, 8vw, 40px); }
+}
+</style>
+</head>
+<body class="news-page">
+
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo" style="text-decoration:none;">
+      <img src="assets/ana-tail.png" class="ana-logo-img" alt="ANA All Nippon Airways">
+      <div class="logo-divider"></div>
+      <div class="sa-badge">
+        <svg class="sa-ring" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g transform="translate(16,16)"><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(72)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(72)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(144)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(144)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(216)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(216)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(288)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(288)"/></g></svg>
+        <div class="sa-text">
+          <span class="sa-name">star alliance</span>
+          <span class="sa-member">a star alliance member</span>
+        </div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Book</a>
+      <a href="destinations.html" class="nav-link">Destinations</a>
+      <a href="fleet.html" class="nav-link">Our Fleet</a>
+      <a href="news.html" class="nav-link" style="color:var(--gold);font-weight:700;">News</a>
+      <a href="#" class="nav-link">Experience</a>
+    </div>
+    <div class="nav-actions">
+      <a href="index.html" class="btn-book-nav">Book Now</a>
+    </div>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" id="mobileNavClose">✕</button>
+  <a href="index.html" class="mobile-nav-link">Book</a>
+  <a href="destinations.html" class="mobile-nav-link">Destinations</a>
+  <a href="fleet.html" class="mobile-nav-link">Our Fleet</a>
+  <a href="news.html" class="mobile-nav-link" style="color:var(--gold);">News</a>
+  <a href="#" class="mobile-nav-link">Experience</a>
+  <div class="mobile-nav-bottom">
+    <a href="index.html" class="mobile-nav-book">Book Now</a>
+  </div>
+</div>
+
+<!-- Hero -->
+<div class="news-hero">
+  <div class="news-hero-inner">
+    <div class="news-hero-tag">ANA Newsroom</div>
+    <h1 class="news-hero-title">Latest News<br>&amp; Updates</h1>
+    <p class="news-hero-sub">Announcements, route launches, fleet milestones, and awards from ANA's Tokyo Mega Hub operations.</p>
+  </div>
+</div>
+
+<!-- Featured article -->
+<div class="news-featured">
+  <div class="featured-card">
+    <div class="featured-bg">
+      <img class="featured-img" src="assets/hero-tarmac-day.jpg" alt="ANA operations at Narita">
+      <div class="featured-overlay"></div>
+    </div>
+    <div class="featured-content">
+      <div class="featured-meta">
+        <span class="cat-pill cat-ops">Operations</span>
+        <span class="featured-date">June 30, 2026</span>
+      </div>
+      <div class="featured-title">Tokyo Mega Hub Connects 12 Million Passengers in First Year of Full Operations</div>
+      <div class="featured-excerpt">ANA's flagship hub at Narita International Airport has surpassed all first-year projections, welcoming over 12 million passengers across 115 routes on six continents. The milestone comes ahead of the hub's one-year anniversary and underscores Tokyo's emergence as Asia's premier long-haul transfer gateway — eclipsing Dubai, Singapore, and Seoul in connection volumes on the trans-Pacific corridor for the first time. Load factors across the five-aircraft fleet averaged 87.4%, with Business and First Class cabins consistently exceeding 91%.</div>
+      <a href="#" class="featured-read">Read Full Release</a>
+    </div>
+  </div>
+</div>
+
+<!-- News body -->
+<div class="news-body">
+
+  <!-- Row: 2 larger cards -->
+  <div class="news-row news-row-2">
+
+    <div class="news-card">
+      <div class="nc-img-wrap">
+        <img class="nc-img" src="assets/fleet-777.jpg" alt="Boeing 777-9" style="object-position:center 40%;">
+      </div>
+      <div class="nc-body">
+        <div class="nc-meta">
+          <span class="cat-pill cat-fleet">Fleet</span>
+          <span class="nc-date">June 18, 2026</span>
+        </div>
+        <div class="nc-title">ANA Boeing 777X Fleet Delivers 20% Fuel Burn Reduction Over Previous Generation</div>
+        <div class="nc-excerpt">Six months of commercial revenue data confirm that ANA's Boeing 777-9 aircraft are achieving fuel burn reductions of 20% per seat compared to the retired 777-300ER fleet. The improvement — driven by the aircraft's composite wing flex design and GE9X engines — has allowed ANA to cut per-seat emissions on its highest-frequency routes including NRT–JFK, NRT–LAX, and NRT–SFO. ANA's Chief Operations Officer cited the figure as critical to the airline's 2030 carbon-neutral target for long-haul flying.</div>
+        <a href="#" class="nc-read">Read More</a>
+      </div>
+    </div>
+
+    <div class="news-card">
+      <div class="nc-img-wrap">
+        <img class="nc-img" src="assets/dest-london.jpg" alt="London Heathrow" style="object-position:center 55%;">
+      </div>
+      <div class="nc-body">
+        <div class="nc-meta">
+          <span class="cat-pill cat-routes">Routes</span>
+          <span class="nc-date">June 5, 2026</span>
+        </div>
+        <div class="nc-title">Freedom Flights Program Expands to 31 European Cities via Eight Star Alliance Partners</div>
+        <div class="nc-excerpt">ANA's innovative Freedom Flights program — which allows single-ticket connectivity from Tokyo to European cities via partner hubs — has expanded to 31 destinations in 22 countries. New additions include Dublin via Brussels, Lisbon via Zurich, Madrid via Geneva, and Budapest via Istanbul. Passengers benefit from full through-check baggage, ANA Mileage Club earning on all segments, and guaranteed connection times backed by ANA's 98.7% on-time performance record. Fares start from ¥142,000 in Economy and ¥485,000 in Business Class.</div>
+        <a href="#" class="nc-read">Read More</a>
+      </div>
+    </div>
+
+  </div><!-- /news-row-2 -->
+
+  <!-- Row: 3 smaller cards -->
+  <div class="news-row news-row-3">
+
+    <div class="news-card">
+      <div class="nc-color ncb-awards">
+        <div class="nc-award-icon">🏆</div>
+        <div>
+          <div class="nc-award-stat">98.7%</div>
+          <div class="nc-award-lbl">On-Time · Long-Haul</div>
+        </div>
+      </div>
+      <div class="nc-body">
+        <div class="nc-meta">
+          <span class="cat-pill cat-awards">Awards</span>
+          <span class="nc-date">May 29, 2026</span>
+        </div>
+        <div class="nc-title">ANA Ranked World's Most Punctual Long-Haul Airline for Third Year Running</div>
+        <div class="nc-excerpt">OAG's 2026 Punctuality League has named ANA the world's most on-time long-haul carrier for the third consecutive year. Tokyo Mega Hub operations recorded a 98.7% on-time departure rate across all routes — a record for a hub of its size. The airline credits its three-wave bank schedule, 45-minute minimum connection standard, and precision ground operations.</div>
+        <a href="#" class="nc-read">Read More</a>
+      </div>
+    </div>
+
+    <div class="news-card">
+      <div class="nc-img-wrap">
+        <img class="nc-img" src="assets/dest-new-york.jpg" alt="Montreal - transatlantic" style="object-position:center 50%;">
+      </div>
+      <div class="nc-body">
+        <div class="nc-meta">
+          <span class="cat-pill cat-partner">Partnership</span>
+          <span class="nc-date">May 15, 2026</span>
+        </div>
+        <div class="nc-title">Air Canada Upgrades KIX–Montréal to 4× Daily as Pacific Gateway Demand Surges</div>
+        <div class="nc-excerpt">Air Canada has confirmed the expansion of its Osaka Kansai–Montréal Trudeau service from two to four daily departures, operating in full code-share with ANA under the NH 8007–8013 series. The move cements KIX's role as a premier second hub for westbound North American travelers, with seamless connections available to ANA's full Asian and Southeast Asian network. Partner fares are now available through ANA booking channels.</div>
+        <a href="#" class="nc-read">Read More</a>
+      </div>
+    </div>
+
+    <div class="news-card">
+      <div class="nc-color ncb-ops">
+        <div style="text-align:center;">
+          <div class="nc-lounge-stat">6,000 m²</div>
+          <div class="nc-lounge-lbl">Flagship Lounge · NRT T1</div>
+        </div>
+      </div>
+      <div class="nc-body">
+        <div class="nc-meta">
+          <span class="cat-pill cat-ops">Operations</span>
+          <span class="nc-date">May 3, 2026</span>
+        </div>
+        <div class="nc-title">ANA Unveils 6,000 m² Flagship Lounge at Narita Terminal 1 — Japan's Largest Airport Lounge</div>
+        <div class="nc-excerpt">ANA's new suite-level lounge at NRT Terminal 1 spans three floors and features a dedicated First Class suite with private dining rooms, a teppanyaki counter overseen by a Michelin-starred chef, a sake and whisky bar with 80 Japanese labels, and panoramic apron views. The facility serves Business, Premium Economy, and top-tier Mileage Club members across all three daily wave departures.</div>
+        <a href="#" class="nc-read">Read More</a>
+      </div>
+    </div>
+
+  </div><!-- /news-row-3 -->
+
+</div><!-- /news-body -->
+
+<!-- Press release archive -->
+<div class="press-section">
+  <div class="press-title">Recent Press Releases</div>
+  <div class="press-list">
+
+    <div class="press-row">
+      <span class="press-date">Apr 28, 2026</span>
+      <span class="press-cat"><span class="cat-pill cat-routes">Routes</span></span>
+      <span class="press-headline">ANA Launches Singapore–NRT Third Daily Flight, Boosting Southeast Asia Connectivity to 5 Daily Departures</span>
+      <a href="#" class="press-link">View →</a>
+    </div>
+
+    <div class="press-row">
+      <span class="press-date">Apr 14, 2026</span>
+      <span class="press-cat"><span class="cat-pill cat-fleet">Fleet</span></span>
+      <span class="press-headline">ANA Takes Delivery of 12th Airbus A350-900, Expanding Asian Trunk Network Capacity</span>
+      <a href="#" class="press-link">View →</a>
+    </div>
+
+    <div class="press-row">
+      <span class="press-date">Apr 2, 2026</span>
+      <span class="press-cat"><span class="cat-pill cat-fleet">Fleet</span></span>
+      <span class="press-headline">Boeing 777X Makes Revenue Debut on NRT–JFK — First Commercial Service by an Asian Carrier</span>
+      <a href="#" class="press-link">View →</a>
+    </div>
+
+    <div class="press-row">
+      <span class="press-date">Mar 20, 2026</span>
+      <span class="press-cat"><span class="cat-pill cat-partner">Partnership</span></span>
+      <span class="press-headline">ANA and Lufthansa Group Deepen Code-Share, Adding ANA Metal to FRA–NRT–Asia Connections</span>
+      <a href="#" class="press-link">View →</a>
+    </div>
+
+    <div class="press-row">
+      <span class="press-date">Mar 8, 2026</span>
+      <span class="press-cat"><span class="cat-pill cat-ops">Operations</span></span>
+      <span class="press-headline">ANA Introduces Biometric FastTrack Boarding Across All NRT International Gates</span>
+      <a href="#" class="press-link">View →</a>
+    </div>
+
+    <div class="press-row">
+      <span class="press-date">Feb 22, 2026</span>
+      <span class="press-cat"><span class="cat-pill cat-routes">Routes</span></span>
+      <span class="press-headline">KIX International Gateway: New Routes to Guangzhou, Hanoi, and Ho Chi Minh City Begin March 29</span>
+      <a href="#" class="press-link">View →</a>
+    </div>
+
+    <div class="press-row">
+      <span class="press-date">Feb 10, 2026</span>
+      <span class="press-cat"><span class="cat-pill cat-awards">Awards</span></span>
+      <span class="press-headline">ANA Receives SKYTRAX 5-Star Certification for Ninth Consecutive Year at World Airline Awards</span>
+      <a href="#" class="press-link">View →</a>
+    </div>
+
+    <div class="press-row">
+      <span class="press-date">Jan 27, 2026</span>
+      <span class="press-cat"><span class="cat-pill cat-partner">Partnership</span></span>
+      <span class="press-headline">ANA and Singapore Airlines Announce Enhanced Reciprocal Frequent Flyer Benefits Under New Bilateral Agreement</span>
+      <a href="#" class="press-link">View →</a>
+    </div>
+
+    <div class="press-row">
+      <span class="press-date">Jan 15, 2026</span>
+      <span class="press-cat"><span class="cat-pill cat-ops">Operations</span></span>
+      <span class="press-headline">Tokyo Mega Hub Passes 10 Million Total Passengers Milestone Eleven Months After Launch</span>
+      <a href="#" class="press-link">View →</a>
+    </div>
+
+    <div class="press-row">
+      <span class="press-date">Dec 19, 2025</span>
+      <span class="press-cat"><span class="cat-pill cat-routes">Routes</span></span>
+      <span class="press-headline">ANA Confirms KIX–Mexico City 4× Daily Service; Becomes First Japanese Carrier on Osaka–Latin America Route</span>
+      <a href="#" class="press-link">View →</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+window.addEventListener('scroll', function() {
+  var nav = document.getElementById('navbar');
+  if (nav) nav.classList.toggle('scrolled', window.scrollY > 10);
+});
+</script>
+<script src="js/nav.js"></script>
+</body>
+</html>

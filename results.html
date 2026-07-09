@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANA | Flight Results</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="results-page">
+
+<!-- Navbar -->
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo" style="text-decoration:none;">
+      <img src="assets/ana-tail.png" class="ana-logo-img" alt="ANA All Nippon Airways">
+      <div class="logo-divider"></div>
+      <div class="sa-badge">
+        <svg class="sa-ring" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g transform="translate(16,16)"><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(72)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(72)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(144)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(144)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(216)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(216)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(288)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(288)"/></g></svg>
+        <div class="sa-text">
+          <span class="sa-name">star alliance</span>
+          <span class="sa-member">a star alliance member</span>
+        </div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link" data-en="Book" data-jp="予約">Book</a>
+      <a href="destinations.html" class="nav-link" data-en="Destinations" data-jp="目的地">Destinations</a>
+      <a href="fleet.html" class="nav-link" data-en="Our Fleet" data-jp="機材">Our Fleet</a>
+      <a href="news.html" class="nav-link" data-en="News" data-jp="ニュース">News</a>
+      <a href="#" class="nav-link" data-en="Experience" data-jp="サービス">Experience</a>
+    </div>
+    <div class="nav-actions">
+      <div class="currency-mount" id="currencyMount"></div>
+      <button class="lang-toggle" id="langToggle">
+        <span class="lang-option active" id="lang-en">EN</span>
+        <span class="lang-divider">|</span>
+        <span class="lang-option" id="lang-jp">日本語</span>
+      </button>
+      <a href="index.html" class="btn-book-nav" data-en="New Search" data-jp="新規検索">New Search</a>
+    </div>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" id="mobileNavClose">✕</button>
+  <a href="index.html" class="mobile-nav-link">Book</a>
+  <a href="destinations.html" class="mobile-nav-link">Destinations</a>
+  <a href="fleet.html" class="mobile-nav-link">Our Fleet</a>
+  <a href="news.html" class="mobile-nav-link">News</a>
+  <a href="#" class="mobile-nav-link">Experience</a>
+  <div class="mobile-nav-bottom">
+    <a href="index.html" class="mobile-nav-book">New Search</a>
+  </div>
+</div>
+
+<!-- Results hero -->
+<div class="results-hero">
+  <div class="container">
+    <div id="routeHeader"></div>
+  </div>
+</div>
+
+<!-- Results body -->
+<div class="results-body">
+  <!-- Flight list -->
+  <div class="flights-section">
+    <h3 data-en="Available Flights" data-jp="利用可能なフライト">Available Flights</h3>
+    <div id="flightList"></div>
+  </div>
+
+  <!-- Map panel -->
+  <div class="map-panel">
+    <div class="map-panel-header">
+      <h3 data-en="Your Route" data-jp="あなたのルート">Your Route</h3>
+    </div>
+    <div id="results-map"></div>
+    <div class="map-legend">
+      <div class="legend-item">
+        <div class="legend-dot legend-dot-hub"></div>
+        <span data-en="Tokyo Hub (NRT)" data-jp="東京ハブ（NRT）">Tokyo Hub (NRT)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot legend-dot-city"></div>
+        <span data-en="Your cities" data-jp="あなたの都市">Your cities</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/airports.js"></script>
+<script src="js/currencies.js"></script>
+<script src="js/flights.js?v=10"></script>
+<script src="js/map.js?v=10"></script>
+<script src="js/results.js?v=10"></script>
+<script src="js/nav.js"></script>
+</body>
+</html>

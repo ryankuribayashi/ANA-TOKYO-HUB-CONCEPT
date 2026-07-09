@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANA | Our Fleet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+.fleet-page { background: var(--off-white); min-height: 100vh; }
+
+/* ── Hero ── */
+.fleet-hero {
+  padding: 120px 0 60px;
+  background:
+    radial-gradient(ellipse at 75% 35%, rgba(11,61,145,0.07) 0%, transparent 55%),
+    linear-gradient(160deg, #E8ECF7 0%, #DDE3F0 45%, #D8E0EE 100%);
+  border-bottom: 1px solid rgba(11,61,145,0.08);
+}
+.fleet-hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.fleet-hero-tag {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+  color: var(--navy); text-transform: uppercase; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.fleet-hero-tag::before { content:''; width:28px; height:2px; background:var(--gold); }
+.fleet-hero-title {
+  font-size: clamp(36px, 4.5vw, 60px); font-weight: 900;
+  color: var(--navy-dark); letter-spacing: -0.03em; line-height: 1.1;
+  margin-bottom: 14px;
+}
+.fleet-hero-sub { font-size: 16px; color: #4B5563; max-width: 520px; line-height: 1.7; }
+
+/* ── Stats bar ── */
+.fleet-stats-bar { background: var(--navy); padding: 28px 0; }
+.fleet-stats-inner {
+  max-width: 1200px; margin: 0 auto; padding: 0 24px;
+  display: flex; justify-content: space-around; flex-wrap: wrap; gap: 24px;
+}
+.fleet-stat { text-align: center; }
+.fleet-stat-num { font-size: 36px; font-weight: 900; color: var(--gold); letter-spacing: -0.02em; }
+.fleet-stat-label { font-size: 12px; color: rgba(255,255,255,0.65); font-weight: 500; margin-top: 4px; }
+
+/* ── Widget Grid ── */
+.fleet-grid {
+  max-width: 1200px; margin: 0 auto; padding: 48px 24px 80px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+}
+
+.fleet-widget {
+  position: relative; cursor: pointer; border-radius: 10px; overflow: hidden;
+  height: 300px; border: 1.5px solid rgba(11,61,145,0.1);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s;
+  outline: none;
+}
+.fleet-widget:hover, .fleet-widget:focus-visible {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 56px rgba(11,61,145,0.22);
+  border-color: rgba(11,61,145,0.25);
+}
+.fleet-widget:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+/* gradient fallbacks (show while photo loads) */
+.ac-777  { background: linear-gradient(160deg, #000C24 0%, #0B2E6B 60%, #000820 100%); }
+.ac-a351 { background: linear-gradient(160deg, #0d2b4e 0%, #1a4a6e 60%, #1565C0 100%); }
+.ac-789  { background: linear-gradient(160deg, #0f1e3d 0%, #263b6e 60%, #37517e 100%); }
+.ac-a359 { background: linear-gradient(160deg, #13253d 0%, #1b3a5c 60%, #2660a4 100%); }
+.ac-788  { background: linear-gradient(160deg, #1a2a4a 0%, #243d6b 60%, #2d4f88 100%); }
+
+.fw-photo {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 0;
+  transition: transform 0.45s ease;
+}
+.fleet-widget:hover .fw-photo { transform: scale(1.04); }
+
+.fw-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,0.32) 0%, transparent 40%),
+    linear-gradient(to top, rgba(0,8,28,0.8) 0%, transparent 55%);
+}
+
+.fw-type {
+  position: absolute; top: 14px; left: 15px; z-index: 2;
+  background: rgba(0,0,0,0.42); backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.18); border-radius: 4px;
+  padding: 4px 10px; font-size: 10px; font-weight: 800;
+  color: rgba(255,255,255,0.9); letter-spacing: 0.12em; text-transform: uppercase;
+}
+
+.fw-explore {
+  position: absolute; top: 14px; right: 14px; z-index: 2;
+  background: rgba(255,255,255,0.14); backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.28); border-radius: 20px;
+  padding: 4px 12px; font-size: 10px; font-weight: 700;
+  color: rgba(255,255,255,0.9); letter-spacing: 0.06em; text-transform: uppercase;
+  opacity: 0; transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.fleet-widget:hover .fw-explore,
+.fleet-widget:focus-visible .fw-explore { opacity: 1; transform: translateY(0); }
+
+.fw-bottom {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+  padding: 18px 18px 20px;
+}
+.fw-name { font-size: 21px; font-weight: 900; color: #fff; letter-spacing: -0.02em; line-height: 1.15; }
+.fw-role { font-size: 11px; color: rgba(255,255,255,0.56); font-weight: 500; margin-top: 3px; line-height: 1.4; }
+.fw-pill {
+  display: inline-flex; align-items: center; margin-top: 9px;
+  background: rgba(201,168,76,0.16); border: 1px solid rgba(201,168,76,0.4);
+  border-radius: 12px; padding: 3px 10px;
+  font-size: 11px; font-weight: 700; color: #C9A84C; letter-spacing: 0.04em;
+}
+
+/* ── Modal ── */
+.fleet-modal {
+  position: fixed; inset: 0; z-index: 2000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.fleet-modal.open { opacity: 1; pointer-events: all; }
+
+.fleet-modal-bg {
+  position: absolute; inset: 0;
+  background: rgba(0,8,24,0.72);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+
+.fleet-modal-box {
+  position: relative; z-index: 1; background: #fff; border-radius: 10px;
+  width: min(860px, 100%); max-height: 86vh; overflow-y: auto;
+  transform: translateY(30px) scale(0.97);
+  transition: transform 0.32s cubic-bezier(0.34,1.2,0.64,1);
+  box-shadow: 0 32px 96px rgba(0,0,0,0.42);
+  scrollbar-width: thin; scrollbar-color: rgba(11,61,145,0.2) transparent;
+}
+.fleet-modal.open .fleet-modal-box { transform: translateY(0) scale(1); }
+
+.fleet-modal-close {
+  position: absolute; top: 13px; right: 13px; z-index: 20;
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.35);
+  background: rgba(0,0,0,0.4); backdrop-filter: blur(8px);
+  cursor: pointer; color: #fff; font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, transform 0.15s; line-height: 1;
+}
+.fleet-modal-close:hover { background: rgba(0,0,0,0.65); transform: scale(1.08); }
+
+.fleet-modal-photo {
+  width: 100%; height: 210px; position: relative;
+  overflow: hidden; border-radius: 10px 10px 0 0;
+}
+.fleet-modal-photo img { width: 100%; height: 100%; object-fit: cover; }
+.fmp-overlay {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, transparent 35%),
+    linear-gradient(to top, rgba(0,8,28,0.62) 0%, transparent 52%);
+}
+.fmp-badge {
+  position: absolute; top: 16px; left: 20px; z-index: 2;
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.2); border-radius: 4px;
+  padding: 5px 12px; font-size: 11px; font-weight: 800;
+  color: rgba(255,255,255,0.92); letter-spacing: 0.1em; text-transform: uppercase;
+}
+.fmp-bottom { position: absolute; bottom: 16px; left: 20px; right: 20px; z-index: 2; }
+.fmp-name { font-size: 24px; font-weight: 900; color: #fff; letter-spacing: -0.02em; }
+.fmp-role { font-size: 11px; color: rgba(255,255,255,0.62); font-weight: 500; margin-top: 3px; }
+
+/* Modal inner */
+.fleet-modal-inner { padding: 24px 28px 32px; }
+.fmi-seats { font-size: 14px; color: #6B7280; font-weight: 500; margin-bottom: 18px; }
+.fmi-seats strong { color: var(--navy); font-weight: 800; }
+.fmi-label {
+  font-size: 10px; font-weight: 800; letter-spacing: 0.18em;
+  text-transform: uppercase; color: #B0B8C9; margin-bottom: 10px;
+}
+
+/* ── Cabins ── */
+.aircraft-cabins { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.cabin-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 11px 18px; border-radius: 4px;
+  background: #F8FAFC; border: 1px solid #EEF0F8;
+}
+.cabin-row-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.cabin-fc  { background: #C9A84C; box-shadow: 0 0 8px rgba(201,168,76,0.5); }
+.cabin-bc  { background: var(--navy); box-shadow: 0 0 6px rgba(11,61,145,0.4); }
+.cabin-pe  { background: #60A5FA; }
+.cabin-eco { background: #9CA3AF; }
+.cabin-row-label { font-size: 12px; font-weight: 700; color: #374151; min-width: 120px; }
+.cabin-row-config { font-size: 12px; color: #6B7280; font-weight: 500; flex: 1; }
+.cabin-row-seats { font-size: 13px; font-weight: 800; color: var(--navy); min-width: 40px; text-align: right; }
+
+/* ── Routes ── */
+.ac-routes-section { padding-top: 18px; border-top: 1px solid #EEF0F8; }
+.ac-routes-title {
+  font-size: 10px; font-weight: 800; letter-spacing: 0.18em;
+  text-transform: uppercase; color: #B0B8C9; margin-bottom: 14px;
+}
+.ac-regions { display: flex; flex-direction: column; gap: 14px; }
+.ac-region-head {
+  font-size: 10px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px; margin-bottom: 7px;
+}
+.ac-region-head .rh-line { width: 14px; height: 2px; flex-shrink: 0; border-radius: 1px; }
+.rh-na  { color: #3B82F6; } .rh-na  .rh-line { background: #3B82F6; }
+.rh-asia{ color: #F59E0B; } .rh-asia .rh-line{ background: #F59E0B; }
+.rh-eu  { color: #10B981; } .rh-eu  .rh-line { background: #10B981; }
+.rh-me  { color: #8B5CF6; } .rh-me  .rh-line { background: #8B5CF6; }
+.rh-af  { color: #EF4444; } .rh-af  .rh-line { background: #EF4444; }
+.rh-oc  { color: #06B6D4; } .rh-oc  .rh-line { background: #06B6D4; }
+.rh-fr  { color: #C9A84C; } .rh-fr  .rh-line { background: #C9A84C; }
+.ac-dest-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.ac-dest-list.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.ac-dest-row {
+  display: flex; align-items: center; gap: 7px;
+  padding: 4px 0; border-bottom: 1px solid #F5F7FB;
+}
+.ac-dest-code { font-size: 12px; font-weight: 900; color: var(--navy); min-width: 32px; flex-shrink: 0; letter-spacing: 0.02em; }
+.ac-dest-city { font-size: 11px; color: #4B5563; flex: 1; }
+.ac-dest-city em { font-style: italic; color: #9CA3AF; font-size: 10px; }
+.ac-dest-freq { font-size: 10px; font-weight: 700; color: #9CA3AF; white-space: nowrap; flex-shrink: 0; }
+.ac-dest-freq.fr { color: #C9A84C; }
+.ac-specs-inline {
+  margin-top: 16px; padding-top: 14px; border-top: 1px solid #EEF0F8;
+  display: flex; gap: 24px; flex-wrap: wrap;
+}
+.ac-spec { display: flex; flex-direction: column; gap: 2px; }
+.ac-spec-val { font-size: 16px; font-weight: 900; color: var(--navy); }
+.ac-spec-lbl { font-size: 10px; color: #9CA3AF; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .fleet-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .fleet-hero { padding: 80px 0 36px; }
+  .fleet-hero-title { font-size: clamp(30px, 8vw, 44px); }
+  .fleet-hero-sub { font-size: 14px; }
+  .fleet-stats-bar { padding: 20px 0; }
+  .fleet-stat-num { font-size: 26px; }
+  .fleet-modal-inner { padding: 18px 18px 24px; }
+  .cabin-row-label { min-width: 90px; font-size: 11px; }
+  .ac-dest-list.cols-3 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 520px) {
+  .fleet-grid { grid-template-columns: 1fr; gap: 14px; padding: 28px 16px 56px; }
+  .fleet-widget { height: 260px; }
+  .fleet-modal { padding: 0; align-items: flex-end; }
+  .fleet-modal-box { width: 100%; max-height: 90vh; border-radius: 12px 12px 0 0; }
+  .fleet-modal-photo { height: 160px; }
+}
+</style>
+</head>
+<body class="fleet-page">
+
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo" style="text-decoration:none;">
+      <img src="assets/ana-tail.png" class="ana-logo-img" alt="ANA">
+      <div class="logo-divider"></div>
+      <div class="sa-badge">
+        <svg class="sa-ring" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g transform="translate(16,16)"><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(72)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(72)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(144)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(144)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(216)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(216)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(288)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(288)"/></g></svg>
+        <div class="sa-text">
+          <span class="sa-name">star alliance</span>
+          <span class="sa-member">a star alliance member</span>
+        </div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Book</a>
+      <a href="destinations.html" class="nav-link">Destinations</a>
+      <a href="fleet.html" class="nav-link" style="color:var(--gold);font-weight:700;">Our Fleet</a>
+      <a href="news.html" class="nav-link">News</a>
+      <a href="#" class="nav-link">Experience</a>
+    </div>
+    <div class="nav-actions">
+      <a href="index.html" class="btn-book-nav">Book Now</a>
+    </div>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" id="mobileNavClose">✕</button>
+  <a href="index.html" class="mobile-nav-link">Book</a>
+  <a href="destinations.html" class="mobile-nav-link">Destinations</a>
+  <a href="fleet.html" class="mobile-nav-link" style="color:var(--gold);">Our Fleet</a>
+  <a href="news.html" class="mobile-nav-link">News</a>
+  <a href="#" class="mobile-nav-link">Experience</a>
+  <div class="mobile-nav-bottom">
+    <a href="index.html" class="mobile-nav-book">Book Now</a>
+  </div>
+</div>
+
+<!-- Hero -->
+<div class="fleet-hero">
+  <div class="fleet-hero-inner">
+    <div class="fleet-hero-tag">ANA FLEET</div>
+    <h1 class="fleet-hero-title">Next-Generation<br>Aircraft</h1>
+    <p class="fleet-hero-sub">Five state-of-the-art aircraft types purpose-built for the Tokyo Mega Hub — from ultra-capacity trunk routes to premium regional service.</p>
+  </div>
+</div>
+
+<!-- Stats bar -->
+<div class="fleet-stats-bar">
+  <div class="fleet-stats-inner">
+    <div class="fleet-stat"><div class="fleet-stat-num">5</div><div class="fleet-stat-label">Aircraft Types</div></div>
+    <div class="fleet-stat"><div class="fleet-stat-num">1,396</div><div class="fleet-stat-label">Total Seats (per rotation)</div></div>
+    <div class="fleet-stat"><div class="fleet-stat-num">115</div><div class="fleet-stat-label">Routes Served</div></div>
+    <div class="fleet-stat"><div class="fleet-stat-num">3</div><div class="fleet-stat-label">Daily Flight Banks</div></div>
+  </div>
+</div>
+
+<!-- Fleet Grid -->
+<div class="fleet-grid">
+
+  <div class="fleet-widget ac-777" data-aircraft="777" role="button" tabindex="0" aria-label="Boeing 777-9, click to expand">
+    <img class="fw-photo" src="assets/fleet-777.jpg" alt="ANA Boeing 777-9" style="object-position:center 38%;">
+    <div class="fw-overlay"></div>
+    <div class="fw-type">TYPE 1</div>
+    <div class="fw-explore">Explore →</div>
+    <div class="fw-bottom">
+      <div class="fw-name">Boeing 777-9</div>
+      <div class="fw-role">High-Capacity Trunk · North America &amp; Europe</div>
+      <div class="fw-pill">356 seats</div>
+    </div>
+  </div>
+
+  <div class="fleet-widget ac-a351" data-aircraft="a351" role="button" tabindex="0" aria-label="Airbus A350-1000, click to expand">
+    <img class="fw-photo" src="assets/fleet-a351.jpg" alt="ANA Airbus A350-1000" style="object-position:center 42%;">
+    <div class="fw-overlay"></div>
+    <div class="fw-type">TYPE 2</div>
+    <div class="fw-explore">Explore →</div>
+    <div class="fw-bottom">
+      <div class="fw-name">Airbus A350-1000</div>
+      <div class="fw-role">Premium Long-Haul · Transatlantic &amp; Trans-Pacific</div>
+      <div class="fw-pill">285 seats</div>
+    </div>
+  </div>
+
+  <div class="fleet-widget ac-789" data-aircraft="789" role="button" tabindex="0" aria-label="Boeing 787-9, click to expand">
+    <img class="fw-photo" src="assets/fleet-789.jpg" alt="ANA Boeing 787-9" style="object-position:center 52%;">
+    <div class="fw-overlay"></div>
+    <div class="fw-type">TYPE 3</div>
+    <div class="fw-explore">Explore →</div>
+    <div class="fw-bottom">
+      <div class="fw-name">Boeing 787-9</div>
+      <div class="fw-role">Secondary Long-Haul · North America &amp; Europe</div>
+      <div class="fw-pill">240 seats</div>
+    </div>
+  </div>
+
+  <div class="fleet-widget ac-a359" data-aircraft="a359" role="button" tabindex="0" aria-label="Airbus A350-900, click to expand">
+    <img class="fw-photo" src="assets/fleet-a359.jpg" alt="ANA Airbus A350-900" style="object-position:center 40%;">
+    <div class="fw-overlay"></div>
+    <div class="fw-type">TYPE 4</div>
+    <div class="fw-explore">Explore →</div>
+    <div class="fw-bottom">
+      <div class="fw-name">Airbus A350-900</div>
+      <div class="fw-role">Premium Asian Routes · Regional &amp; Medium-Haul</div>
+      <div class="fw-pill">271 seats</div>
+    </div>
+  </div>
+
+  <div class="fleet-widget ac-788" data-aircraft="788" role="button" tabindex="0" aria-label="Boeing 787-8, click to expand">
+    <img class="fw-photo" src="assets/fleet-788.avif" alt="ANA Boeing 787-8" style="object-position:center 40%;">
+    <div class="fw-overlay"></div>
+    <div class="fw-type">TYPE 5</div>
+    <div class="fw-explore">Explore →</div>
+    <div class="fw-bottom">
+      <div class="fw-name">Boeing 787-8</div>
+      <div class="fw-role">Secondary Asian &amp; Regional Routes</div>
+      <div class="fw-pill">244 seats</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Hidden detail store -->
+<div id="fleet-detail-store" style="display:none;" aria-hidden="true">
+
+  <!-- 777-9 -->
+  <div id="fleet-detail-777">
+    <div class="fmi-seats">Total: <strong>356 seats</strong> · Twin-engine widebody</div>
+    <div class="fmi-label">Cabin Configuration</div>
+    <div class="aircraft-cabins">
+      <div class="cabin-row"><div class="cabin-row-dot cabin-fc"></div><span class="cabin-row-label">First Class</span><span class="cabin-row-config">1-2-1 · Private suite · Fully flat bed</span><span class="cabin-row-seats">8</span></div>
+      <div class="cabin-row"><div class="cabin-row-dot cabin-bc"></div><span class="cabin-row-label">Business Class</span><span class="cabin-row-config">2-2-2 · Lie-flat · Aisle access every seat</span><span class="cabin-row-seats">48</span></div>
+      <div class="cabin-row"><div class="cabin-row-dot cabin-eco"></div><span class="cabin-row-label">Economy</span><span class="cabin-row-config">3-4-3 · In-seat power · ANA entertainment</span><span class="cabin-row-seats">300</span></div>
+    </div>
+    <div class="ac-routes-section">
+      <div class="ac-routes-title">Routes &amp; Destinations</div>
+      <div class="ac-regions">
+        <div>
+          <div class="ac-region-head rh-na"><span class="rh-line"></span>North America</div>
+          <div class="ac-dest-list cols-3">
+            <div class="ac-dest-row"><span class="ac-dest-code">JFK</span><span class="ac-dest-city">New York</span><span class="ac-dest-freq">2×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">LAX</span><span class="ac-dest-city">Los Angeles</span><span class="ac-dest-freq">2×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">SFO</span><span class="ac-dest-city">San Francisco</span><span class="ac-dest-freq">2×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">ORD</span><span class="ac-dest-city">Chicago</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">SEA</span><span class="ac-dest-city">Seattle</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">HNL</span><span class="ac-dest-city">Honolulu</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">YYZ</span><span class="ac-dest-city">Toronto</span><span class="ac-dest-freq">daily</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="ac-region-head rh-eu"><span class="rh-line"></span>Europe</div>
+          <div class="ac-dest-list">
+            <div class="ac-dest-row"><span class="ac-dest-code">LHR</span><span class="ac-dest-city">London</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">CDG</span><span class="ac-dest-city">Paris</span><span class="ac-dest-freq">daily</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="ac-specs-inline">
+        <div class="ac-spec"><span class="ac-spec-val">16,090 km</span><span class="ac-spec-lbl">Max Range</span></div>
+        <div class="ac-spec"><span class="ac-spec-val">905 km/h</span><span class="ac-spec-lbl">Cruise Speed</span></div>
+        <div class="ac-spec"><span class="ac-spec-val">356</span><span class="ac-spec-lbl">Total Seats</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A350-1000 -->
+  <div id="fleet-detail-a351">
+    <div class="fmi-seats">Total: <strong>285 seats</strong> · Twin-engine widebody</div>
+    <div class="fmi-label">Cabin Configuration</div>
+    <div class="aircraft-cabins">
+      <div class="cabin-row"><div class="cabin-row-dot cabin-fc"></div><span class="cabin-row-label">First Class</span><span class="cabin-row-config">1-1-1 · Private suite · Door-to-door</span><span class="cabin-row-seats">6</span></div>
+      <div class="cabin-row"><div class="cabin-row-dot cabin-bc"></div><span class="cabin-row-label">Business Class</span><span class="cabin-row-config">1-2-1 · Full flat · Direct aisle access</span><span class="cabin-row-seats">40</span></div>
+      <div class="cabin-row"><div class="cabin-row-dot cabin-pe"></div><span class="cabin-row-label">Premium Economy</span><span class="cabin-row-config">2-4-2 · Extra legroom · Premium dining</span><span class="cabin-row-seats">32</span></div>
+      <div class="cabin-row"><div class="cabin-row-dot cabin-eco"></div><span class="cabin-row-label">Economy</span><span class="cabin-row-config">3-3-3 · In-seat power · 31" pitch</span><span class="cabin-row-seats">207</span></div>
+    </div>
+    <div class="ac-routes-section">
+      <div class="ac-routes-title">Routes &amp; Destinations</div>
+      <div class="ac-regions">
+        <div>
+          <div class="ac-region-head rh-na"><span class="rh-line"></span>North America</div>
+          <div class="ac-dest-list cols-3">
+            <div class="ac-dest-row"><span class="ac-dest-code">ORD</span><span class="ac-dest-city">Chicago</span><span class="ac-dest-freq">2×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">SEA</span><span class="ac-dest-city">Seattle</span><span class="ac-dest-freq">2×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">JFK</span><span class="ac-dest-city">New York</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">LAX</span><span class="ac-dest-city">Los Angeles</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">SFO</span><span class="ac-dest-city">San Francisco</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">BOS</span><span class="ac-dest-city">Boston</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">IAH</span><span class="ac-dest-city">Houston</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">YVR</span><span class="ac-dest-city">Vancouver</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">HNL</span><span class="ac-dest-city">Honolulu</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">YYZ</span><span class="ac-dest-city">Toronto</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">IAD</span><span class="ac-dest-city">Washington</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">DFW</span><span class="ac-dest-city">Dallas</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">YUL</span><span class="ac-dest-city">Montreal</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">MEX</span><span class="ac-dest-city">Mexico City</span><span class="ac-dest-freq">daily</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="ac-region-head rh-eu"><span class="rh-line"></span>Europe</div>
+          <div class="ac-dest-list cols-3">
+            <div class="ac-dest-row"><span class="ac-dest-code">LHR</span><span class="ac-dest-city">London</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">CDG</span><span class="ac-dest-city">Paris</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">FRA</span><span class="ac-dest-city">Frankfurt</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">MUC</span><span class="ac-dest-city">Munich</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">IST</span><span class="ac-dest-city">Istanbul</span><span class="ac-dest-freq">daily</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="ac-region-head rh-me"><span class="rh-line"></span>Middle East</div>
+          <div class="ac-dest-list">
+            <div class="ac-dest-row"><span class="ac-dest-code">DXB</span><span class="ac-dest-city">Dubai</span><span class="ac-dest-freq">daily</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="ac-region-head rh-oc"><span class="rh-line"></span>Oceania</div>
+          <div class="ac-dest-list">
+            <div class="ac-dest-row"><span class="ac-dest-code">SYD</span><span class="ac-dest-city">Sydney</span><span class="ac-dest-freq">daily</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="ac-specs-inline">
+        <div class="ac-spec"><span class="ac-spec-val">15,600 km</span><span class="ac-spec-lbl">Max Range</span></div>
+        <div class="ac-spec"><span class="ac-spec-val">903 km/h</span><span class="ac-spec-lbl">Cruise Speed</span></div>
+        <div class="ac-spec"><span class="ac-spec-val">285</span><span class="ac-spec-lbl">Total Seats</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 787-9 -->
+  <div id="fleet-detail-789">
+    <div class="fmi-seats">Total: <strong>240 seats</strong> · Twin-engine widebody</div>
+    <div class="fmi-label">Cabin Configuration</div>
+    <div class="aircraft-cabins">
+      <div class="cabin-row"><div class="cabin-row-dot cabin-bc"></div><span class="cabin-row-label">Business Class</span><span class="cabin-row-config">1-2-1 · Full flat · Direct aisle access</span><span class="cabin-row-seats">32</span></div>
+      <div class="cabin-row"><div class="cabin-row-dot cabin-pe"></div><span class="cabin-row-label">Premium Economy</span><span class="cabin-row-config">2-3-2 · Extra legroom · Priority boarding</span><span class="cabin-row-seats">28</span></div>
+      <div class="cabin-row"><div class="cabin-row-dot cabin-eco"></div><span class="cabin-row-label">Economy</span><span class="cabin-row-config">3-3-3 · In-seat power · Large windows</span><span class="cabin-row-seats">180</span></div>
+    </div>
+    <div class="ac-routes-section">
+      <div class="ac-routes-title">Routes &amp; Destinations</div>
+      <div class="ac-regions">
+        <div>
+          <div class="ac-region-head rh-na"><span class="rh-line"></span>North America · Daily</div>
+          <div class="ac-dest-list cols-3">
+            <div class="ac-dest-row"><span class="ac-dest-code">BOS</span><span class="ac-dest-city">Boston</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">IAH</span><span class="ac-dest-city">Houston</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">YVR</span><span class="ac-dest-city">Vancouver</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">DTW</span><span class="ac-dest-city">Detroit</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">MSP</span><span class="ac-dest-city">Minneapolis</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">ATL</span><span class="ac-dest-city">Atlanta</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">DEN</span><span class="ac-dest-city">Denver</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">SAN</span><span class="ac-dest-city">San Diego</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">YYC</span><span class="ac-dest-city">Calgary</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">SJC</span><span class="ac-dest-city">San Jose</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">MTY</span><span class="ac-dest-city">Monterrey</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">MIA</span><span class="ac-dest-city">Miami</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">MCO</span><span class="ac-dest-city">Orlando</span><span class="ac-dest-freq">daily</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="ac-region-head rh-na"><span class="rh-line"></span>North America · Select Days</div>
+          <div class="ac-dest-list cols-3">
+            <div class="ac-dest-row"><span class="ac-dest-code">PHL</span><span class="ac-dest-city">Philadelphia</span><span class="ac-dest-freq">5×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">CLT</span><span class="ac-dest-city">Charlotte</span><span class="ac-dest-freq">5×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">LAS</span><span class="ac-dest-city">Las Vegas</span><span class="ac-dest-freq">4×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">SLC</span><span class="ac-dest-city">Salt Lake City</span><span class="ac-dest-freq">4×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">PHX</span><span class="ac-dest-city">Phoenix</span><span class="ac-dest-freq">4×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">PDX</span><span class="ac-dest-city">Portland</span><span class="ac-dest-freq">4×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">AUS</span><span class="ac-dest-city">Austin</span><span class="ac-dest-freq">4×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">ANC</span><span class="ac-dest-city">Anchorage</span><span class="ac-dest-freq">4×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">IND</span><span class="ac-dest-city">Indianapolis</span><span class="ac-dest-freq">3×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">STL</span><span class="ac-dest-city">St. Louis</span><span class="ac-dest-freq">3×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">MCI</span><span class="ac-dest-city">Kansas City</span><span class="ac-dest-freq">3×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">PTY</span><span class="ac-dest-city">Panama City</span><span class="ac-dest-freq">3×wk</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="ac-region-head rh-eu"><span class="rh-line"></span>Europe · Direct</div>
+          <div class="ac-dest-list cols-3">
+            <div class="ac-dest-row"><span class="ac-dest-code">FRA</span><span class="ac-dest-city">Frankfurt</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">MUC</span><span class="ac-dest-city">Munich</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">IST</span><span class="ac-dest-city">Istanbul</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">ARN</span><span class="ac-dest-city">Stockholm</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">BRU</span><span class="ac-dest-city">Brussels</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">MXP</span><span class="ac-dest-city">Milan</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">WAW</span><span class="ac-dest-city">Warsaw</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">VIE</span><span class="ac-dest-city">Vienna</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">ZRH</span><span class="ac-dest-city">Zurich</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">GVA</span><span class="ac-dest-city">Geneva</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">FCO</span><span class="ac-dest-city">Rome</span><span class="ac-dest-freq">daily</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="ac-region-head rh-fr"><span class="rh-line"></span>Europe · Freedom Flights</div>
+          <div class="ac-dest-list cols-3">
+            <div class="ac-dest-row"><span class="ac-dest-code">DUB</span><span class="ac-dest-city">Dublin <em>via BRU</em></span><span class="ac-dest-freq fr">freedom</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">CPH</span><span class="ac-dest-city">Copenhagen <em>via MUC</em></span><span class="ac-dest-freq fr">freedom</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">HEL</span><span class="ac-dest-city">Helsinki <em>via WAW</em></span><span class="ac-dest-freq fr">freedom</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">AMS</span><span class="ac-dest-city">Amsterdam <em>via FRA</em></span><span class="ac-dest-freq fr">freedom</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">OSL</span><span class="ac-dest-city">Oslo <em>via ARN</em></span><span class="ac-dest-freq fr">freedom</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">BER</span><span class="ac-dest-city">Berlin <em>via FRA</em></span><span class="ac-dest-freq fr">freedom</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">PRG</span><span class="ac-dest-city">Prague <em>via MUC</em></span><span class="ac-dest-freq fr">freedom</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">LIS</span><span class="ac-dest-city">Lisbon <em>via ZRH</em></span><span class="ac-dest-freq fr">freedom</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">MAD</span><span class="ac-dest-city">Madrid <em>via GVA</em></span><span class="ac-dest-freq fr">freedom</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">BCN</span><span class="ac-dest-city">Barcelona <em>via FCO</em></span><span class="ac-dest-freq fr">freedom</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">ATH</span><span class="ac-dest-city">Athens <em>via IST</em></span><span class="ac-dest-freq fr">freedom</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">BUD</span><span class="ac-dest-city">Budapest <em>via IST</em></span><span class="ac-dest-freq fr">freedom</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">ZAG</span><span class="ac-dest-city">Zagreb <em>via VIE</em></span><span class="ac-dest-freq fr">freedom</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="ac-region-head rh-me"><span class="rh-line"></span>Middle East</div>
+          <div class="ac-dest-list">
+            <div class="ac-dest-row"><span class="ac-dest-code">DOH</span><span class="ac-dest-city">Doha</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">AUH</span><span class="ac-dest-city">Abu Dhabi</span><span class="ac-dest-freq">daily</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="ac-region-head rh-af"><span class="rh-line"></span>Africa</div>
+          <div class="ac-dest-list cols-3">
+            <div class="ac-dest-row"><span class="ac-dest-code">CAI</span><span class="ac-dest-city">Cairo</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">ADD</span><span class="ac-dest-city">Addis Ababa</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">JNB</span><span class="ac-dest-city">Johannesburg <em>via ADD</em></span><span class="ac-dest-freq fr">freedom</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="ac-region-head rh-oc"><span class="rh-line"></span>Oceania</div>
+          <div class="ac-dest-list cols-3">
+            <div class="ac-dest-row"><span class="ac-dest-code">SYD</span><span class="ac-dest-city">Sydney</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">AKL</span><span class="ac-dest-city">Auckland</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">MEL</span><span class="ac-dest-city">Melbourne</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">BNE</span><span class="ac-dest-city">Brisbane</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">PER</span><span class="ac-dest-city">Perth</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">CNS</span><span class="ac-dest-city">Cairns</span><span class="ac-dest-freq">5×wk</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="ac-specs-inline">
+        <div class="ac-spec"><span class="ac-spec-val">14,140 km</span><span class="ac-spec-lbl">Max Range</span></div>
+        <div class="ac-spec"><span class="ac-spec-val">903 km/h</span><span class="ac-spec-lbl">Cruise Speed</span></div>
+        <div class="ac-spec"><span class="ac-spec-val">240</span><span class="ac-spec-lbl">Total Seats</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A350-900 -->
+  <div id="fleet-detail-a359">
+    <div class="fmi-seats">Total: <strong>271 seats</strong> · Twin-engine widebody</div>
+    <div class="fmi-label">Cabin Configuration</div>
+    <div class="aircraft-cabins">
+      <div class="cabin-row"><div class="cabin-row-dot cabin-fc"></div><span class="cabin-row-label">First Class</span><span class="cabin-row-config">1-1-1 · Suite-style · Asian routes</span><span class="cabin-row-seats">3</span></div>
+      <div class="cabin-row"><div class="cabin-row-dot cabin-bc"></div><span class="cabin-row-label">Business Class</span><span class="cabin-row-config">2-2-2 · Recliner-flat · Premium dining</span><span class="cabin-row-seats">48</span></div>
+      <div class="cabin-row"><div class="cabin-row-dot cabin-pe"></div><span class="cabin-row-label">Premium Economy</span><span class="cabin-row-config">2-4-2 · Priority service</span><span class="cabin-row-seats">40</span></div>
+      <div class="cabin-row"><div class="cabin-row-dot cabin-eco"></div><span class="cabin-row-label">Economy</span><span class="cabin-row-config">3-3-3 · Premium cabin air quality</span><span class="cabin-row-seats">180</span></div>
+    </div>
+    <div class="ac-routes-section">
+      <div class="ac-routes-title">Routes &amp; Destinations</div>
+      <div class="ac-regions">
+        <div>
+          <div class="ac-region-head rh-asia"><span class="rh-line"></span>High-Frequency Trunk</div>
+          <div class="ac-dest-list cols-3">
+            <div class="ac-dest-row"><span class="ac-dest-code">SIN</span><span class="ac-dest-city">Singapore</span><span class="ac-dest-freq">3×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">HKG</span><span class="ac-dest-city">Hong Kong</span><span class="ac-dest-freq">3×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">ICN</span><span class="ac-dest-city">Seoul Incheon</span><span class="ac-dest-freq">2×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">PEK</span><span class="ac-dest-city">Beijing</span><span class="ac-dest-freq">2×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">PVG</span><span class="ac-dest-city">Shanghai</span><span class="ac-dest-freq">2×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">TPE</span><span class="ac-dest-city">Taipei</span><span class="ac-dest-freq">2×d</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="ac-region-head rh-asia"><span class="rh-line"></span>Asia · Daily</div>
+          <div class="ac-dest-list cols-3">
+            <div class="ac-dest-row"><span class="ac-dest-code">GMP</span><span class="ac-dest-city">Seoul Gimpo</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">BKK</span><span class="ac-dest-city">Bangkok</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">MNL</span><span class="ac-dest-city">Manila</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">CGK</span><span class="ac-dest-city">Jakarta</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">KUL</span><span class="ac-dest-city">Kuala Lumpur</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">SGN</span><span class="ac-dest-city">Ho Chi Minh</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">HAN</span><span class="ac-dest-city">Hanoi</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">CAN</span><span class="ac-dest-city">Guangzhou</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">DEL</span><span class="ac-dest-city">Delhi</span><span class="ac-dest-freq">daily</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="ac-specs-inline">
+        <div class="ac-spec"><span class="ac-spec-val">15,000 km</span><span class="ac-spec-lbl">Max Range</span></div>
+        <div class="ac-spec"><span class="ac-spec-val">910 km/h</span><span class="ac-spec-lbl">Cruise Speed</span></div>
+        <div class="ac-spec"><span class="ac-spec-val">271</span><span class="ac-spec-lbl">Total Seats</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 787-8 -->
+  <div id="fleet-detail-788">
+    <div class="fmi-seats">Total: <strong>244 seats</strong> · Twin-engine widebody</div>
+    <div class="fmi-label">Cabin Configuration</div>
+    <div class="aircraft-cabins">
+      <div class="cabin-row"><div class="cabin-row-dot cabin-bc"></div><span class="cabin-row-label">Business Class</span><span class="cabin-row-config">2-2-2 · Lie-flat · Regional configuration</span><span class="cabin-row-seats">36</span></div>
+      <div class="cabin-row"><div class="cabin-row-dot cabin-pe"></div><span class="cabin-row-label">Premium Economy</span><span class="cabin-row-config">2-3-2 · Extra pitch · Footrest</span><span class="cabin-row-seats">28</span></div>
+      <div class="cabin-row"><div class="cabin-row-dot cabin-eco"></div><span class="cabin-row-label">Economy</span><span class="cabin-row-config">3-3-3 · Standard ANA configuration</span><span class="cabin-row-seats">180</span></div>
+    </div>
+    <div class="ac-routes-section">
+      <div class="ac-routes-title">Routes &amp; Destinations</div>
+      <div class="ac-regions">
+        <div>
+          <div class="ac-region-head rh-asia"><span class="rh-line"></span>Asia Trunk</div>
+          <div class="ac-dest-list cols-3">
+            <div class="ac-dest-row"><span class="ac-dest-code">ICN</span><span class="ac-dest-city">Seoul Incheon</span><span class="ac-dest-freq">3×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">GMP</span><span class="ac-dest-city">Seoul Gimpo</span><span class="ac-dest-freq">2×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">SIN</span><span class="ac-dest-city">Singapore</span><span class="ac-dest-freq">2×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">HKG</span><span class="ac-dest-city">Hong Kong</span><span class="ac-dest-freq">2×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">BKK</span><span class="ac-dest-city">Bangkok</span><span class="ac-dest-freq">2×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">MNL</span><span class="ac-dest-city">Manila</span><span class="ac-dest-freq">2×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">CGK</span><span class="ac-dest-city">Jakarta</span><span class="ac-dest-freq">2×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">KUL</span><span class="ac-dest-city">Kuala Lumpur</span><span class="ac-dest-freq">2×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">PUS</span><span class="ac-dest-city">Busan</span><span class="ac-dest-freq">2×d</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">PEK</span><span class="ac-dest-city">Beijing</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">PVG</span><span class="ac-dest-city">Shanghai</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">TPE</span><span class="ac-dest-city">Taipei</span><span class="ac-dest-freq">daily</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="ac-region-head rh-asia"><span class="rh-line"></span>East &amp; Southeast Asia · Daily</div>
+          <div class="ac-dest-list cols-3">
+            <div class="ac-dest-row"><span class="ac-dest-code">SZX</span><span class="ac-dest-city">Shenzhen</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">MFM</span><span class="ac-dest-city">Macau</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">HGH</span><span class="ac-dest-city">Hangzhou</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">TSN</span><span class="ac-dest-city">Tianjin</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">CTU</span><span class="ac-dest-city">Chengdu</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">XIY</span><span class="ac-dest-city">Xi'an</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">SGN</span><span class="ac-dest-city">Ho Chi Minh</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">HAN</span><span class="ac-dest-city">Hanoi</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">CEB</span><span class="ac-dest-city">Cebu</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">GUM</span><span class="ac-dest-city">Guam</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">SUB</span><span class="ac-dest-city">Surabaya</span><span class="ac-dest-freq">daily</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="ac-region-head rh-asia"><span class="rh-line"></span>South Asia · Night Bank</div>
+          <div class="ac-dest-list cols-3">
+            <div class="ac-dest-row"><span class="ac-dest-code">BOM</span><span class="ac-dest-city">Mumbai</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">BLR</span><span class="ac-dest-city">Bangalore</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">HYD</span><span class="ac-dest-city">Hyderabad</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">DAC</span><span class="ac-dest-city">Dhaka</span><span class="ac-dest-freq">daily</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">KHI</span><span class="ac-dest-city">Karachi</span><span class="ac-dest-freq">daily</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="ac-region-head rh-asia"><span class="rh-line"></span>Leisure Routes · 4–5×/wk</div>
+          <div class="ac-dest-list cols-3">
+            <div class="ac-dest-row"><span class="ac-dest-code">HKT</span><span class="ac-dest-city">Phuket</span><span class="ac-dest-freq">5×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">TAE</span><span class="ac-dest-city">Daegu</span><span class="ac-dest-freq">5×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">KWJ</span><span class="ac-dest-city">Gwangju</span><span class="ac-dest-freq">5×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">CJU</span><span class="ac-dest-city">Jeju</span><span class="ac-dest-freq">5×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">KHH</span><span class="ac-dest-city">Kaohsiung</span><span class="ac-dest-freq">5×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">RGN</span><span class="ac-dest-city">Yangon</span><span class="ac-dest-freq">4×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">PNH</span><span class="ac-dest-city">Phnom Penh</span><span class="ac-dest-freq">4×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">VTE</span><span class="ac-dest-city">Vientiane</span><span class="ac-dest-freq">4×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">ULN</span><span class="ac-dest-city">Ulaanbaatar</span><span class="ac-dest-freq">4×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">KTM</span><span class="ac-dest-city">Kathmandu</span><span class="ac-dest-freq">4×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">CMB</span><span class="ac-dest-city">Colombo</span><span class="ac-dest-freq">4×wk</span></div>
+            <div class="ac-dest-row"><span class="ac-dest-code">MLE</span><span class="ac-dest-city">Malé</span><span class="ac-dest-freq">4×wk</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="ac-specs-inline">
+        <div class="ac-spec"><span class="ac-spec-val">13,530 km</span><span class="ac-spec-lbl">Max Range</span></div>
+        <div class="ac-spec"><span class="ac-spec-val">903 km/h</span><span class="ac-spec-lbl">Cruise Speed</span></div>
+        <div class="ac-spec"><span class="ac-spec-val">244</span><span class="ac-spec-lbl">Total Seats</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /fleet-detail-store -->
+
+<!-- Modal -->
+<div class="fleet-modal" id="fleetModal" role="dialog" aria-modal="true">
+  <div class="fleet-modal-bg" id="fleetModalBg"></div>
+  <div class="fleet-modal-box" id="fleetModalBox">
+    <button class="fleet-modal-close" id="fleetModalClose" aria-label="Close">✕</button>
+    <div class="fleet-modal-photo" id="fleetModalPhoto">
+      <img id="fmpImg" src="" alt="">
+      <div class="fmp-overlay"></div>
+      <div class="fmp-badge" id="fmpBadge"></div>
+      <div class="fmp-bottom">
+        <div class="fmp-name" id="fmpName"></div>
+        <div class="fmp-role" id="fmpRole"></div>
+      </div>
+    </div>
+    <div class="fleet-modal-inner" id="fleetModalInner"></div>
+  </div>
+</div>
+
+<script>
+const FLEET_DATA = {
+  '777':  { type:'TYPE 1', name:'Boeing 777-9',     role:'High-Capacity Trunk Routes · North America & Europe',  img:'assets/fleet-777.jpg',  imgPos:'center 38%', bg:'ac-777',  detail:'fleet-detail-777'  },
+  'a351': { type:'TYPE 2', name:'Airbus A350-1000',  role:'Premium Long-Haul · Transatlantic & Trans-Pacific',     img:'assets/fleet-a351.jpg', imgPos:'center 42%', bg:'ac-a351', detail:'fleet-detail-a351' },
+  '789':  { type:'TYPE 3', name:'Boeing 787-9',      role:'Secondary Long-Haul · North America & Europe',         img:'assets/fleet-789.jpg',  imgPos:'center 52%', bg:'ac-789',  detail:'fleet-detail-789'  },
+  'a359': { type:'TYPE 4', name:'Airbus A350-900',   role:'Premium Asian Routes · Regional & Medium-Haul',         img:'assets/fleet-a359.jpg', imgPos:'center 40%', bg:'ac-a359', detail:'fleet-detail-a359' },
+  '788':  { type:'TYPE 5', name:'Boeing 787-8',      role:'Secondary Asian & Regional Routes',                     img:'assets/fleet-788.avif', imgPos:'center 40%', bg:'ac-788',  detail:'fleet-detail-788'  },
+};
+
+function openModal(id) {
+  var ac = FLEET_DATA[id];
+  if (!ac) return;
+  var photo = document.getElementById('fleetModalPhoto');
+  photo.className = 'fleet-modal-photo ' + ac.bg;
+  var img = document.getElementById('fmpImg');
+  img.src = ac.img; img.alt = 'ANA ' + ac.name; img.style.objectPosition = ac.imgPos;
+  document.getElementById('fmpBadge').textContent = ac.type;
+  document.getElementById('fmpName').textContent = ac.name;
+  document.getElementById('fmpRole').textContent = ac.role;
+  var detail = document.getElementById(ac.detail);
+  document.getElementById('fleetModalInner').innerHTML = detail ? detail.innerHTML : '';
+  document.getElementById('fleetModalBox').scrollTop = 0;
+  document.getElementById('fleetModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('fleetModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.querySelectorAll('.fleet-widget').forEach(function(w) {
+  w.addEventListener('click', function() { openModal(w.dataset.aircraft); });
+  w.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(w.dataset.aircraft); }
+  });
+});
+
+document.getElementById('fleetModalClose').addEventListener('click', closeModal);
+document.getElementById('fleetModalBg').addEventListener('click', closeModal);
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
+window.addEventListener('scroll', function() {
+  var nav = document.getElementById('navbar');
+  if (nav) nav.classList.toggle('scrolled', window.scrollY > 10);
+});
+</script>
+<script src="js/nav.js"></script>
+</body>
+</html>

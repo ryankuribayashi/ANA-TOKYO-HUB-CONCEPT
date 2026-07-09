@@ -1,0 +1,453 @@
+// Airline name → logo image path (only for airlines that operate own flights to NRT)
+const AIRLINE_LOGOS = {
+  'ANA':                  'assets/ana-tail.png',
+  'Air Canada':           'assets/air-canada.png',
+  'EVA Air':              'assets/eva-air.png',
+  'ITA Airways':          'assets/ita-airways.png',
+  'United':               'assets/united.png',
+  'United Airlines':      'assets/united.png',
+  'Air China':            'assets/air-china.png',
+  'Asiana':               'assets/asiana.png',
+  'Swiss':                'assets/swiss.png',
+  'Turkish Airlines':     'assets/turkish.png',
+  'Austrian Airlines':    'assets/austrian.png',
+  'Austrian':             'assets/austrian.png',
+  'Air New Zealand':      'assets/air-new-zealand.png',
+  'LOT Polish':           'assets/lot-polish.png',
+  'LOT Polish Airlines':  'assets/lot-polish.png',
+  'Air India':            'assets/air-india.png',
+  'Thai Airways':         'assets/thai-airways.webp',
+  'Singapore Airlines':   'assets/singapore-airlines.webp',
+  'Lufthansa':            'assets/lufthansa.png',
+};
+
+function airlineShort(name) {
+  const shorts = {
+    'ANA':'ANA','United':'UA','United Airlines':'UA','Air Canada':'AC',
+    'Avianca':'AV','Aeromexico':'AM','Copa Airlines':'CM',
+    'Air China':'CA','Asiana':'OZ','Singapore Airlines':'SQ',
+    'EVA Air':'BR','Thai Airways':'TG','Air India':'AI',
+    'Lufthansa':'LH','Turkish Airlines':'TK','Brussels Airlines':'SN',
+    'LOT Polish':'LO','LOT Polish Airlines':'LO',
+    'Swiss':'LX','Swiss/TAP':'LX','ITA Airways':'AZ',
+    'Austrian':'OS','Austrian Airlines':'OS',
+    'EgyptAir':'MS','Ethiopian':'ET','South African':'SA',
+    'Air New Zealand':'NZ',
+  };
+  return shorts[name] || name.substring(0, 3).toUpperCase();
+}
+
+function makeLogoBox(name, small = false) {
+  const img = AIRLINE_LOGOS[name];
+  const cls = small ? 'airline-logo-box-sm' : 'airline-logo-box';
+  if (img) {
+    return `<div class="${cls}" style="background:transparent;padding:2px;">` +
+           `<img src="${img}" alt="${name}" style="width:100%;height:100%;object-fit:contain;border-radius:6px;"></div>`;
+  }
+  return `<div class="${cls}">${airlineShort(name)}</div>`;
+}
+
+function airlineLogoHtml(operator) {
+  const parts = operator.split('/').map(s => s.trim());
+  if (parts.length > 1) {
+    return `<div class="airline-logos-dual">${makeLogoBox(parts[0], true)}${makeLogoBox(parts[1], true)}</div>`;
+  }
+  return makeLogoBox(parts[0], false);
+}
+
+const params     = new URLSearchParams(window.location.search);
+const fromCode   = params.get('from')  || '';
+const toCode     = params.get('to')    || '';
+const travelDate = params.get('date')  || '';
+const cabin      = params.get('cabin') || 'Economy';
+const mcParam    = params.get('mc');
+let mcLegs = null;
+try { if (mcParam) mcLegs = JSON.parse(mcParam); } catch(e) {}
+let currentLang  = 'en';
+
+function setLang(lang) {
+    currentLang = lang;
+    document.querySelectorAll('[data-en]').forEach(el => {
+        el.innerHTML = lang === 'jp' ? el.dataset.jp : el.dataset.en;
+    });
+    document.getElementById('lang-en')?.classList.toggle('active', lang === 'en');
+    document.getElementById('lang-jp')?.classList.toggle('active', lang === 'jp');
+}
+document.getElementById('langToggle')?.addEventListener('click', () =>
+    setLang(currentLang === 'en' ? 'jp' : 'en'));
+
+window.addEventListener('scroll', () =>
+    document.getElementById('navbar')?.classList.toggle('scrolled', window.scrollY > 10));
+
+// ── Route header ──────────────────────────────────────────────────────────────
+const fromAp = AIRPORTS[fromCode] || { city: fromCode, name: fromCode };
+const toAp   = AIRPORTS[toCode]   || { city: toCode,   name: toCode   };
+
+const routeHeader = document.getElementById('routeHeader');
+if (routeHeader) {
+    // Multi-city banner
+    const mcBanner = mcLegs && mcLegs.length > 1 ? `
+    <div class="mc-results-banner">
+      <span class="mc-results-label">✈ MULTI-CITY JOURNEY</span>
+      <div class="mc-results-legs">
+        ${mcLegs.map((l,i) => {
+          const fa = AIRPORTS[l.from], ta = AIRPORTS[l.to];
+          return `<div class="mc-results-leg">
+            <span class="mc-results-num">${i+1}</span>
+            <span>${fa?.city||l.from} (${l.from}) → ${ta?.city||l.to} (${l.to})</span>
+            ${l.date ? `<span class="mc-results-date">${l.date}</span>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+      <span class="mc-results-note">Showing results for Leg 1 · Select each flight to continue your journey</span>
+    </div>` : '';
+
+    routeHeader.innerHTML = mcBanner + `
+    <div class="route-display">
+      <div class="route-point">
+        <span class="route-code">${fromCode}</span>
+        <span class="route-city-name">${fromAp.city}</span>
+      </div>
+      <div class="route-connector">
+        <div class="route-line"></div>
+        ${(() => {
+          const isKixDirect = (fromCode === 'KIX' && (KIX_SCHEDULE[toCode] || KIX_PARTNER_OPS[toCode]))
+                           || (toCode   === 'KIX' && (KIX_SCHEDULE[fromCode] || KIX_PARTNER_OPS[fromCode]))
+                           || fromCode === 'KIX' && toCode === 'NRT'
+                           || fromCode === 'NRT' && toCode === 'KIX';
+          return isKixDirect
+            ? `<div class="route-hub-badge"><span>direct</span><strong>Osaka Hub</strong><span>KIX</span></div>`
+            : `<div class="route-hub-badge"><span>via</span><strong>Tokyo Hub</strong><span>NRT</span></div>`;
+        })()}
+        <div class="route-line"></div>
+      </div>
+      <div class="route-point">
+        <span class="route-code">${toCode}</span>
+        <span class="route-city-name">${toAp.city}</span>
+      </div>
+    </div>
+    <div class="route-meta">
+      <span>${travelDate || 'Select date'}</span>
+      <span class="dot">·</span>
+      <span>${cabin}</span>
+      ${(() => {
+        const _ks = typeof KIX_SCHEDULE !== 'undefined' ? KIX_SCHEDULE : {};
+        const days = (typeof SCHEDULE !== 'undefined') ? (SCHEDULE[toCode]?.days || SCHEDULE[fromCode]?.days || _ks[toCode]?.days || _ks[fromCode]?.days) : null;
+        if (!days) return '';
+        const DN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        return `<span class="ops-days-badge">Operates: ${days.map(d=>DN[d]).join(' · ')}</span>`;
+      })()}
+      <a href="index.html" class="modify-link" data-en="Modify search" data-jp="検索を変更">Modify search</a>
+    </div>`;
+}
+
+// ── Day-of-week operating check ───────────────────────────────────────────────
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function getRouteDays(code) {
+  const kxDays = typeof KIX_SCHEDULE !== 'undefined' ? KIX_SCHEDULE[code]?.days : null;
+  return SCHEDULE[code]?.days || kxDays || null;
+}
+
+function routeOperatesOn(dateStr, fromC, toC) {
+  if (!dateStr) return { operates: true };
+  // Check both ends — the restrictive leg determines if route operates
+  const days = getRouteDays(toC) || getRouteDays(fromC);
+  if (!days) return { operates: true };
+  const d = new Date(dateStr + 'T12:00:00');
+  const dow = d.getDay();
+  if (days.includes(dow)) return { operates: true };
+  // Find next 3 available dates
+  const next = [];
+  const probe = new Date(d);
+  for (let i = 1; next.length < 3; i++) {
+    probe.setDate(probe.getDate() + 1);
+    if (days.includes(probe.getDay())) next.push(probe.toISOString().split('T')[0]);
+  }
+  const prev = [];
+  const probe2 = new Date(d);
+  for (let i = 1; prev.length < 2; i++) {
+    probe2.setDate(probe2.getDate() - 1);
+    if (days.includes(probe2.getDay())) prev.push(probe2.toISOString().split('T')[0]);
+  }
+  return { operates: false, days, dow, next, prev: prev.reverse() };
+}
+
+const dayCheck = routeOperatesOn(travelDate, fromCode, toCode);
+
+// ── Flight data ───────────────────────────────────────────────────────────────
+const flights = dayCheck.operates ? buildFlights(fromCode, toCode) : null;
+
+const cabinKey = {
+    'Economy':'e','Premium Economy':'pe',
+    'Business':'bc','First Class':'fc'
+};
+const selectedKey = cabinKey[cabin] || 'e';
+
+function priceHtml(yen) {
+    if (!yen) return '<span class="no-avail">N/A</span>';
+    return `<span class="price-yen" data-yen="${yen}">${formatCurrency(yen)}</span>`;
+}
+
+// Returns a codeshare row if ANA operates this segment and the schedule shows a partner
+function csRow(schedCode) {
+    if (!schedCode) return '';
+    const s = typeof SCHEDULE !== 'undefined' ? SCHEDULE[schedCode] : null;
+    if (!s?.partner) return '';
+    return `<div class="exp-row exp-row-cs"><span class="exp-label">Codeshare</span>` +
+           `<span class="exp-val"><span class="cs-badge">${s.partnerNo}</span> also marketed by ${s.partner}</span></div>`;
+}
+
+function kixCsRow(destCode) {
+    if (!destCode) return '';
+    const s = typeof KIX_SCHEDULE !== 'undefined' ? KIX_SCHEDULE[destCode] : null;
+    if (!s?.partner) return '';
+    return `<div class="exp-row exp-row-cs"><span class="exp-label">Codeshare</span>` +
+           `<span class="exp-val"><span class="cs-badge">${s.partnerNo}</span> also marketed by ${s.partner}</span></div>`;
+}
+
+function expandedHtml(f) {
+    // Determine which schedule codes to use for codeshare lookups
+    let cs1 = '', cs2 = '';
+    const isKixRoute = fromCode === 'KIX' || toCode === 'KIX';
+    if (f.direct) {
+        const cityCode = isKixRoute
+            ? (fromCode === 'KIX' ? toCode : fromCode)
+            : (fromCode === 'NRT') ? toCode : fromCode;
+        if (f.operator === 'ANA') cs1 = isKixRoute ? kixCsRow(cityCode) : csRow(cityCode);
+    } else if (f._viaCode) {
+        // Via connection — seg1 is ANA operating NRT↔viaCode
+        if (f.flightOut.startsWith('NH')) cs1 = csRow(f._viaCode);
+    } else {
+        // Normal connecting flight
+        if (f.flightOut.startsWith('NH')) cs1 = csRow(fromCode);
+        if (f.flightIn.startsWith('NH') && typeof VIA_CONNECTIONS !== 'undefined' && !VIA_CONNECTIONS[toCode])
+            cs2 = csRow(toCode);
+    }
+
+    if (f.direct) {
+        return `
+    <div class="flight-expanded-content">
+      <div class="exp-segments">
+        <div class="exp-segment">
+          <div class="exp-seg-header">
+            <span class="exp-seg-badge">Direct Flight</span>
+            <span class="exp-seg-route">${fromCode} → ${toCode}</span>
+            <span class="exp-seg-time">${f.totalTime}</span>
+          </div>
+          <div class="exp-seg-body">
+            <div class="exp-row"><span class="exp-label">Flight</span><span class="exp-val">${f.flightOut}</span></div>
+            ${cs1}
+            <div class="exp-row"><span class="exp-label">Aircraft</span><span class="exp-val">${f.aircraft1}</span></div>
+            <div class="exp-row"><span class="exp-label">Departs</span><span class="exp-val">${f.depLocal} local · ${f.termOut}</span></div>
+            <div class="exp-row"><span class="exp-label">Arrives</span><span class="exp-val">${f.arrDest} local${f.note ? ' ('+f.note+')' : ''} · ${f.termDest}</span></div>
+            <div class="exp-row"><span class="exp-label">Cabins</span><span class="exp-val">${f.cabinOut}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+    }
+
+    return `
+    <div class="flight-expanded-content">
+      <div class="exp-segments">
+        <div class="exp-segment">
+          <div class="exp-seg-header">
+            <span class="exp-seg-badge">Segment 1</span>
+            <span class="exp-seg-route">${f._seg1Label || (fromCode + ' → NRT')}</span>
+            <span class="exp-seg-time">${f.seg1Time}</span>
+          </div>
+          <div class="exp-seg-body">
+            <div class="exp-row"><span class="exp-label">Flight</span><span class="exp-val">${f.flightOut}</span></div>
+            ${cs1}
+            <div class="exp-row"><span class="exp-label">Aircraft</span><span class="exp-val">${f.aircraft1}</span></div>
+            <div class="exp-row"><span class="exp-label">Departs</span><span class="exp-val">${f.depLocal} local · ${f.termOut}</span></div>
+            <div class="exp-row"><span class="exp-label">Arrives</span><span class="exp-val">${f.arrHub} JST · ${f.termHub1}</span></div>
+            <div class="exp-row"><span class="exp-label">Cabins</span><span class="exp-val">${f.cabinOut}</span></div>
+          </div>
+        </div>
+
+        <div class="exp-transit">
+          <div class="exp-transit-icon">✈ ${f._hubLabel || 'TOKYO HUB'}</div>
+          <div class="exp-transit-detail">
+            <div class="exp-row">
+              <span class="exp-label">Transit</span>
+              <span class="exp-val exp-val-gold">${f.transitTime}${f.note ? ' · <em>'+f.note+'</em>' : ''}</span>
+            </div>
+            <div class="exp-row"><span class="exp-label">Connection</span><span class="exp-val">${f.transfer}</span></div>
+            ${f._nrtTransit ? `<div class="exp-row"><span class="exp-label">NRT Transit</span><span class="exp-val" style="color:#6B7280;">${f._nrtTransit} included in ${f._kixViaNrt ? 'Segment 1' : 'Segment 2'} duration</span></div>` : ''}
+            <div class="exp-row"><span class="exp-label">Note</span><span class="exp-val">${f.mct}</span></div>
+          </div>
+        </div>
+
+        <div class="exp-segment">
+          <div class="exp-seg-header">
+            <span class="exp-seg-badge">Segment 2</span>
+            <span class="exp-seg-route">${f._seg2Label || ('NRT → ' + toCode)}</span>
+            <span class="exp-seg-time">${f.seg2Time}</span>
+          </div>
+          <div class="exp-seg-body">
+            <div class="exp-row"><span class="exp-label">Flight</span><span class="exp-val">${f.flightIn}</span></div>
+            ${cs2}
+            <div class="exp-row"><span class="exp-label">Aircraft</span><span class="exp-val">${f.aircraft2}</span></div>
+            <div class="exp-row"><span class="exp-label">Departs</span><span class="exp-val">${f.hubDep} JST · ${f.termHub2}</span></div>
+            <div class="exp-row"><span class="exp-label">Arrives</span><span class="exp-val">${f.arrDest} local · ${f.termDest}</span></div>
+            <div class="exp-row"><span class="exp-label">Cabins</span><span class="exp-val">${f.cabinIn}</span></div>
+          </div>
+        </div>
+        ${f._seg3Label ? `
+        <div class="exp-transit">
+          <div class="exp-transit-icon">✈ ${f._seg3Label.split(' → ')[0].toUpperCase()}</div>
+          <div class="exp-transit-detail">
+            <div class="exp-row"><span class="exp-label">Connection</span><span class="exp-val exp-val-gold">${f._seg3Note} — short connection</span></div>
+          </div>
+        </div>
+        <div class="exp-segment">
+          <div class="exp-seg-header">
+            <span class="exp-seg-badge">Segment 3</span>
+            <span class="exp-seg-route">${f._seg3Label}</span>
+            <span class="exp-seg-time">${f._seg3Duration}</span>
+          </div>
+          <div class="exp-seg-body">
+            <div class="exp-row"><span class="exp-label">Flight</span><span class="exp-val">${f._seg3Flight}</span></div>
+            <div class="exp-row"><span class="exp-label">Operator</span><span class="exp-val">${f._seg3Operator}</span></div>
+            <div class="exp-row"><span class="exp-label">Aircraft</span><span class="exp-val">${f._seg3Aircraft}</span></div>
+            <div class="exp-row"><span class="exp-label">Arrives</span><span class="exp-val">${f._seg3Term}</span></div>
+          </div>
+        </div>` : ''}
+      </div>
+    </div>`;
+}
+
+function renderFlights() {
+    const container = document.getElementById('flightList');
+    if (!container) return;
+
+    if (!flights || flights.length === 0) {
+        const fromCity = fromAp.city || fromCode;
+        const toCity   = toAp.city   || toCode;
+
+        // Day-of-week restriction message
+        if (!dayCheck.operates && dayCheck.days) {
+          const opDays = dayCheck.days.map(d => DAY_NAMES[d]).join(' · ');
+          const nextLinks = dayCheck.next.map(d =>
+            `<a href="results.html?from=${fromCode}&to=${toCode}&date=${d}&cabin=${cabin}"
+               style="display:inline-block;margin:4px;padding:8px 16px;background:#0B3D91;color:#fff;border-radius:4px;text-decoration:none;font-size:13px;font-weight:700;">
+              ${new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
+            </a>`
+          ).join('');
+          container.innerHTML = `
+          <div style="padding:40px 24px;text-align:center;">
+            <div style="font-size:48px;margin-bottom:16px;">📅</div>
+            <h3 style="color:#1A1A2E;margin-bottom:8px;">No flights on ${new Date(travelDate+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</h3>
+            <p style="color:#6B7280;margin-bottom:8px;">
+              <strong>${fromCity} → ${toCity}</strong> operates on:<br>
+              <strong style="color:#0B3D91;">${opDays}</strong>
+            </p>
+            <p style="color:#6B7280;font-size:13px;margin-bottom:16px;">Next available flights:</p>
+            <div>${nextLinks}</div>
+            <a href="index.html" style="display:inline-block;margin-top:20px;padding:10px 24px;border:1px solid #E5E7EB;color:#6B7280;border-radius:4px;text-decoration:none;font-size:13px;">New Search</a>
+          </div>`;
+          return;
+        }
+
+        container.innerHTML = `
+        <div style="padding:40px 24px;text-align:center;color:#6B7280;">
+          <div style="font-size:48px;margin-bottom:16px;">✈</div>
+          <h3 style="color:#1A1A2E;margin-bottom:8px;">No service found</h3>
+          <p>ANA does not currently offer service between <strong>${fromCity}</strong> and <strong>${toCity}</strong> via the Tokyo Hub.</p>
+          <a href="index.html" style="display:inline-block;margin-top:20px;padding:10px 24px;background:#0B3D91;color:#fff;border-radius:8px;text-decoration:none;">New Search</a>
+        </div>`;
+        return;
+    }
+
+    container.innerHTML = flights.map((f, i) => {
+        const tagLabel = f.tag === 'recommended' ? '⭐ Recommended' :
+                         f.tag === 'best value'   ? '💰 Best Value' :
+                         f.tag === 'kix'          ? '✦ Via Osaka Hub' :
+                         f.tag === 'partner'      ? `✈ ${f._partner || 'Star Alliance Partner'}` : '';
+        const price = f.prices[selectedKey];
+        const stopsLabel = f.direct ? 'Nonstop' :
+          f._kixViaNrt  ? '2 stops · via Tokyo Hub & Osaka Hub' :
+          f._kixThenNrt ? '2 stops · via Osaka Hub & Tokyo Hub' :
+          f._kixHub     ? '1 stop · via Osaka Hub (KIX)' :
+                          '1 stop · via Tokyo Hub (NRT)';
+        const plusMark = f.note && !f.note.startsWith('Overnight')
+            ? ` <span class="plus-day">${f.note}</span>` : '';
+
+        return `
+    <div class="flight-card ${f.tag === 'partner' ? 'flight-card-partner' : f.tag ? 'flight-card-featured' : ''}" data-index="${i}">
+      ${f.tag ? `<div class="flight-tag">${tagLabel}</div>` : ''}
+      <div class="flight-main">
+        <div class="flight-airline">
+          ${airlineLogoHtml(f.operator)}
+          <span class="flight-nums">${f.flightOut}<br>${f.direct ? '' : f.flightIn}</span>
+        </div>
+        <div class="flight-times">
+          <div class="flight-time-point">
+            <span class="time-big">${f.depLocal}</span>
+            <span class="time-code">${fromCode}</span>
+          </div>
+          <div class="flight-duration">
+            <span class="duration-time">${f.totalTime}</span>
+            <div class="duration-bar">
+              <div class="duration-dot"></div>
+              <div class="duration-line"></div>
+              ${f.direct ? '' : `<div class="duration-hub"><span>${f._kixHub ? 'KIX' : 'NRT'}</span><span class="transit-time">${f.transitTime}</span></div><div class="duration-line"></div>`}
+              <div class="duration-dot"></div>
+            </div>
+            <span class="stops-label">${stopsLabel}</span>
+          </div>
+          <div class="flight-time-point">
+            <span class="time-big">${f.arrDest}</span>
+            <span class="time-code">${toCode}${plusMark}</span>
+          </div>
+        </div>
+        <div class="flight-price-col">
+          <div class="price-from">from</div>
+          <div class="price-main">${priceHtml(price)}</div>
+          <div class="price-cabin">${cabin}</div>
+          <button class="select-btn">Select</button>
+        </div>
+      </div>
+      <div class="flight-details">
+        <span class="flight-aircraft-hint">${f.aircraft1}${f.direct ? '' : ' · ' + f.aircraft2}</span>
+        <button class="details-toggle" data-index="${i}">Flight details ▾</button>
+      </div>
+      ${expandedHtml(f)}
+    </div>`;
+    }).join('');
+
+    container.querySelectorAll('.details-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const card = btn.closest('.flight-card');
+            const open = card.classList.toggle('expanded');
+            btn.textContent = open ? 'Hide details ▴' : 'Flight details ▾';
+        });
+    });
+
+    container.querySelectorAll('.select-btn').forEach((btn, i) => {
+        btn.addEventListener('click', () => {
+            const f = flights[i];
+            const p = new URLSearchParams({
+                from: fromCode,
+                to:   toCode,
+                date: travelDate || '',
+                cabin,
+                fi:   i,
+                outFlight: f.flightOut + (f.direct ? '' : '+' + f.flightIn),
+                outDep:  f.depLocal,
+                outArr:  f.arrDest,
+                outDur:  f.totalTime,
+                outOp:   f.operator,
+            });
+            // Pass multi-city legs so booking.html uses leg 2 as the next flight
+            if (mcParam) p.set('mc', mcParam);
+            window.location.href = 'booking.html?' + p.toString();
+        });
+    });
+}
+
+renderFlights();
+buildCurrencySelector('currencyMount');
+window.addEventListener('load', () => initAnimatedMap(fromCode, toCode));
