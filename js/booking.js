@@ -87,119 +87,8 @@ const returnFlights = buildFlights(retFrom, retTo);
 const cabinKey = { 'Economy':'e','Premium Economy':'pe','Business':'bc','First Class':'fc' };
 const selectedKey = cabinKey[cabin] || 'e';
 
-// ── Codeshare row helper ──────────────────────────────────────────────────────
-function csRowBk(schedCode) {
-  if (!schedCode) return '';
-  const s = typeof SCHEDULE !== 'undefined' ? SCHEDULE[schedCode] : null;
-  if (!s?.partner) return '';
-  return `<div class="exp-row exp-row-cs"><span class="exp-label">Codeshare</span>` +
-         `<span class="exp-val"><span class="cs-badge">${s.partnerNo}</span> also marketed by ${s.partner}</span></div>`;
-}
-
-// ── Expanded flight details (return legs) ─────────────────────────────────────
-function expandedHtmlRet(f) {
-  let cs1 = '', cs2 = '';
-  if (f.direct) {
-    const cityCode = (retFrom === 'NRT') ? retTo : retFrom;
-    if (f.operator === 'ANA') cs1 = csRowBk(cityCode);
-  } else if (f._viaCode) {
-    if (f.flightOut.startsWith('NH')) cs1 = csRowBk(f._viaCode);
-  } else {
-    if (f.flightOut.startsWith('NH')) cs1 = csRowBk(retFrom);
-    if (f.flightIn.startsWith('NH') && !(typeof VIA_CONNECTIONS !== 'undefined' && VIA_CONNECTIONS[retTo]))
-      cs2 = csRowBk(retTo);
-  }
-
-  if (f.direct) {
-    return `
-  <div class="flight-expanded-content">
-    <div class="exp-segments">
-      <div class="exp-segment">
-        <div class="exp-seg-header">
-          <span class="exp-seg-badge">Direct Flight</span>
-          <span class="exp-seg-route">${retFrom} → ${retTo}</span>
-          <span class="exp-seg-time">${f.totalTime}</span>
-        </div>
-        <div class="exp-seg-body">
-          <div class="exp-row"><span class="exp-label">Flight</span><span class="exp-val">${f.flightOut}</span></div>
-          ${cs1}
-          <div class="exp-row"><span class="exp-label">Aircraft</span><span class="exp-val">${f.aircraft1}</span></div>
-          <div class="exp-row"><span class="exp-label">Departs</span><span class="exp-val">${f.depLocal} local · ${f.termOut}</span></div>
-          <div class="exp-row"><span class="exp-label">Arrives</span><span class="exp-val">${f.arrDest} local${f.note?' ('+f.note+')':''} · ${f.termDest}</span></div>
-          <div class="exp-row"><span class="exp-label">Cabins</span><span class="exp-val">${f.cabinOut}</span></div>
-        </div>
-      </div>
-    </div>
-  </div>`;
-  }
-
-  return `
-  <div class="flight-expanded-content">
-    <div class="exp-segments">
-      <div class="exp-segment">
-        <div class="exp-seg-header">
-          <span class="exp-seg-badge">Segment 1</span>
-          <span class="exp-seg-route">${f._seg1Label || (retFrom + ' → NRT')}</span>
-          <span class="exp-seg-time">${f.seg1Time}</span>
-        </div>
-        <div class="exp-seg-body">
-          <div class="exp-row"><span class="exp-label">Flight</span><span class="exp-val">${f.flightOut}</span></div>
-          ${cs1}
-          <div class="exp-row"><span class="exp-label">Aircraft</span><span class="exp-val">${f.aircraft1}</span></div>
-          <div class="exp-row"><span class="exp-label">Departs</span><span class="exp-val">${f.depLocal} local · ${f.termOut}</span></div>
-          <div class="exp-row"><span class="exp-label">Arrives</span><span class="exp-val">${f.arrHub} JST · ${f.termHub1}</span></div>
-          <div class="exp-row"><span class="exp-label">Cabins</span><span class="exp-val">${f.cabinOut}</span></div>
-        </div>
-      </div>
-      <div class="exp-transit">
-        <div class="exp-transit-icon">✈ ${f._hubLabel || 'TOKYO HUB'}</div>
-        <div class="exp-transit-detail">
-          <div class="exp-row">
-            <span class="exp-label">Transit</span>
-            <span class="exp-val exp-val-gold">${f.transitTime}${f.note?' · <em>'+f.note+'</em>':''}</span>
-          </div>
-          <div class="exp-row"><span class="exp-label">Connection</span><span class="exp-val">${f.transfer}</span></div>
-          <div class="exp-row"><span class="exp-label">Note</span><span class="exp-val">${f.mct}</span></div>
-        </div>
-      </div>
-      <div class="exp-segment">
-        <div class="exp-seg-header">
-          <span class="exp-seg-badge">Segment 2</span>
-          <span class="exp-seg-route">${f._seg2Label || ('NRT → ' + retTo)}</span>
-          <span class="exp-seg-time">${f.seg2Time}</span>
-        </div>
-        <div class="exp-seg-body">
-          <div class="exp-row"><span class="exp-label">Flight</span><span class="exp-val">${f.flightIn}</span></div>
-          ${cs2}
-          <div class="exp-row"><span class="exp-label">Aircraft</span><span class="exp-val">${f.aircraft2}</span></div>
-          <div class="exp-row"><span class="exp-label">Departs</span><span class="exp-val">${f.hubDep} JST · ${f.termHub2}</span></div>
-          <div class="exp-row"><span class="exp-label">Arrives</span><span class="exp-val">${f.arrDest} local · ${f.termDest}</span></div>
-          <div class="exp-row"><span class="exp-label">Cabins</span><span class="exp-val">${f.cabinIn}</span></div>
-        </div>
-      </div>
-      ${f._seg3Label ? `
-      <div class="exp-transit">
-        <div class="exp-transit-icon">✈ ${f._seg3Label.split(' → ')[0].toUpperCase()}</div>
-        <div class="exp-transit-detail">
-          <div class="exp-row"><span class="exp-label">Connection</span><span class="exp-val exp-val-gold">${f._seg3Note}</span></div>
-        </div>
-      </div>
-      <div class="exp-segment">
-        <div class="exp-seg-header">
-          <span class="exp-seg-badge">Segment 3</span>
-          <span class="exp-seg-route">${f._seg3Label}</span>
-          <span class="exp-seg-time">${f._seg3Duration}</span>
-        </div>
-        <div class="exp-seg-body">
-          <div class="exp-row"><span class="exp-label">Flight</span><span class="exp-val">${f._seg3Flight}</span></div>
-          <div class="exp-row"><span class="exp-label">Operator</span><span class="exp-val">${f._seg3Operator}</span></div>
-          <div class="exp-row"><span class="exp-label">Aircraft</span><span class="exp-val">${f._seg3Aircraft}</span></div>
-          <div class="exp-row"><span class="exp-label">Arrives</span><span class="exp-val">${f._seg3Term}</span></div>
-        </div>
-      </div>` : ''}
-    </div>
-  </div>`;
-}
+// Expanded flight-details rendering now lives in js/itinerary-view.js
+// (shared with results.js) — see renderItinerarySegments(f).
 
 function priceHtmlBk(yen) {
   if (!yen) return '<span class="no-avail">N/A</span>';
@@ -227,7 +116,10 @@ function renderReturnFlights() {
                      f.tag === 'best value'   ? '💰 Best Value' :
                      f.tag === 'partner'      ? `✈ ${f._partner || 'Star Alliance Partner'}` : '';
     const price      = f.prices[selectedKey];
-    const stopsLabel = f.direct ? 'Nonstop' : '1 stop · via Tokyo Hub';
+    const stops = f.layovers || [];
+    const hubName = code => code === 'NRT' ? 'Tokyo Hub' : code === 'KIX' ? 'Osaka Hub' : (AIRPORTS[code]?.city || code);
+    const stopsLabel = f.direct ? 'Nonstop' :
+      `${stops.length} stop${stops.length > 1 ? 's' : ''} · via ${stops.map(s => hubName(s.code)).join(' & ')}`;
     const plusMark   = f.note && !f.note.startsWith('Overnight')
                        ? ` <span class="plus-day">${f.note}</span>` : '';
 
@@ -249,7 +141,7 @@ function renderReturnFlights() {
         <div class="duration-bar">
           <div class="duration-dot"></div>
           <div class="duration-line"></div>
-          ${f.direct ? '' : `<div class="duration-hub"><span>NRT</span><span class="transit-time">${f.transitTime}</span></div><div class="duration-line"></div>`}
+          ${stops.map(s => `<div class="duration-hub"><span>${s.code}</span><span class="transit-time">${s.wait}</span></div><div class="duration-line"></div>`).join('')}
           <div class="duration-dot"></div>
         </div>
         <span class="stops-label">${stopsLabel}</span>
@@ -270,7 +162,7 @@ function renderReturnFlights() {
     <span class="flight-aircraft-hint">${f.aircraft1}${f.direct ? '' : ' · ' + f.aircraft2}</span>
     <button class="details-toggle" data-index="${i}">Flight details ▾</button>
   </div>
-  ${expandedHtmlRet(f)}
+  ${renderItinerarySegments(f)}
 </div>`;
   }).join('');
 

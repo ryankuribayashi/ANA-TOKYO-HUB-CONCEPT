@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANA | Terminal Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+.term-page { background: var(--off-white); min-height: 100vh; }
+
+/* ── Hero ── */
+.term-hero {
+  padding: 120px 0 48px;
+  background:
+    radial-gradient(ellipse at 75% 35%, rgba(11,61,145,0.07) 0%, transparent 55%),
+    linear-gradient(160deg, #E8ECF7 0%, #DDE3F0 45%, #D8E0EE 100%);
+  border-bottom: 1px solid rgba(11,61,145,0.08);
+}
+.term-hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.term-hero-tag {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+  color: var(--navy); text-transform: uppercase; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.term-hero-tag::before { content:''; width:28px; height:2px; background:var(--gold); }
+.term-hero-title {
+  font-size: clamp(32px, 4.2vw, 54px); font-weight: 900;
+  color: var(--navy-dark); letter-spacing: -0.03em; line-height: 1.1;
+  margin-bottom: 14px;
+}
+.term-hero-sub { font-size: 15px; color: #4B5563; max-width: 620px; line-height: 1.7; }
+
+/* ── Stats bar ── */
+.term-stats-bar { background: var(--navy); padding: 26px 0; }
+.term-stats-inner {
+  max-width: 1200px; margin: 0 auto; padding: 0 24px;
+  display: flex; justify-content: space-around; flex-wrap: wrap; gap: 22px;
+}
+.term-stat { text-align: center; }
+.term-stat-num { font-size: 26px; font-weight: 900; color: var(--gold); }
+.term-stat-num.warn { color: #F87171; }
+.term-stat-label { font-size: 11px; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+
+/* ── Diagram section ── */
+.term-diagram-wrap { max-width: 1200px; margin: 0 auto; padding: 44px 24px 20px; }
+.term-diagram-title { font-size: 22px; font-weight: 800; color: var(--navy-dark); margin-bottom: 4px; }
+.term-diagram-sub { font-size: 13px; color: #6B7280; margin-bottom: 20px; }
+
+.term-svg-box {
+  background: #0B1220; border-radius: 16px; padding: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  position: relative;
+}
+.term-svg-box svg { display: block; width: 100%; height: auto; margin: 0 auto; cursor: grab; touch-action: none; }
+.term-svg-box svg.grabbing { cursor: grabbing; }
+
+.term-zoom-controls {
+  position: absolute; top: 32px; right: 32px; z-index: 5;
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(11,18,32,0.85); backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 6px;
+}
+.term-zoom-controls button {
+  width: 28px; height: 28px; border-radius: 6px; border: none; cursor: pointer;
+  background: rgba(255,255,255,0.08); color: #E5E9F2; font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; line-height: 1;
+  transition: background 0.15s;
+}
+.term-zoom-controls button:hover { background: rgba(201,168,76,0.35); }
+.term-zoom-hint { font-size: 10.5px; color: rgba(255,255,255,0.5); margin-left: 4px; white-space: nowrap; }
+@media (max-width: 640px) { .term-zoom-hint { display: none; } }
+
+.term-zone { cursor: pointer; transition: opacity 0.15s, filter 0.15s; }
+.term-zone:hover { opacity: 0.85; }
+/* Was `.term-zone.active rect { stroke: gold; }` — only highlighted rect children, so
+   T2A/T2B/T2 Main (whose bodies are <path>/<polygon>, not <rect>) never got the outline on
+   their main shape, only on whatever small <rect> pier happened to be inside them (the
+   reported bug: clicking T2B highlighted only its new N-S pier). A path with fill="none"
+   also can't just get a CSS stroke override without losing its own color (stroke IS its
+   color there). A glow applied to the whole group works uniformly regardless of whether
+   the shape uses fill or stroke for its color, and highlights every child at once. */
+.term-zone.active { filter: drop-shadow(0 0 3px var(--gold)) drop-shadow(0 0 7px var(--gold)); }
+.term-zone-label { font-family: 'Inter', sans-serif; font-weight: 800; fill: #fff; pointer-events: none; }
+.term-zone-sub { font-family: 'Inter', sans-serif; fill: rgba(255,255,255,0.75); pointer-events: none; }
+.term-gate-badge {
+  font-family: 'Inter', sans-serif; font-weight: 800; font-size: 10px;
+  letter-spacing: 0.05em; pointer-events: none;
+}
+.term-runway { stroke: #55606E; stroke-width: 18; }
+.term-runway.proposed { stroke-dasharray: 16 10; stroke: #6B7280; }
+.term-runway-centerline { stroke: #F3F4F6; stroke-width: 1.5; stroke-dasharray: 10 8; opacity: 0.5; }
+.term-runway-label { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 10px; fill: #9CA3AF; letter-spacing: 0.04em; }
+.term-mover-line { stroke: var(--gold); stroke-width: 2.5; stroke-dasharray: 1 6; stroke-linecap: round; }
+.term-mover-station { fill: var(--gold); }
+
+/* Small decorative aircraft dotted around the aprons — a gentle idle-engine glow (opacity
+   only, never transform, so it never fights the per-icon rotate/scale baked into each
+   <g transform="translate(...) rotate(...) scale(...)"> wrapper). Staggered per-instance
+   via inline animation-delay so they don't all pulse in lockstep. */
+@keyframes planeGlow { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+.plane-icon { animation: planeGlow 3.6s ease-in-out infinite; }
+
+/* ── Legend ── */
+.term-legend {
+  display: flex; flex-wrap: wrap; gap: 18px; margin-top: 18px;
+  padding: 16px 20px; background: #fff; border-radius: 12px; border: 1px solid #E5E7EB;
+}
+.term-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #374151; }
+.term-legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+.term-legend-item.status-ok .term-legend-dot { background: #10B981; }
+.term-legend-item.status-tight .term-legend-dot { background: #F59E0B; }
+.term-legend-item.status-over .term-legend-dot { background: #EF4444; }
+
+/* ── Info panel ── */
+.term-info-panel {
+  margin-top: 24px; background: #fff; border-radius: 16px; border: 1px solid #E5E7EB;
+  padding: 28px; box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+}
+.term-info-empty { color: #9CA3AF; font-size: 14px; text-align: center; padding: 20px 0; }
+.term-info-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 6px; flex-wrap: wrap; }
+.term-info-name { font-size: 22px; font-weight: 800; color: var(--navy-dark); }
+.term-info-status {
+  font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 5px 12px; border-radius: 20px; white-space: nowrap;
+}
+.term-info-status.ok { background: rgba(16,185,129,0.12); color: #059669; }
+.term-info-status.tight { background: rgba(245,158,11,0.14); color: #B45309; }
+.term-info-status.over { background: rgba(239,68,68,0.14); color: #B91C1C; }
+.term-info-desc { font-size: 14px; color: #4B5563; line-height: 1.6; margin: 10px 0 18px; }
+.term-info-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px; padding-top: 16px; border-top: 1px solid #F3F4F6;
+}
+.term-info-metric-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #9CA3AF; margin-bottom: 4px; }
+.term-info-metric-val { font-size: 16px; font-weight: 700; color: var(--navy-dark); }
+.term-info-airlines { margin-top: 18px; padding-top: 16px; border-top: 1px solid #F3F4F6; }
+.term-info-airlines-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #9CA3AF; margin-bottom: 8px; }
+.term-info-tag {
+  display: inline-block; font-size: 12px; font-weight: 600; color: var(--navy);
+  background: #EEF2FF; padding: 4px 10px; border-radius: 6px; margin: 0 6px 6px 0;
+}
+.term-info-airline-group { margin-bottom: 12px; }
+.term-info-airline-group:last-child { margin-bottom: 0; }
+.term-info-group-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  color: #B0B5BE; margin-bottom: 6px;
+}
+.term-info-group-gates { font-weight: 600; letter-spacing: normal; text-transform: none; color: #C7CBD3; }
+.term-info-tag.tag-star { background: #EEF2FF; color: #3730A3; }
+.term-info-tag.tag-oneworld { background: #F3E8FF; color: #6B21A8; }
+.term-info-tag.tag-skyteam { background: #ECFDF5; color: #047857; }
+.term-info-tag.tag-indep { background: #FEF3C7; color: #92400E; }
+
+/* ── Connectivity note ── */
+.term-connect-note {
+  margin-top: 32px; margin-bottom: 60px; padding: 20px 24px; background: rgba(201,168,76,0.07);
+  border: 1px solid rgba(201,168,76,0.3); border-radius: 12px; font-size: 13.5px; color: #4B5563; line-height: 1.7;
+}
+.term-connect-note strong { color: var(--navy-dark); }
+
+@media (max-width: 720px) {
+  .term-info-head { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo" style="text-decoration:none;">
+      <img src="assets/ana-tail.png" class="ana-logo-img" alt="ANA">
+      <div class="logo-divider"></div>
+      <div class="sa-badge">
+        <svg class="sa-ring" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g transform="translate(16,16)"><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(72)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(72)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(144)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(144)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(216)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(216)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(288)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(288)"/></g></svg>
+        <div class="sa-text">
+          <span class="sa-name">star alliance</span>
+          <span class="sa-member">a star alliance member</span>
+        </div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Book</a>
+      <a href="destinations.html" class="nav-link">Destinations</a>
+      <a href="fleet.html" class="nav-link">Our Fleet</a>
+      <a href="news.html" class="nav-link">News</a>
+      <a href="terminal.html" class="nav-link" style="color:var(--gold);font-weight:700;">Terminal Map</a>
+    </div>
+    <div class="nav-actions">
+      <a href="index.html" class="btn-book-nav">Book Now</a>
+    </div>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" id="mobileNavClose">✕</button>
+  <a href="index.html" class="mobile-nav-link">Book</a>
+  <a href="destinations.html" class="mobile-nav-link">Destinations</a>
+  <a href="fleet.html" class="mobile-nav-link">Our Fleet</a>
+  <a href="news.html" class="mobile-nav-link">News</a>
+  <a href="terminal.html" class="mobile-nav-link" style="color:var(--gold);">Terminal Map</a>
+  <div class="mobile-nav-bottom">
+    <a href="index.html" class="mobile-nav-book">Book Now</a>
+  </div>
+</div>
+
+<div class="term-page">
+
+  <!-- Hero -->
+  <div class="term-hero">
+    <div class="term-hero-inner">
+      <div class="term-hero-tag">TOKYO MEGA HUB</div>
+      <h1 class="term-hero-title">Terminal Map</h1>
+      <p class="term-hero-sub">One connected T1 building plus a three-part T2 international complex, linked by a single people-mover line. Click any zone below for gate ranges, airline assignments, and current capacity status.</p>
+    </div>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="term-stats-bar">
+    <div class="term-stats-inner">
+      <div class="term-stat"><div class="term-stat-num">271</div><div class="term-stat-label">Total Gates</div></div>
+      <div class="term-stat"><div class="term-stat-num">5</div><div class="term-stat-label">Runways</div></div>
+      <div class="term-stat"><div class="term-stat-num">6</div><div class="term-stat-label">Terminal Zones</div></div>
+      <div class="term-stat"><div class="term-stat-num">1 min</div><div class="term-stat-label">People Mover Frequency</div></div>
+      <div class="term-stat"><div class="term-stat-num warn">1</div><div class="term-stat-label">Zone Over Capacity</div></div>
+    </div>
+  </div>
+
+  <!-- Diagram -->
+  <div class="term-diagram-wrap">
+    <div class="term-diagram-title">Interactive Layout</div>
+    <div class="term-diagram-sub">Not to scale — schematic. West (T2 Main Concourse) is on the left, east (T1) on the right.</div>
+
+    <div class="term-svg-box">
+      <div class="term-zoom-controls">
+        <button id="zoomIn" title="Zoom in">+</button>
+        <button id="zoomOut" title="Zoom out">−</button>
+        <button id="zoomReset" title="Reset view">⤢</button>
+        <span class="term-zoom-hint">Scroll to zoom · drag to pan</span>
+      </div>
+      <svg id="termSvg" viewBox="0 0 1280 760" xmlns="http://www.w3.org/2000/svg">
+        <!-- Blueprint grid background -->
+        <defs>
+          <pattern id="blueprintGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#2A3855" stroke-width="0.5" opacity="0.35"></path>
+          </pattern>
+          <pattern id="blueprintGridMajor" width="100" height="100" patternUnits="userSpaceOnUse">
+            <rect width="100" height="100" fill="url(#blueprintGrid)"></rect>
+            <path d="M 100 0 L 0 0 0 100" fill="none" stroke="#344268" stroke-width="0.7" opacity="0.4"></path>
+          </pattern>
+        </defs>
+        <rect x="0" y="0" width="1280" height="760" fill="url(#blueprintGridMajor)"></rect>
+
+        <!-- Proposed north runway — 3,500m -->
+        <line x1="20" y1="25" x2="1260" y2="25" class="term-runway proposed"></line>
+        <line x1="20" y1="25" x2="1260" y2="25" class="term-runway-centerline"></line>
+        <text x="640" y="12" text-anchor="middle" class="term-runway-label">PROPOSED · WEST–EAST · 3,500M</text>
+
+        <!-- South runways x2 — 4,000m each. Pushed 80 units further south (was y=612/658)
+             to open up real room for JAL Domestic and T1 Asia to stretch into. -->
+        <line x1="20" y1="692" x2="1260" y2="692" class="term-runway"></line>
+        <line x1="20" y1="692" x2="1260" y2="692" class="term-runway-centerline"></line>
+        <text x="70" y="680" class="term-runway-label">4,000M</text>
+        <line x1="20" y1="738" x2="1260" y2="738" class="term-runway"></line>
+        <line x1="20" y1="738" x2="1260" y2="738" class="term-runway-centerline"></line>
+        <text x="70" y="756" class="term-runway-label">4,000M</text>
+
+        <!-- N-S runways between T2 complex and T1 — 3,500m and 4,000m -->
+        <line x1="595" y1="45" x2="595" y2="600" class="term-runway"></line>
+        <line x1="595" y1="45" x2="595" y2="600" class="term-runway-centerline"></line>
+        <text x="581" y="345" text-anchor="middle" class="term-runway-label" transform="rotate(-90 581 345)">3,500M</text>
+        <line x1="650" y1="45" x2="650" y2="600" class="term-runway"></line>
+        <line x1="650" y1="45" x2="650" y2="600" class="term-runway-centerline"></line>
+        <text x="664" y="345" text-anchor="middle" class="term-runway-label" transform="rotate(-90 664 345)">4,000M</text>
+
+        <!-- T2 Main Concourse — semicircle, flat edge west, curved edge bulging east.
+             3 piers total, all sticking straight out from the curve at their own local
+             tangent-perpendicular (a stub pier at the very top/bottom of the curve wouldn't
+             sit flush against it, since the curve isn't vertical there — each is built as a
+             4-point polygon using the true outward-normal direction at its own point,
+             computed analytically since this is an exact circle). Gate total stays at 21
+             (206–226) — no gates were added, a few were simply relocated off the main arc
+             onto the piers, at the positions previously labeled ~211 (north pier) and ~227
+             (south pier) back when this had 27 gates. -->
+        <g class="term-zone" data-zone="t2main">
+          <path d="M 50 200 A 140 140 0 0 1 50 480 Z" fill="#1E3A8A" opacity="0.9"></path>
+          <rect x="44" y="200" width="6" height="280" fill="#F59E0B"></rect>
+          <rect x="190" y="322" width="32" height="36" rx="2" fill="#1E3A8A" opacity="0.9"></rect>
+          <polygon points="92.9,205.5 125.5,220.7 139.0,191.7 106.4,176.5" fill="#1E3A8A" opacity="0.9"></polygon>
+          <polygon points="125.5,459.3 92.9,474.5 106.4,503.5 139.0,488.3" fill="#1E3A8A" opacity="0.9"></polygon>
+          <g id="gates-t2main-piern"></g>
+          <g id="gates-t2main-piers"></g>
+          <!-- Invisible guide arc for gate-tick math via getPointAtLength. Deliberately ONE
+               path spanning the full semicircle (50,200)→(50,480), not two separate 90° arcs
+               split at the pier — those endpoints aren't diametrically opposite, so a given
+               radius has TWO valid circle centers and the sweep-flag picked the wrong one
+               (center (190,200) instead of (50,340)), which is why the arc gates rendered
+               nowhere near the building. This single 180° arc's endpoints ARE diametrically
+               opposite, so there's no ambiguity — the north/south halves are taken as two
+               different length-ranges (t 0–0.5 and 0.5–1) of this one correct path instead. -->
+          <path id="t2mainArc" d="M 50 200 A 140 140 0 0 1 50 480" fill="none" stroke="none"></path>
+          <g id="gates-t2main-arcn1"></g>
+          <g id="gates-t2main-arcn2"></g>
+          <g id="gates-t2main-pier"></g>
+          <g id="gates-t2main-arcs1"></g>
+          <g id="gates-t2main-arcs2"></g>
+          <g transform="translate(90 230) rotate(20) scale(0.75)"><use href="#planeIcon" class="plane-icon" style="animation-delay:2.4s"></use></g>
+          <g transform="translate(90 420) rotate(-160) scale(0.75)"><use href="#planeIcon" class="plane-icon" style="animation-delay:3.5s"></use></g>
+          <text x="112" y="300" text-anchor="middle" class="term-zone-label" font-size="15">T2 MAIN</text>
+          <circle cx="112" cy="360" r="5" fill="#10B981"></circle>
+          <text x="112" y="364" text-anchor="middle" font-size="9" font-family="Inter" font-weight="800" fill="#0B1220">OK</text>
+        </g>
+
+        <!-- T2B satellite (north) — chevron pier. Gap widened again: now 150 (was 130).
+             Two new small stub piers added on the OUTWARD legs (mirroring T2 Main's own
+             stub-pier fix), at the exact spot gates 173/182 used to sit — a couple of gates
+             physically relocated off the crowded main run onto them, not new capacity. -->
+        <g class="term-zone" data-zone="t2b">
+          <path d="M 245 200 L 387.9 117.5 L 530.8 200" fill="none" stroke="#3B4A6B" stroke-width="70" stroke-linecap="butt" stroke-linejoin="miter" opacity="0.9"></path>
+          <!-- Small stub piers on leg1/leg2, at the former gate-173/182 positions. -->
+          <polygon points="274.9,142.3 299.2,128.3 287.2,107.5 262.9,121.5" fill="#3B4A6B" opacity="0.9"></polygon>
+          <polygon points="476.6,128.3 500.9,142.3 512.9,121.5 488.6,107.5" fill="#3B4A6B" opacity="0.9"></polygon>
+          <g id="gates-t2b-pier1"></g>
+          <g id="gates-t2b-pier2"></g>
+          <!-- The 2 gates that used to sit at the tip of the N–S pier (below) were moved to
+               these 2 corners of the main chevron body instead — the vertex points where
+               westcap/eastcap meet the outward legs. Same gate numbers (196/197), just
+               relocated, so nothing downstream needed renumbering. -->
+          <g id="gates-t2b-corner1"></g>
+          <g id="gates-t2b-corner2"></g>
+          <!-- Slim N–S pier hanging down from the apex's own inward (south) side. -->
+          <rect x="369.9" y="154" width="36" height="178" fill="#3B4A6B" opacity="0.9"></rect>
+          <g id="gates-t2b-westcap"></g>
+          <g id="gates-t2b-leg1a"></g>
+          <g id="gates-t2b-leg1b"></g>
+          <g id="gates-t2b-tip"></g>
+          <g id="gates-t2b-leg2a"></g>
+          <g id="gates-t2b-leg2b"></g>
+          <g id="gates-t2b-eastcap"></g>
+          <g id="gates-t2b-leg2in"></g>
+          <g id="gates-t2b-newpier-east"></g>
+          <g id="gates-t2b-newpier-west"></g>
+          <g id="gates-t2b-leg1in"></g>
+          <g transform="translate(316 159) rotate(-30) scale(1)"><use href="#planeIcon" class="plane-icon" style="animation-delay:0s"></use></g>
+          <g transform="translate(388 240) rotate(0) scale(0.7)"><use href="#planeIcon" class="plane-icon" style="animation-delay:1.6s"></use></g>
+          <text x="387.9" y="127" text-anchor="middle" class="term-zone-label" font-size="15">T2B</text>
+          <circle cx="440" cy="92" r="6" fill="#F59E0B"></circle>
+          <text x="440" y="96" text-anchor="middle" font-size="9" font-family="Inter" font-weight="800" fill="#0B1220">!</text>
+        </g>
+
+        <!-- T2A satellite (south) — exact mirror of T2B across the centerline (y=350). -->
+        <g class="term-zone" data-zone="t2a">
+          <path d="M 245 500 L 387.9 582.5 L 530.8 500" fill="none" stroke="#1F2937" stroke-width="70" stroke-linecap="butt" stroke-linejoin="miter" opacity="0.9"></path>
+          <polygon points="299.2,571.7 274.9,557.7 262.9,578.5 287.2,592.5" fill="#1F2937" opacity="0.9"></polygon>
+          <polygon points="500.9,557.7 476.6,571.7 488.6,592.5 512.9,578.5" fill="#1F2937" opacity="0.9"></polygon>
+          <g id="gates-t2a-pier1"></g>
+          <g id="gates-t2a-pier2"></g>
+          <!-- Same relocation as T2B: N–S pier's old tip gates (158/159) moved to these 2
+               corners of the main chevron body instead. -->
+          <g id="gates-t2a-corner1"></g>
+          <g id="gates-t2a-corner2"></g>
+          <!-- Same new N–S pier as T2B, mirrored: hangs UP from the apex's inward (north)
+               side, stopping 10 units short of the mover line. -->
+          <rect x="369.9" y="368" width="36" height="178" fill="#1F2937" opacity="0.9"></rect>
+          <g id="gates-t2a-westcap"></g>
+          <g id="gates-t2a-leg1a"></g>
+          <g id="gates-t2a-leg1b"></g>
+          <g id="gates-t2a-tip"></g>
+          <g id="gates-t2a-leg2a"></g>
+          <g id="gates-t2a-leg2b"></g>
+          <g id="gates-t2a-eastcap"></g>
+          <g id="gates-t2a-leg2in"></g>
+          <g id="gates-t2a-newpier-east"></g>
+          <g id="gates-t2a-newpier-west"></g>
+          <g id="gates-t2a-leg1in"></g>
+          <g transform="translate(316 541) rotate(30) scale(1)"><use href="#planeIcon" class="plane-icon" style="animation-delay:2.1s"></use></g>
+          <g transform="translate(388 460) rotate(180) scale(0.7)"><use href="#planeIcon" class="plane-icon" style="animation-delay:0.5s"></use></g>
+          <text x="387.9" y="573" text-anchor="middle" class="term-zone-label" font-size="15">T2A</text>
+          <circle cx="440" cy="608" r="6" fill="#EF4444"></circle>
+          <text x="440" y="612" text-anchor="middle" font-size="9" font-family="Inter" font-weight="800" fill="#fff">✕</text>
+        </g>
+
+        <!-- Reusable small top-down airplane silhouette -->
+        <defs>
+          <path id="planeIcon" d="M0,-11 L2.5,-3 L9,1.5 L9,4 L2.5,2 L1.5,8 L4,10.5 L4,12 L0,10.5 L-4,12 L-4,10.5 L-1.5,8 L-2.5,2 L-9,4 L-9,1.5 L-2.5,-3 Z" fill="#E5E9F2"></path>
+        </defs>
+
+        <!-- T1 Asia — N–S rectangle, parallel to T1 Main, longer (more gates), west tip of the T1 spine.
+             Shifted 80 units further east from the N-S runways (was x680, now x760) to open up
+             real breathing room between the runway pair and the building. Gate numbering is one
+             continuous perimeter walk that now genuinely lives ON the spine at both ends, not just
+             touching it: gate 70 starts on the spine's NORTH edge, in the stretch immediately west
+             of (next to) ANA Domestic's own spine gates (6–11) → onto T1 Asia's east face → wraps
+             the north end cap → the full west face (the building's main run) → the south end cap →
+             T1 Asia's east face again → and gate 118 ends on the spine's SOUTH edge, in the stretch
+             immediately west of (next to) JAL Domestic's own spine gates (42–47). -->
+        <g class="term-zone" data-zone="t1asia">
+          <rect x="760" y="60" width="70" height="600" rx="3" fill="#1B2A47" opacity="0.94"></rect>
+          <g id="gates-t1asia-spinen"></g>
+          <g id="gates-t1asia-1"></g>
+          <g id="gates-t1asia-capn"></g>
+          <g id="gates-t1asia-2"></g>
+          <g id="gates-t1asia-caps"></g>
+          <g id="gates-t1asia-3"></g>
+          <g id="gates-t1asia-spines"></g>
+          <g transform="translate(751 181) rotate(-90) scale(1.2)"><use href="#planeIcon" class="plane-icon" style="animation-delay:0.9s"></use></g>
+          <g transform="translate(751 556) rotate(-90) scale(1.2)"><use href="#planeIcon" class="plane-icon" style="animation-delay:2.8s"></use></g>
+          <text x="795" y="360" text-anchor="middle" class="term-zone-label" font-size="15" transform="rotate(-90 795 360)">T1 ASIA</text>
+          <circle cx="795" cy="80" r="6" fill="#F59E0B"></circle>
+          <text x="795" y="84" text-anchor="middle" font-size="9" font-family="Inter" font-weight="800" fill="#0B1220">!</text>
+        </g>
+
+        <!-- Spine — E–W connector building from T1 Asia to T1 Main -->
+        <g>
+          <rect x="830" y="310" width="330" height="80" fill="#26314A" opacity="0.88"></rect>
+          <text x="995" y="355" text-anchor="middle" class="term-zone-sub" font-size="10" fill="rgba(255,255,255,0.55)">CONNECTING SPINE</text>
+        </g>
+
+        <!-- ANA Domestic — plain N–S rectangle, same orientation as T1 Asia and T1 Main, sitting
+             directly on top of the spine's north edge. Top edge aligned exactly with T1 Asia's
+             own top edge (y=80, both). Gate 1 now starts even further back, on T1 Main's own
+             unused north end cap (previously dead space, same idea as T1 Asia's caps) — a few
+             gates moved off ANA's own crowded west/east faces onto it to even out spacing. -->
+        <g class="term-zone" data-zone="anadomestic">
+          <rect x="950" y="60" width="70" height="250" rx="3" fill="#0B3D91" opacity="0.94"></rect>
+          <g id="gates-ana-t1main-capn"></g>
+          <g id="gates-ana-t1main"></g>
+          <g id="gates-ana-spine"></g>
+          <g id="gates-ana-west"></g>
+          <g id="gates-ana-cap"></g>
+          <g id="gates-ana-east"></g>
+          <g transform="translate(941 117) rotate(-90) scale(1.2)"><use href="#planeIcon" class="plane-icon" style="animation-delay:1.3s"></use></g>
+          <g transform="translate(941 254) rotate(-90) scale(1.2)"><use href="#planeIcon" class="plane-icon" style="animation-delay:3.1s"></use></g>
+          <text x="985" y="180" text-anchor="middle" class="term-zone-label" font-size="12" transform="rotate(-90 985 180)">ANA DOMESTIC</text>
+          <circle cx="985" cy="75" r="6" fill="#10B981"></circle>
+          <text x="985" y="79" text-anchor="middle" font-size="9" font-family="Inter" font-weight="800" fill="#0B1220">OK</text>
+        </g>
+
+        <!-- JAL Domestic — exact mirror of ANA, sitting on the spine's south edge. Bottom edge
+             stretched from y=580 to y=660 now that the south runways moved 80 units further
+             south to make room — T1 Asia's bottom stretched the same +80 to keep the two
+             ending at the same place. Gate 37 starts on T1 Main's own south end cap. -->
+        <g class="term-zone" data-zone="jaldomestic">
+          <rect x="950" y="390" width="70" height="270" rx="3" fill="#2E3648" opacity="0.94"></rect>
+          <g id="gates-jal-t1main-caps"></g>
+          <g id="gates-jal-t1main"></g>
+          <g id="gates-jal-spine"></g>
+          <g id="gates-jal-west"></g>
+          <g id="gates-jal-cap"></g>
+          <g id="gates-jal-east"></g>
+          <g transform="translate(941 461) rotate(-90) scale(1.2)"><use href="#planeIcon" class="plane-icon" style="animation-delay:1.8s"></use></g>
+          <g transform="translate(941 589) rotate(-90) scale(1.2)"><use href="#planeIcon" class="plane-icon" style="animation-delay:0.2s"></use></g>
+          <text x="985" y="532" text-anchor="middle" class="term-zone-label" font-size="12" transform="rotate(-90 985 532)">JAL DOMESTIC</text>
+          <circle cx="985" cy="639" r="6" fill="#10B981"></circle>
+          <text x="985" y="643" text-anchor="middle" font-size="9" font-family="Inter" font-weight="800" fill="#0B1220">OK</text>
+        </g>
+
+        <!-- T1 Main Concourse — N–S rectangle, east end. Stretched a bit both directions (was
+             y180–520 / h340, now y150–550 / h400) — longer, but still well short of T1 Asia
+             (470) and of ANA+JAL's combined north-to-south span (~490), as intended. Carries
+             the first gates of both sequences on its west face. -->
+        <g class="term-zone" data-zone="t1main">
+          <rect x="1160" y="150" width="70" height="400" rx="3" fill="#14243F" opacity="0.94"></rect>
+          <rect x="1160" y="150" width="70" height="5" fill="var(--gold)" opacity="0.85"></rect>
+          <g transform="translate(1195 250) rotate(-90) scale(0.9)"><use href="#planeIcon" class="plane-icon" style="animation-delay:3.9s"></use></g>
+          <g transform="translate(1195 470) rotate(90) scale(0.9)"><use href="#planeIcon" class="plane-icon" style="animation-delay:1.1s"></use></g>
+          <text x="1195" y="350" text-anchor="middle" class="term-zone-label" font-size="14" transform="rotate(-90 1195 350)">T1 MAIN</text>
+          <circle cx="1195" cy="175" r="6" fill="#10B981"></circle>
+          <text x="1195" y="179" text-anchor="middle" font-size="9" font-family="Inter" font-weight="800" fill="#0B1220">OK</text>
+        </g>
+
+        <!-- People mover line — T2A/T2B each get their own dedicated stub from the
+             centerline (y=350) up/down to their own origin (now 150 units off centerline,
+             was 130), plus a short stub continuing further out to each pier's apex stop. -->
+        <line x1="115" y1="350" x2="1195" y2="350" class="term-mover-line"></line>
+        <line x1="245" y1="200" x2="245" y2="350" class="term-mover-line"></line>
+        <line x1="245" y1="350" x2="245" y2="500" class="term-mover-line"></line>
+        <line x1="245" y1="200" x2="387.9" y2="117.5" class="term-mover-line"></line>
+        <line x1="245" y1="500" x2="387.9" y2="582.5" class="term-mover-line"></line>
+        <circle cx="115" cy="350" r="7" class="term-mover-station"></circle>
+        <circle cx="245" cy="350" r="7" class="term-mover-station"></circle>
+        <circle cx="387.9" cy="117.5" r="6" class="term-mover-station"></circle>
+        <circle cx="387.9" cy="582.5" r="6" class="term-mover-station"></circle>
+        <circle cx="795" cy="350" r="7" class="term-mover-station"></circle>
+        <circle cx="995" cy="350" r="7" class="term-mover-station"></circle>
+        <circle cx="1195" cy="350" r="7" class="term-mover-station"></circle>
+      </svg>
+    </div>
+
+    <div class="term-legend">
+      <div class="term-legend-item status-ok"><span class="term-legend-dot"></span>Comfortable capacity</div>
+      <div class="term-legend-item status-tight"><span class="term-legend-dot"></span>Near/at capacity</div>
+      <div class="term-legend-item status-over"><span class="term-legend-dot"></span>Over capacity</div>
+      <div class="term-legend-item"><span class="term-legend-dot" style="background:#93C5FD;"></span>ANA Domestic gate numbers</div>
+      <div class="term-legend-item"><span class="term-legend-dot" style="background:#FCA5A5;"></span>JAL Domestic gate numbers</div>
+      <div class="term-legend-item"><span class="term-legend-dot" style="background:#E5E9F2;"></span>T1 Asia gate numbers</div>
+      <div class="term-legend-item"><span class="term-legend-dot" style="background:#FDE68A;"></span>T2 Main gate numbers</div>
+      <div class="term-legend-item"><span class="term-legend-dot" style="background:#6EE7B7;"></span>T2B gate numbers</div>
+      <div class="term-legend-item"><span class="term-legend-dot" style="background:#C4B5FD;"></span>T2A gate numbers</div>
+    </div>
+
+    <!-- Info panel -->
+    <div class="term-info-panel" id="termInfoPanel">
+      <div class="term-info-empty">Click a terminal zone above to see gate ranges, airline assignments, and capacity status.</div>
+    </div>
+
+    <div class="term-connect-note">
+      <strong>People mover:</strong> one line, 1-minute frequency, connecting T2 Main ↔ T2A/T2B (short walkway to each satellite) ↔ T1 Asia ↔ T1 Domestic ↔ T1 Main. T2A and T2B are gate-only satellites — all customs, security, and baggage claim for the T2 complex happens at T2 Main Concourse before boarding the mover out to the gate.
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Gate-tick generator ──────────────────────────────────────────────────────
+// Draws exactly `count` evenly-spaced gate markers (one per real gate) along a
+// straight edge or an existing curved <path>, with a gate-number label on a
+// subset of them so the count is genuinely accurate, not just decorative.
+const SVGNS = 'http://www.w3.org/2000/svg';
+
+// Gate marker — a small square sitting at the outward tip (x2,y2) of what used
+// to be a tick line. Callers still pass the full (x1,y1)-(x2,y2) tick geometry;
+// only the endpoint is used, so every call site is unaffected.
+function makeTick(x1, y1, x2, y2, color) {
+  const size = 6;
+  const r = document.createElementNS(SVGNS, 'rect');
+  r.setAttribute('x', x2 - size / 2); r.setAttribute('y', y2 - size / 2);
+  r.setAttribute('width', size); r.setAttribute('height', size);
+  r.setAttribute('rx', 1);
+  r.setAttribute('fill', color);
+  return r;
+}
+function makeLabel(x, y, text, color, angle) {
+  const t = document.createElementNS(SVGNS, 'text');
+  t.setAttribute('x', x); t.setAttribute('y', y);
+  t.setAttribute('font-size', 6.5); t.setAttribute('font-family', 'Inter');
+  t.setAttribute('font-weight', '700'); t.setAttribute('fill', color);
+  t.setAttribute('text-anchor', 'middle');
+  if (angle) t.setAttribute('transform', `rotate(${angle} ${x} ${y})`);
+  t.textContent = text;
+  return t;
+}
+
+// Straight vertical edge, e.g. T1 Asia's west face
+function drawStraightGates(groupId, x, y1, y2, count, startNum, dir, labelEvery, color, labelColor) {
+  const g = document.getElementById(groupId);
+  if (!g || count <= 0) return;
+  const span = y2 - y1;
+  for (let i = 0; i < count; i++) {
+    const y = y1 + span * (i + 0.5) / count;
+    g.appendChild(makeTick(x, y, x + dir * 12, y, color));
+    if (i % labelEvery === 0 || i === count - 1) {
+      g.appendChild(makeLabel(x + dir * 19, y + 2, startNum + i, labelColor));
+    }
+  }
+}
+
+// Along an existing curved <path>, offset to one side, no numbers (decorative
+// "gates on this side too" — used for the non-primary face of a pier)
+function drawCurveGatesPlain(pathId, groupId, count, side, offset, color) {
+  const path = document.getElementById(pathId);
+  const g = document.getElementById(groupId);
+  if (!path || !g || count <= 0) return;
+  const total = path.getTotalLength();
+  for (let i = 0; i < count; i++) {
+    const len = total * (i + 0.5) / count;
+    const p = path.getPointAtLength(len);
+    const p2 = path.getPointAtLength(Math.min(total, len + 1));
+    const dx = p2.x - p.x, dy = p2.y - p.y;
+    const n = Math.hypot(dx, dy) || 1;
+    let px = -dy / n, py = dx / n;
+    if (side === 'in') { px = -px; py = -py; }
+    g.appendChild(makeTick(p.x + px * 23, p.y + py * 23, p.x + px * 32, p.y + py * 32, color));
+  }
+}
+
+// Along an existing curved <path>, offset to the primary side, WITH gate numbers.
+// `offset` is the tick's start distance from the path (default 23/32/39 matches the
+// old thick 46-wide ANA/JAL curve, where that gap was needed to clear half the stroke
+// width — a thin/invisible guide path like T2 Main's arcs has no such stroke to clear,
+// so it passes a small offset instead, same convention as drawStraightGatesXY's flush ticks).
+function drawCurveGatesNumbered(pathId, groupId, count, startNum, side, labelEvery, color, labelColor, offset, tRange) {
+  const path = document.getElementById(pathId);
+  const g = document.getElementById(groupId);
+  if (!path || !g || count <= 0) return;
+  const o = offset || 23, tickEnd = o + 9, labelDist = o + 16;
+  const [t0, t1] = tRange || [0, 1];
+  const total = path.getTotalLength();
+  for (let i = 0; i < count; i++) {
+    const len = total * (t0 + (t1 - t0) * (i + 0.5) / count);
+    const p = path.getPointAtLength(len);
+    const p2 = path.getPointAtLength(Math.min(total, len + 1));
+    const dx = p2.x - p.x, dy = p2.y - p.y;
+    const n = Math.hypot(dx, dy) || 1;
+    let px = -dy / n, py = dx / n;
+    if (side === 'in') { px = -px; py = -py; }
+    g.appendChild(makeTick(p.x + px * o, p.y + py * o, p.x + px * tickEnd, p.y + py * tickEnd, color));
+    if (i % labelEvery === 0 || i === count - 1) {
+      g.appendChild(makeLabel(p.x + px * labelDist, p.y + py * labelDist + 2, startNum + i, labelColor));
+    }
+  }
+}
+
+// T1 Asia — 49 gates (70–118), one continuous perimeter walk. FIXED: the spine segments
+// used to reach all the way to x=1030/1035, which is INSIDE ANA's and JAL's own rectangle
+// footprint (x950–1020) — that's why gates were rendering on top of ANA/JAL instead of
+// next to them. The true unused stretch of spine edge is only x830–950 (T1 Asia's
+// boundary to ANA/JAL's own west edge); everything east of x950 already belongs to
+// ANA/JAL's own building or their own spine gates. Gate 70 now starts right at ANA's west
+// edge (830 → 950, ending there) → T1 Asia's own east face → north cap → west face (the
+// main run) → south cap → east face again → gate 118 ends right at JAL's west edge.
+// Counts allocated by real segment length so spacing is even throughout.
+// CORNERS FILLED: t1asia-1/capn/t1asia-2/caps/t1asia-3 used to stop 4–16 units short of
+// T1 Asia's own actual rect corners (760/830, 60/660) — leaving a small dead zone with no
+// gates at each of the 4 corners. Every face/cap segment below now runs to the literal
+// corner coordinate, closing those gaps. To make room, spinen/spines (the stretch of
+// spine corridor T1 Asia's own gates sit on, not part of its own rect) were trimmed from
+// 4 to 3 gates each, with the freed capacity redistributed into the now-longer corner-
+// adjacent segments.
+drawStraightGatesXY('gates-t1asia-spinen', 946, 310, 834, 310, 3, 74, 0, -1, 10, 'rgba(255,255,255,0.55)', '#E5E9F2');
+drawStraightGatesXY('gates-t1asia-1', 830, 300, 830, 60, 9, 77, 1, 0, 10, 'rgba(255,255,255,0.55)', '#E5E9F2');
+drawStraightGatesXY('gates-t1asia-capn', 830, 60, 760, 60, 2, 86, 0, -1, 10, 'rgba(255,255,255,0.55)', '#E5E9F2');
+drawStraightGatesXY('gates-t1asia-2', 760, 60, 760, 660, 21, 88, -1, 0, 10, 'rgba(255,255,255,0.55)', '#E5E9F2');
+drawStraightGatesXY('gates-t1asia-caps', 760, 660, 830, 660, 2, 109, 0, 1, 10, 'rgba(255,255,255,0.55)', '#E5E9F2');
+drawStraightGatesXY('gates-t1asia-3', 830, 660, 830, 400, 9, 111, 1, 0, 10, 'rgba(255,255,255,0.55)', '#E5E9F2');
+drawStraightGatesXY('gates-t1asia-spines', 834, 390, 946, 390, 3, 120, 0, 1, 10, 'rgba(255,255,255,0.55)', '#E5E9F2');
+
+// General straight-edge tick generator — ticks start EXACTLY on the given line
+// (no offset), so they always sit flush against a real rect edge.
+function drawStraightGatesXY(groupId, x1, y1, x2, y2, count, startNum, perpDx, perpDy, tickLen, color, labelColor) {
+  const g = document.getElementById(groupId);
+  if (!g || count <= 0) return;
+  for (let i = 0; i < count; i++) {
+    const t = (i + 0.5) / count;
+    const x = x1 + (x2 - x1) * t, y = y1 + (y2 - y1) * t;
+    g.appendChild(makeTick(x, y, x + perpDx * tickLen, y + perpDy * tickLen, color));
+    g.appendChild(makeLabel(x + perpDx * (tickLen + 7), y + perpDy * (tickLen + 7) + 2, startNum + i, labelColor));
+  }
+}
+
+// Hand-placed gate markers at exact coordinates (unused now that ANA/JAL Domestic are
+// plain rects instead of curved piers — kept in case a future irregular shape needs it).
+function drawTipGates(groupId, points, nums, color, labelColor) {
+  const g = document.getElementById(groupId);
+  if (!g) return;
+  points.forEach((p, i) => {
+    g.appendChild(makeTick(p[0], p[1], p[0], p[1], color));
+    g.appendChild(makeLabel(p[0] + 11, p[1] + 3, nums[i], labelColor));
+  });
+}
+
+// ANA Domestic — 36 gates, one continuous walk: T1 Main west face (1–7) → spine north
+// edge (8–13) → the rectangle's west face (14–23) → the top end cap, previously unused
+// dead space (24–26) → the east face (27–36). Counts allocated by real segment length.
+// Colored light blue (distinct from T1 Asia's neutral white and JAL's light red) so gate
+// ownership is visually obvious even right at a building boundary, not just positionally
+// correct — position alone wasn't enough for this to read clearly at a glance.
+// Gate 1 starts on T1 Main's own north end cap.
+// CORNERS FILLED: west/cap/east used to stop 6–10 units short of ANA's own actual rect
+// corners (950/1020, 60/310) — same dead-zone bug as T1 Asia. All 3 now run to the literal
+// corner coordinate. spine trimmed 5→4 to help fund the extra length, freed capacity
+// redistributed into west/cap/east by their new (longer) lengths.
+drawStraightGatesXY('gates-ana-t1main-capn', 1226, 150, 1164, 150, 3, 1, 0, -1, 10, 'rgba(147,197,253,0.75)', '#BFDBFE');
+drawStraightGatesXY('gates-ana-t1main', 1160, 160, 1160, 305, 6, 4, -1, 0, 10, 'rgba(147,197,253,0.75)', '#BFDBFE');
+drawStraightGatesXY('gates-ana-spine', 1155, 310, 1025, 310, 4, 10, 0, -1, 10, 'rgba(147,197,253,0.75)', '#BFDBFE');
+drawStraightGatesXY('gates-ana-west', 950, 310, 950, 60, 10, 14, -1, 0, 10, 'rgba(147,197,253,0.75)', '#BFDBFE');
+drawStraightGatesXY('gates-ana-cap', 1020, 60, 950, 60, 3, 24, 0, -1, 10, 'rgba(147,197,253,0.75)', '#BFDBFE');
+drawStraightGatesXY('gates-ana-east', 1020, 60, 1020, 310, 10, 27, 1, 0, 10, 'rgba(147,197,253,0.75)', '#BFDBFE');
+
+// JAL Domestic — 37 gates, mirror of ANA, same corner fix applied: west/cap/east extended
+// to JAL's actual rect corners (950/1020, 390/660), spine trimmed 5→4 to help fund it.
+drawStraightGatesXY('gates-jal-t1main-caps', 1226, 550, 1164, 550, 3, 37, 0, 1, 10, 'rgba(252,165,165,0.75)', '#FCA5A5');
+drawStraightGatesXY('gates-jal-t1main', 1160, 540, 1160, 395, 6, 40, -1, 0, 10, 'rgba(252,165,165,0.75)', '#FCA5A5');
+drawStraightGatesXY('gates-jal-spine', 1155, 390, 1025, 390, 4, 46, 0, 1, 10, 'rgba(252,165,165,0.75)', '#FCA5A5');
+drawStraightGatesXY('gates-jal-west', 950, 390, 950, 660, 11, 50, -1, 0, 10, 'rgba(252,165,165,0.75)', '#FCA5A5');
+drawStraightGatesXY('gates-jal-cap', 1020, 660, 950, 660, 3, 61, 0, 1, 10, 'rgba(252,165,165,0.75)', '#FCA5A5');
+drawStraightGatesXY('gates-jal-east', 1020, 660, 1020, 390, 10, 64, 1, 0, 10, 'rgba(252,165,165,0.75)', '#FCA5A5');
+
+// T2 Main — back to 21 gates (206–226), no net addition. The 2 stub piers didn't get
+// their own new gates this time — a few gates that were already going to be on the main
+// arc got physically relocated onto them instead, at the exact curve positions that were
+// previously labeled ~211 (north) and ~227 (south) back when this briefly had 27 gates.
+// Sequence: arc t:[0,0.1389] (206–207) → north pier (208–209) → arc t:[0.1389,0.5]
+// (210–214) → east pier, unchanged (215–217) → arc t:[0.5,0.8611] (218–222) → south pier
+// (223–224) → arc t:[0.8611,1] (225–226). Counts allocated by real arc length between the
+// new pier attachment points, same convention as everywhere else.
+// Back to 206–226 — the +12 shift is no longer needed now that T2B reverted to its
+// original range (ending at 205 again, same as before it briefly grew to 217).
+drawCurveGatesNumbered('t2mainArc', 'gates-t2main-arcn1', 2, 206, 'in', 1, 'rgba(255,255,255,0.6)', '#FDE68A', -6, [0, 0.1389]);
+drawStraightGatesXY('gates-t2main-piern', 106.38, 176.51, 139.01, 191.73, 2, 208, 0.4226, -0.9063, 10, 'rgba(255,255,255,0.6)', '#FDE68A');
+drawCurveGatesNumbered('t2mainArc', 'gates-t2main-arcn2', 5, 210, 'in', 2, 'rgba(255,255,255,0.6)', '#FDE68A', -6, [0.1389, 0.5]);
+drawStraightGatesXY('gates-t2main-pier', 222, 324, 222, 356, 3, 215, 1, 0, 10, 'rgba(255,255,255,0.6)', '#FDE68A');
+drawCurveGatesNumbered('t2mainArc', 'gates-t2main-arcs1', 5, 218, 'in', 2, 'rgba(255,255,255,0.6)', '#FDE68A', -6, [0.5, 0.8611]);
+drawStraightGatesXY('gates-t2main-piers', 139.01, 488.27, 106.38, 503.49, 2, 223, 0.4226, 0.9063, 10, 'rgba(255,255,255,0.6)', '#FDE68A');
+drawCurveGatesNumbered('t2mainArc', 'gates-t2main-arcs2', 2, 225, 'in', 1, 'rgba(255,255,255,0.6)', '#FDE68A', -6, [0.8611, 1]);
+
+// T2B — 38 gates (168–205), now a full perimeter walk instead of gates on only the
+// outward (north) face: west cap (168–170) → outward leg1 (171–178) → outward leg2
+// (179–186) → east cap (187–189) → inward leg2 (190–197) → inward leg1 (198–205). Same
+// idea as T1 Asia's own perimeter walk (spine → east face → cap → west face → cap → east
+// face → spine) — this pier is a hexagon (2 caps + 4 faces), not just a single stroke edge.
+// FIXED (prior bug): tickLen=10 on the outward faces was measured from the pier's
+// CENTERLINE, not an edge — 10 units only reached deep inside the 70-wide (half-width 35)
+// corridor. Now 44 (35+9) for the two long faces, clearing the true edge by 9 units. Cap
+// ticks use 10, matching T1 Asia's own end-cap convention, since caps sit ON the building's
+// flat edge already and just need a small stick-out. Counts allocated by real perimeter
+// length (hexagon total 800 units / 38 gates ≈ 21/gate) with both caps forced equal (3
+// each) for the same reason T1 Asia's caps were forced equal earlier this session.
+// TIP FIX: with a mitered join, the true outer boundary near the apex pokes further out
+// than a flat 44-unit offset from either leg's own straight line accounts for (verified:
+// the actual miter tip sits ~40 units past the apex centerline point, but the nearest
+// leg-face gates were landing ~32 units short of it) — leaving a real, empty wedge at the
+// north tip with no gates in it. Fixed by computing the true miter tip geometrically
+// (exact line-line intersection of the two offset edges) and adding 2 dedicated tip gates
+// right there, pulled from leg1/leg2-outward (8→7 each) so the total stays 38 and the
+// main faces get LESS cramped, not more.
+// Gap widened to 130 (from 100). REVERTED total back to 38 (was briefly 44) — the extra
+// room from moving the buildings apart now goes into wider SPACING for the original count,
+// not more gates. Counts reallocated by real segment length at the current (longer)
+// geometry: westcap=eastcap=3 (fixed flat caps), outward tip=2 and pier tip=2 (fixed small
+// features, not length-proportional), remaining 28 spread across the 6 long faces by
+// length. This lands T2B back at its ORIGINAL range (168–205) and T2A at its original
+// (130–167) — no lingering +6 offset, no need to also shift T2 Main.
+// Gap widened again to 150 (from 130). Two small stub piers added on the OUTWARD legs —
+// same fix pattern as T2 Main's own stub piers — inserted right at the point former gates
+// 173/182 occupied. leg1/leg2 each SPLIT into an 'a' (before the pier) and 'b' (after)
+// segment so the pier's gates land in the middle of the walk, not tacked onto the end.
+// Total gates unchanged (38) — pier1/pier2 gates are relocated from leg1/leg2 (6→2+2+2
+// each), which is also why spacing on the main run loosens up as requested.
+drawStraightGatesXY('gates-t2b-westcap', 227.5, 169.69, 262.5, 230.31, 3, 168, -0.866, 0.5, 10, 'rgba(110,231,183,0.75)', '#6EE7B7');
+drawStraightGatesXY('gates-t2b-leg1a', 245, 200, 304.54, 165.63, 2, 171, -0.5, -0.866, 44, 'rgba(110,231,183,0.75)', '#6EE7B7');
+drawStraightGatesXY('gates-t2b-pier1', 262.92, 121.54, 287.16, 107.54, 2, 173, -0.5, -0.866, 8, 'rgba(110,231,183,0.75)', '#6EE7B7');
+drawStraightGatesXY('gates-t2b-leg1b', 304.54, 165.63, 387.9, 117.5, 2, 175, -0.5, -0.866, 44, 'rgba(110,231,183,0.75)', '#6EE7B7');
+drawStraightGatesXY('gates-t2b-tip', 365.53, 90, 410.26, 90, 2, 177, 0, -1, 5, 'rgba(110,231,183,0.75)', '#6EE7B7');
+drawStraightGatesXY('gates-t2b-leg2a', 387.9, 117.5, 471.25, 165.63, 2, 179, 0.5, -0.866, 44, 'rgba(110,231,183,0.75)', '#6EE7B7');
+drawStraightGatesXY('gates-t2b-pier2', 488.63, 107.54, 512.87, 121.54, 2, 181, 0.5, -0.866, 8, 'rgba(110,231,183,0.75)', '#6EE7B7');
+drawStraightGatesXY('gates-t2b-leg2b', 471.25, 165.63, 530.8, 200, 2, 183, 0.5, -0.866, 44, 'rgba(110,231,183,0.75)', '#6EE7B7');
+drawStraightGatesXY('gates-t2b-eastcap', 548.29, 169.69, 513.29, 230.31, 3, 185, 0.866, 0.5, 10, 'rgba(110,231,183,0.75)', '#6EE7B7');
+drawStraightGatesXY('gates-t2b-leg2in', 530.8, 200, 445.05, 150.5, 3, 188, -0.5, 0.866, 44, 'rgba(110,231,183,0.75)', '#6EE7B7');
+// Corner gates — relocated here from the N-S pier's old tip (same numbers, 196/197), at
+// the true vertex where westcap/eastcap meet the outward legs, each pushed 10 units
+// further out along that corner's own outward normal for visual separation.
+drawTipGates('gates-t2b-corner1', [[222.5, 161.03]], [196], 'rgba(110,231,183,0.75)', '#6EE7B7');
+drawTipGates('gates-t2b-corner2', [[553.29, 161.03]], [197], 'rgba(110,231,183,0.75)', '#6EE7B7');
+drawStraightGatesXY('gates-t2b-newpier-east', 405.9, 154, 405.9, 332, 5, 191, 1, 0, 10, 'rgba(110,231,183,0.75)', '#6EE7B7');
+drawStraightGatesXY('gates-t2b-newpier-west', 369.9, 332, 369.9, 154, 5, 198, -1, 0, 10, 'rgba(110,231,183,0.75)', '#6EE7B7');
+drawStraightGatesXY('gates-t2b-leg1in', 330.73, 150.5, 245, 200, 3, 203, 0.5, 0.866, 44, 'rgba(110,231,183,0.75)', '#6EE7B7');
+
+// T2A — 38 gates (130–167), exact mirror of T2B.
+drawStraightGatesXY('gates-t2a-westcap', 227.5, 530.31, 262.5, 469.69, 3, 130, -0.866, -0.5, 10, 'rgba(196,181,253,0.75)', '#C4B5FD');
+drawStraightGatesXY('gates-t2a-leg1a', 245, 500, 304.54, 534.38, 2, 133, -0.5, 0.866, 44, 'rgba(196,181,253,0.75)', '#C4B5FD');
+drawStraightGatesXY('gates-t2a-pier1', 287.16, 592.47, 262.92, 578.47, 2, 135, -0.5, 0.866, 8, 'rgba(196,181,253,0.75)', '#C4B5FD');
+drawStraightGatesXY('gates-t2a-leg1b', 304.54, 534.38, 387.9, 582.5, 2, 137, -0.5, 0.866, 44, 'rgba(196,181,253,0.75)', '#C4B5FD');
+drawStraightGatesXY('gates-t2a-tip', 365.53, 610, 410.26, 610, 2, 139, 0, 1, 5, 'rgba(196,181,253,0.75)', '#C4B5FD');
+drawStraightGatesXY('gates-t2a-leg2a', 387.9, 582.5, 471.25, 534.38, 2, 141, 0.5, 0.866, 44, 'rgba(196,181,253,0.75)', '#C4B5FD');
+drawStraightGatesXY('gates-t2a-pier2', 512.87, 578.47, 488.63, 592.47, 2, 143, 0.5, 0.866, 8, 'rgba(196,181,253,0.75)', '#C4B5FD');
+drawStraightGatesXY('gates-t2a-leg2b', 471.25, 534.38, 530.8, 500, 2, 145, 0.5, 0.866, 44, 'rgba(196,181,253,0.75)', '#C4B5FD');
+drawStraightGatesXY('gates-t2a-eastcap', 548.29, 530.31, 513.29, 469.69, 3, 147, 0.866, -0.5, 10, 'rgba(196,181,253,0.75)', '#C4B5FD');
+drawStraightGatesXY('gates-t2a-leg2in', 530.8, 500, 445.05, 549.5, 3, 150, -0.5, -0.866, 44, 'rgba(196,181,253,0.75)', '#C4B5FD');
+// Corner gates — relocated from the N-S pier's old tip (same numbers, 158/159), mirroring
+// T2B's fix.
+drawTipGates('gates-t2a-corner1', [[222.5, 538.97]], [158], 'rgba(196,181,253,0.75)', '#C4B5FD');
+drawTipGates('gates-t2a-corner2', [[553.29, 538.97]], [159], 'rgba(196,181,253,0.75)', '#C4B5FD');
+drawStraightGatesXY('gates-t2a-newpier-east', 405.9, 546, 405.9, 368, 5, 153, 1, 0, 10, 'rgba(196,181,253,0.75)', '#C4B5FD');
+drawStraightGatesXY('gates-t2a-newpier-west', 369.9, 368, 369.9, 546, 5, 160, -1, 0, 10, 'rgba(196,181,253,0.75)', '#C4B5FD');
+drawStraightGatesXY('gates-t2a-leg1in', 330.73, 549.5, 245, 500, 3, 165, 0.5, -0.866, 44, 'rgba(196,181,253,0.75)', '#C4B5FD');
+
+const ZONES = {
+  t2main: {
+    name: 'T2 Main Concourse', status: 'ok',
+    desc: 'The westernmost building and the only check-in, security, customs, and baggage point for the entire T2 complex — T2A and T2B are gate-only satellites reached by people mover after clearing here. Semicircular footprint, flat edge west (landside) and curved edge east, with a small pier at the midpoint of the curve carrying its own gates for LCC flights that board directly from T2 Main rather than the satellites.',
+    gates: '206–226 · 21 gates', remote: '—', region: 'International LCC',
+    peak: '—', capacity: 'Not modeled as ANA/Star Alliance — LCC-only zone',
+    airlines: ['Zip Air', 'Scoot', 'AirAsia X', 'Cebu Pacific', 'VietJet', 'Jetstar', 'HK Express', 'IndiGo', 'flydubai', 'Batik Air Malaysia', 'Jin Air', 'Jeju Air', "T'way Air"],
+  },
+  t2b: {
+    name: 'T2B — North Satellite', status: 'tight',
+    desc: 'Isolated gate-only satellite serving Europe, the Middle East, Africa, and Oceania. Reached from T2 Main or T1 via people mover.',
+    gates: '168–205 · 38 gates', remote: '15 remote stands (235–242, 243–245, 246a/b, 249, 250)', region: 'Europe / ME / Africa / Oceania',
+    peak: '23 departures — night bank', capacity: 'Near capacity: 23 departures vs. 18 dedicated contact gates (33 incl. remote). Absorbed most of this session\'s new codeshare-hub traffic (IST, FRA).',
+    airlines: {
+      'Star Alliance': ['ANA', 'Lufthansa', 'Swiss', 'Austrian Airlines', 'LOT Polish Airlines', 'Turkish Airlines', 'Ethiopian Airlines', 'Air New Zealand'],
+      'Oneworld': ['JAL', 'British Airways', 'Qantas', 'Finnair', 'Qatar Airways'],
+      'SkyTeam': ['Air France', 'KLM'],
+      'Independent': ['Emirates', 'Etihad Airways'],
+    },
+    gateSplit: {
+      'Star Alliance': '168–185 · 18 gates', 'Oneworld': '186–198 · 13 gates', 'SkyTeam': '199–201 · 3 gates', 'Independent': '202–205 · 4 gates',
+    },
+  },
+  t2a: {
+    name: 'T2A — South Satellite', status: 'over',
+    desc: 'Isolated gate-only satellite serving North America. The busiest bank of the day lands here, and it\'s currently over its dedicated gate capacity.',
+    gates: '130–167 · 38 gates', remote: '16 remote stands (223–230, 231a/b, 232a/b, 233, 234, 247, 248)', region: 'North America',
+    peak: '38 departures — afternoon bank', capacity: 'Over capacity: 38 departures vs. 18 dedicated contact gates (34 max incl. all remote stands). Direct result of splitting the 777-9 into Premium/Main Trunk — the new afternoon bank landed on top of the existing busiest window.',
+    airlines: {
+      'Star Alliance': ['ANA', 'United Airlines', 'Air Canada'],
+      'Oneworld': ['JAL', 'American Airlines'],
+      'SkyTeam': ['Delta Air Lines'],
+      'Independent': ['Hawaiian Airlines', 'WestJet'],
+    },
+    gateSplit: {
+      'Star Alliance': '130–147 · 18 gates', 'Oneworld': '148–159 · 12 gates', 'SkyTeam': '160–163 · 4 gates', 'Independent': '164–167 · 4 gates',
+    },
+  },
+  t1asia: {
+    name: 'T1 Asia', status: 'tight',
+    desc: 'Full-service Asia gate pool, shared between ANA and JAL (plus other full-service Asian carriers) — connected to T1 Domestic and the T2 complex by people mover.',
+    gates: '74–122 · 49 gates', remote: '123–133 · 11 gates (LCC only, separate pool)', region: 'East & Southeast Asia, South Asia',
+    peak: '35 departures — morning bank', capacity: 'Getting tight: 35 ANA+partner departures vs. 49 shared contact gates — and that\'s before adding JAL\'s own comparable Asia network into the same pool.',
+    airlines: {
+      'Star Alliance': ['ANA', 'Air China', 'Singapore Airlines', 'EVA Air', 'Thai Airways', 'Air India'],
+      'Oneworld': ['JAL', 'Cathay Pacific', 'Malaysia Airlines'],
+      'SkyTeam': ['China Eastern', 'China Southern', 'Korean Air', 'Vietnam Airlines', 'Garuda Indonesia'],
+      'Independent': ['China Airlines', 'Philippine Airlines'],
+    },
+    gateSplit: {
+      'Star Alliance': '74–99 · 26 gates', 'Oneworld': '100–111 · 12 gates', 'SkyTeam': '112–118 · 7 gates', 'Independent': '119–122 · 4 gates',
+    },
+  },
+  anadomestic: {
+    name: 'ANA Domestic', status: 'ok',
+    desc: 'Curved pier branching north off the T1 connecting spine — ANA\'s dedicated domestic hall, mirrored by JAL\'s to the south.',
+    gates: '1–36 · 36 gates', remote: '7b–12b · 6 remote stands', region: 'Domestic Japan',
+    peak: '17 departures — morning bank (combined w/ JAL)', capacity: 'Comfortable: 17 departures vs. 42 available ANA gates alone.',
+    airlines: ['ANA'],
+  },
+  jaldomestic: {
+    name: 'JAL Domestic', status: 'ok',
+    desc: 'Curved pier branching south off the T1 connecting spine — symmetric mirror of the ANA Domestic building to the north.',
+    gates: '37–73 · 37 gates', remote: '41b–44b · 4 remote stands', region: 'Domestic Japan',
+    peak: 'Combined w/ ANA Domestic bank', capacity: 'Comfortable — shares T1\'s domestic security/customs footprint with ANA.',
+    airlines: ['JAL'],
+  },
+  t1main: {
+    name: 'T1 Main Concourse', status: 'ok',
+    desc: 'The easternmost point of T1 — central check-in and arrivals hall, not a gate zone itself.',
+    gates: '—', remote: '—', region: 'Central hub / landmark',
+    peak: '—', capacity: 'Not a gate-constrained zone.',
+    airlines: ['—'],
+  },
+};
+
+const ALLIANCE_TAG_CLASS = {
+  'Star Alliance': 'tag-star', 'Oneworld': 'tag-oneworld', 'SkyTeam': 'tag-skyteam', 'Independent': 'tag-indep',
+};
+
+function renderAirlines(airlines, gateSplit) {
+  if (Array.isArray(airlines)) {
+    return airlines.map(a => `<span class="term-info-tag">${a}</span>`).join('');
+  }
+  return Object.entries(airlines).map(([group, list]) => `
+    <div class="term-info-airline-group">
+      <div class="term-info-group-label">${group}${gateSplit && gateSplit[group] ? ` <span class="term-info-group-gates">· ${gateSplit[group]}</span>` : ''}</div>
+      <div>${list.map(a => `<span class="term-info-tag ${ALLIANCE_TAG_CLASS[group] || ''}">${a}</span>`).join('')}</div>
+    </div>
+  `).join('');
+}
+
+function selectZone(id) {
+  document.querySelectorAll('.term-zone').forEach(z => z.classList.toggle('active', z.dataset.zone === id));
+  const z = ZONES[id];
+  const panel = document.getElementById('termInfoPanel');
+  const statusLabel = z.status === 'ok' ? 'Comfortable' : z.status === 'tight' ? 'Near Capacity' : 'Over Capacity';
+  panel.innerHTML = `
+    <div class="term-info-head">
+      <div class="term-info-name">${z.name}</div>
+      <div class="term-info-status ${z.status}">${statusLabel}</div>
+    </div>
+    <div class="term-info-desc">${z.desc}</div>
+    <div class="term-info-grid">
+      <div><div class="term-info-metric-label">Contact Gates</div><div class="term-info-metric-val">${z.gates}</div></div>
+      <div><div class="term-info-metric-label">Remote Stands</div><div class="term-info-metric-val">${z.remote}</div></div>
+      <div><div class="term-info-metric-label">Region Served</div><div class="term-info-metric-val">${z.region}</div></div>
+      <div><div class="term-info-metric-label">Peak Bank Demand</div><div class="term-info-metric-val">${z.peak}</div></div>
+    </div>
+    <div class="term-info-desc" style="margin-top:14px;"><strong style="color:var(--navy-dark);">Capacity read:</strong> ${z.capacity}</div>
+    <div class="term-info-airlines">
+      <div class="term-info-airlines-label">Airlines / Alliances</div>
+      ${renderAirlines(z.airlines, z.gateSplit)}
+    </div>
+  `;
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+document.querySelectorAll('.term-zone').forEach(z => {
+  z.addEventListener('click', () => selectZone(z.dataset.zone));
+});
+// Open with T2A pre-selected since it's the headline finding
+selectZone('t2a');
+
+// ── Zoom / pan ────────────────────────────────────────────────────────────────
+(function () {
+  const svg = document.getElementById('termSvg');
+  const BASE = { x: 0, y: 0, w: 1280, h: 760 };
+  let vb = { ...BASE };
+  const MIN_W = 150;   // deepest zoom-in
+  const MAX_W = BASE.w; // fully zoomed out = original view
+
+  function apply() {
+    svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  }
+
+  function zoomAt(cx, cy, factor) {
+    const newW = Math.min(MAX_W, Math.max(MIN_W, vb.w * factor));
+    const newH = newW * (BASE.h / BASE.w);
+    // keep the point under the cursor (cx,cy in current viewBox coords) fixed
+    const fx = (cx - vb.x) / vb.w, fy = (cy - vb.y) / vb.h;
+    vb.x = cx - fx * newW;
+    vb.y = cy - fy * newH;
+    vb.w = newW; vb.h = newH;
+    clamp();
+    apply();
+  }
+
+  function clamp() {
+    vb.x = Math.min(Math.max(vb.x, BASE.x - (BASE.w - vb.w)), BASE.x + (BASE.w - vb.w));
+    vb.y = Math.min(Math.max(vb.y, BASE.y - (BASE.h - vb.h)), BASE.y + (BASE.h - vb.h));
+    if (vb.w >= BASE.w) { vb.x = BASE.x; vb.y = BASE.y; }
+  }
+
+  function svgPoint(evt) {
+    const pt = svg.createSVGPoint();
+    pt.x = evt.clientX; pt.y = evt.clientY;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return { x: vb.x + vb.w / 2, y: vb.y + vb.h / 2 };
+    const loc = pt.matrixTransform(ctm.inverse());
+    return { x: loc.x, y: loc.y };
+  }
+
+  document.getElementById('zoomIn').addEventListener('click', () => zoomAt(vb.x + vb.w / 2, vb.y + vb.h / 2, 0.7));
+  document.getElementById('zoomOut').addEventListener('click', () => zoomAt(vb.x + vb.w / 2, vb.y + vb.h / 2, 1 / 0.7));
+  document.getElementById('zoomReset').addEventListener('click', () => { vb = { ...BASE }; apply(); });
+
+  svg.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const p = svgPoint(e);
+    zoomAt(p.x, p.y, e.deltaY > 0 ? 1.12 : 1 / 1.12);
+  }, { passive: false });
+
+  let dragging = false, last = null;
+  svg.addEventListener('mousedown', (e) => {
+    dragging = true; last = { x: e.clientX, y: e.clientY };
+    svg.classList.add('grabbing');
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const scale = vb.w / svg.getBoundingClientRect().width;
+    vb.x -= (e.clientX - last.x) * scale;
+    vb.y -= (e.clientY - last.y) * scale;
+    last = { x: e.clientX, y: e.clientY };
+    clamp();
+    apply();
+  });
+  window.addEventListener('mouseup', () => { dragging = false; svg.classList.remove('grabbing'); });
+})();
+
+window.addEventListener('scroll', function() {
+  var nav = document.getElementById('navbar');
+  if (nav) nav.classList.toggle('scrolled', window.scrollY > 10);
+});
+</script>
+<script src="js/nav.js"></script>
+</body>
+</html>

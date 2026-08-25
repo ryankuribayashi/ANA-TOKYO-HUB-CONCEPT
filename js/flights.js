@@ -1,19 +1,23 @@
 // ── Aircraft ────────────────────────────────────────────────────────────────
 const ACFT = {
-  1: { name: 'Boeing 777-9',      hasFc: true,  hasPe: false }, // B777-9: FC+BC+EC only
-  2: { name: 'Airbus A350-1000',  hasFc: true,  hasPe: true  },
+  1: { name: 'Boeing 777-9',      hasFc: true,  hasPe: false }, // B777-9 Premium Trunk: FC 8 / BC 48 / EC 300
+  2: { name: 'Airbus A350-1000',  hasFc: true,  hasPe: true  }, // A350-1000 Premium: FC 6 / BC 40 / PE 32 / EC 207
   3: { name: 'Boeing 787-9',      hasFc: false, hasPe: true  },
-  4: { name: 'Airbus A350-900',   hasFc: true,  hasPe: true  },
+  4: { name: 'Airbus A350-900',   hasFc: true,  hasPe: true  }, // A350-900 Premium: FC 3 / BC 48 / PE 40 / EC 180
   5: { name: 'Boeing 787-8',      hasFc: false, hasPe: true  },
-  6: { name: 'Airbus A350-900',   hasFc: false, hasPe: false }, // domestic config (TBD)
-  7: { name: 'Boeing 787-8',      hasFc: false, hasPe: false }, // domestic config (TBD)
+  6: { name: 'Airbus A350-900',   hasFc: true,  hasPe: false }, // A350-900 Domestic: FC 6 / Premium Class 40 / EC 270
+  7: { name: 'Boeing 787-8',      hasFc: false, hasPe: false }, // B787-8 Domestic: Premium Class 35 / EC 243
+  8: { name: 'Boeing 777-9',      hasFc: true,  hasPe: false }, // B777-9 Main Trunk: FC 4 / BC 54 / EC 320
+  9: { name: 'Airbus A350-1000',  hasFc: true,  hasPe: true  }, // A350-1000 Main Trunk: FC 3 / BC 44 / PE 32 / EC 225
+  10: { name: 'Airbus A350-900',  hasFc: true,  hasPe: true  }, // A350-900 Main Trunk: FC 3 / BC 42 / PE 32 / EC 198
 };
 
 function cabinStr(ac) {
   if (ac === 1) return 'First Class · Business · Economy';
   if (ac === 2) return 'First Class · Business · Premium Economy · Economy';
   if (ac === 4) return 'First Class · Business · Premium Economy · Economy';
-  if (ac === 6 || ac === 7) return 'ANA Premium Class · Economy';
+  if (ac === 6) return 'First Class · ANA Premium Class · Economy';
+  if (ac === 7) return 'ANA Premium Class · Economy';
   return 'Business · Premium Economy · Economy';
 }
 
@@ -32,6 +36,7 @@ const TZ = {
   CAN:8,  SZX:8,  MFM:8,  HGH:8,  TSN:8,  CTU:8,  XIY:8,
   KHH:8,  CEB:8,  TSA:8,
   BKK:7,  CGK:7,  SGN:7,  HAN:7,  PNH:7,  VTE:7,  HKT:7,
+  DPS:8,
   DEL:5.5, BOM:5.5, BLR:5.5, HYD:5.5, CMB:5.5,
   KHI:5,  MLE:5,
   KTM:5.75,
@@ -47,6 +52,8 @@ const TZ = {
   DOH:3, AUH:4, DXB:4,
   CAI:3, ADD:3, JNB:2,
   SYD:10, MEL:10, BNE:10, CNS:10, AKL:12,
+  // ── Codeshare-only cities (not ANA destinations — see VIA_CONNECTIONS) ────
+  CMN:1, LOS:1, NBO:3, GRU:-3, SCL:-4, EZE:-3, GIG:-3, BOG:-5, LIM:-5, NAN:12, PPT:-10,
 };
 
 // ── Schedule ─────────────────────────────────────────────────────────────────
@@ -54,28 +61,28 @@ function m(h, min) { return h * 60 + (min || 0); }
 
 const SCHEDULE = {
   // ── North America 3x daily ─────────────────────────────────────────────────
-  JFK: { ac:[1,1,2], outDeps:[m(10,50),m(16,55),m(21,10)],    inArrs:[m(16,50),m(22,55),m(3,10)],     dur:810, nos:['NH 9', 'NH 11','NH 13'],    partner:'United',     partnerNo:'UA 79',  prices:{e:158000,pe:318000,bc:798000,fc:1980000} },
-  LAX: { ac:[1,1,2], outDeps:[m(11,10),m(17,15),m(21,50)], inArrs:[m(9,40),m(15,45),m(20,20)],dur:600, nos:['NH 5', 'NH 7', 'NH 99'],   partner:'United',     partnerNo:'UA 837', prices:{e:145000,pe:295000,bc:748000,fc:1820000} },
-  SFO: { ac:[1,1,2], outDeps:[m(10,50),m(16,45),m(21,10)],    inArrs:[m(8,20),m(14,15),m(18,40)],  dur:600, nos:['NH 1', 'NH 3', 'NH 107'],  partner:'United',     partnerNo:'UA 837', prices:{e:145000,pe:295000,bc:748000,fc:1820000} },
-  ORD: { ac:[1,2,2], outDeps:[m(10,15),m(15,50),m(20,55)], inArrs:[m(13,45),m(19,20),m(0,25)],dur:750, nos:['NH 101','NH 103','NH 105'], partner:'United',    partnerNo:'UA 881', prices:{e:138000,pe:278000,bc:698000,fc:1680000} },
-  SEA: { ac:[1,2,2], outDeps:[m(10,45),m(16,20),m(20,35)], inArrs:[m(7,15),m(12,50),m(17,5)],dur:540, nos:['NH 107','NH 109','NH 111'], partner:'United',    partnerNo:'UA 849', prices:{e:138000,pe:278000,bc:698000,fc:1520000} },
+  JFK: { ac:[1,8,2], outDeps:[m(10,50),m(16,55),m(21,10)],    inArrs:[m(16,50),m(22,55),m(3,10)],     dur:810, nos:['NH 9', 'NH 11','NH 13'],    partner:'United',     partnerNo:'UA 79',  prices:{e:158000,pe:318000,bc:798000,fc:1980000} },
+  LAX: { ac:[1,8,2], outDeps:[m(11,10),m(17,15),m(21,50)], inArrs:[m(9,40),m(15,45),m(20,20)],dur:600, nos:['NH 5', 'NH 7', 'NH 99'],   partner:'United',     partnerNo:'UA 837', prices:{e:145000,pe:295000,bc:748000,fc:1820000} },
+  SFO: { ac:[1,8,2], outDeps:[m(10,50),m(16,45),m(21,10)],    inArrs:[m(8,20),m(14,15),m(18,40)],  dur:600, nos:['NH 1', 'NH 3', 'NH 107'],  partner:'United',     partnerNo:'UA 837', prices:{e:145000,pe:295000,bc:748000,fc:1820000} },
+  ORD: { ac:[8,9,2], outDeps:[m(10,15),m(15,50),m(20,55)], inArrs:[m(13,45),m(19,20),m(0,25)],dur:750, nos:['NH 101','NH 103','NH 105'], partner:'United',    partnerNo:'UA 881', prices:{e:138000,pe:278000,bc:698000,fc:1680000} },
+  SEA: { ac:[8,9,2], outDeps:[m(10,45),m(16,20),m(20,35)], inArrs:[m(7,15),m(12,50),m(17,5)],dur:540, nos:['NH 107','NH 109','NH 111'], partner:'United',    partnerNo:'UA 849', prices:{e:138000,pe:278000,bc:698000,fc:1520000} },
   // ── North America 2x daily ─────────────────────────────────────────────────
   HNL: { ac:[1,2],   outDeps:[m(9,10),m(20,5)],              inArrs:[m(2,10),m(13,5)],         dur:450, nos:['NH 183','NH 185'],          partner:'United',     partnerNo:'UA 803', prices:{e:92000, pe:185000,bc:468000,fc:1198000} },
-  BOS: { ac:[2,3],   outDeps:[m(10,10),m(21,5)],              inArrs:[m(17,10),m(4,5)],            dur:840, nos:['NH 139','NH 141'],          partner:null,                             prices:{e:142000,pe:285000,bc:718000,fc:1868000} },
-  IAH: { ac:[2,3],   outDeps:[m(10,50),m(21,15)],              inArrs:[m(18),m(4,25)],            dur:845, nos:['NH 115','NH 169'],          partner:'United',     partnerNo:'UA 7',   prices:{e:138000,pe:278000,bc:698000,fc:1698000} },
-  YVR: { ac:[2,3],   outDeps:[m(10,50),m(21,25)],              inArrs:[m(8,20),m(18,55)],            dur:570, nos:['NH 117','NH 173'],          partner:'Air Canada',  partnerNo:'AC 5',  prices:{e:135000,pe:272000,bc:678000,fc:1498000} },
-  YYZ: { ac:[1,2],   outDeps:[m(11,25),m(21,50)],           inArrs:[m(17,25),m(3,50)],            dur:810, nos:['NH 119','NH 175'],          partner:'Air Canada',  partnerNo:'AC 3',  prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
+  BOS: { ac:[9,3],   outDeps:[m(10,10),m(21,5)],              inArrs:[m(17,10),m(4,5)],            dur:840, nos:['NH 139','NH 141'],          partner:null,                             prices:{e:142000,pe:285000,bc:718000,fc:1868000} },
+  IAH: { ac:[9,3],   outDeps:[m(10,50),m(21,15)],              inArrs:[m(18),m(4,25)],            dur:845, nos:['NH 115','NH 169'],          partner:'United',     partnerNo:'UA 7',   prices:{e:138000,pe:278000,bc:698000,fc:1698000} },
+  YVR: { ac:[9,3],   outDeps:[m(10,50),m(21,25)],              inArrs:[m(8,20),m(18,55)],            dur:570, nos:['NH 117','NH 173'],          partner:'Air Canada',  partnerNo:'AC 5',  prices:{e:135000,pe:272000,bc:678000,fc:1498000} },
+  YYZ: { ac:[8,9],   outDeps:[m(11,25),m(21,50)],           inArrs:[m(17,25),m(3,50)],            dur:810, nos:['NH 119','NH 175'],          partner:'Air Canada',  partnerNo:'AC 3',  prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
   // ── North America 1x daily ─────────────────────────────────────────────────
-  IAD: { ac:[2],     outDeps:[m(15,5)],                       inArrs:[m(22,5)],                  dur:840, nos:['NH 125'],                   partner:'United',     partnerNo:'UA 803', prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
+  IAD: { ac:[9],     outDeps:[m(15,5)],                       inArrs:[m(22,5)],                  dur:840, nos:['NH 125'],                   partner:'United',     partnerNo:'UA 803', prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
   DTW: { ac:[3],     outDeps:[m(14,10)],                       inArrs:[m(19,40)],                     dur:795, nos:['NH 127'],                   partner:null,                             prices:{e:132000,pe:268000,bc:668000,fc:null} },
   MSP: { ac:[3],     outDeps:[m(14,45)],                    inArrs:[m(16,15)],                     dur:690, nos:['NH 129'],                   partner:null,                             prices:{e:132000,pe:268000,bc:668000,fc:null} },
   ATL: { ac:[3],     outDeps:[m(15,20)],                       inArrs:[m(0,20)],                  dur:900, nos:['NH 131'],                   partner:null,                             prices:{e:135000,pe:272000,bc:678000,fc:null} },
-  DFW: { ac:[2],     outDeps:[m(14,40)],                    inArrs:[m(20,40)],                     dur:810, nos:['NH 133'],                   partner:null,                             prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
+  DFW: { ac:[9],     outDeps:[m(14,40)],                    inArrs:[m(20,40)],                     dur:810, nos:['NH 133'],                   partner:null,                             prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
   DEN: { ac:[3],     outDeps:[m(14,45)],                    inArrs:[m(15,15)],                     dur:660, nos:['NH 135'],                   partner:'United',     partnerNo:'UA 133', prices:{e:132000,pe:268000,bc:668000,fc:null} },
   SAN: { ac:[3],     outDeps:[m(14,20)],                       inArrs:[m(13,50)],                     dur:630, nos:['NH 137'],                   partner:null,                             prices:{e:132000,pe:268000,bc:668000,fc:null} },
   YYC: { ac:[3],     outDeps:[m(14,35)],                    inArrs:[m(12,5)],                  dur:570, nos:['NH 143'],                   partner:'Air Canada',  partnerNo:'AC 11', prices:{e:128000,pe:255000,bc:638000,fc:null} },
-  YUL: { ac:[2],     outDeps:[m(15,15)],                       inArrs:[m(23,15)],                  dur:870, nos:['NH 145'],                   partner:'Air Canada',  partnerNo:'AC 7',  prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
-  MEX: { ac:[2],     outDeps:[m(15,15)],                       inArrs:[m(0,15)],                     dur:900, nos:['NH 147'],                   partner:'Avianca',    partnerNo:'AV 5',   prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
+  YUL: { ac:[9],     outDeps:[m(15,15)],                       inArrs:[m(23,15)],                  dur:870, nos:['NH 145'],                   partner:'Air Canada',  partnerNo:'AC 7',  prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
+  MEX: { ac:[9],     outDeps:[m(15,15)],                       inArrs:[m(0,15)],                     dur:900, nos:['NH 147'],                   partner:'Avianca',    partnerNo:'AV 5',   prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
   MIA: { ac:[3],     outDeps:[m(14,40)],                    inArrs:[m(8,30)],                  dur:870, nos:['NH 193'],                   partner:null,                             prices:{e:145000,pe:290000,bc:738000,fc:null} },
   MCO: { ac:[3],     outDeps:[m(15,0)],                     inArrs:[m(9,0)],                   dur:870, nos:['NH 195'],                   partner:null,                             prices:{e:142000,pe:285000,bc:730000,fc:null} },
   // ── North America 4–5x weekly ─────────────────────────────────────────────
@@ -95,31 +102,31 @@ const SCHEDULE = {
   ANC: { ac:[3],     outDeps:[m(9,15)],                        inArrs:[m(5,45)],                     dur:450, nos:['NH 189'],                   partner:null,                             prices:{e:98000, pe:195000,bc:498000,fc:null}, days:[1,2,4,6] },
   AUS: { ac:[3],     outDeps:[m(15,50)],                    inArrs:[m(22,50)],                     dur:840, nos:['NH 191'],                   partner:null,                             prices:{e:138000,pe:278000,bc:698000,fc:null}, days:[1,3,5,0] },
   // ── Asia 3x daily ─────────────────────────────────────────────────────────
-  PEK: { ac:[4,4,5], outDeps:[m(8,25),m(13,20),m(20,15)],    inArrs:[m(17,10),m(22,5),m(5)],   dur:210, nos:['NH 901','NH 903','NH 905'], partner:'Air China',   partnerNo:'CA 183', prices:{e:32000, pe:62000, bc:185000,fc:448000} },
-  PVG: { ac:[4,4,5], outDeps:[m(8,50),m(13,55),m(20,35)], inArrs:[m(16,15),m(21,20),m(4)],dur:170,nos:['NH 907','NH 909','NH 911'], partner:'Air China',   partnerNo:'CA 937', prices:{e:28000, pe:55000, bc:168000,fc:398000} },
-  HKG: { ac:[4,5,4,5,4], outDeps:[m(9,20),m(11,45),m(14,5),m(17,55),m(21,15)], inArrs:[m(20,5),m(22,30),m(0,50),m(4,40),m(8)], dur:270, nos:['NH 913','NH 969','NH 915','NH 971','NH 917'], partner:null, prices:{e:42000,pe:82000,bc:225000,fc:528000} },
-  ICN: { ac:[4,4,5,5,5], outDeps:[m(7,30),m(8,15),m(13,10),m(16,30),m(19,55)], inArrs:[m(10,30),m(14,45),m(17,45),m(19,40),m(2,25)], dur:150, nos:['NH 861','NH 919','NH 921','NH 863','NH 923'], partner:null, prices:{e:28000, pe:52000, bc:158000,fc:368000} },
-  SIN: { ac:[4,4,5], outDeps:[m(9,45),m(14,40),m(23,25)], inArrs:[m(2,15),m(7,10),m(15,55)], dur:450, nos:['NH 925','NH 927','NH 929'], partner:'Singapore Airlines', partnerNo:'SQ 11', prices:{e:55000,pe:108000,bc:288000,fc:698000} },
-  TPE: { ac:[4,4,5], outDeps:[m(8,5),m(13,10),m(20,15)],    inArrs:[m(15,50),m(20,55),m(4)],dur:180, nos:['NH 931','NH 933','NH 935'], partner:'EVA Air',     partnerNo:'BR 197', prices:{e:32000, pe:62000, bc:185000,fc:448000} },
-  BKK: { ac:[4,5,5], outDeps:[m(9,15),m(14,10),m(23,5)],    inArrs:[m(0,15),m(5,10),m(14,5)],   dur:390, nos:['NH 937','NH 939','NH 941'], partner:'Thai Airways', partnerNo:'TG 640', prices:{e:48000, pe:92000, bc:258000,fc:618000} },
-  MNL: { ac:[4,5,5], outDeps:[m(9,25),m(14,5),m(21,15)],    inArrs:[m(20,30),m(1,10),m(8,20)],dur:280, nos:['NH 943','NH 945','NH 947'], partner:null,                             prices:{e:38000, pe:72000, bc:198000,fc:478000} },
-  CGK: { ac:[4,5,5], outDeps:[m(9,20),m(15,25),m(23,10)],    inArrs:[m(2,20),m(8,25),m(16,10)],   dur:450, nos:['NH 949','NH 951','NH 953'], partner:null,                             prices:{e:52000, pe:98000, bc:268000,fc:638000} },
-  KUL: { ac:[4,5,5], outDeps:[m(9,45),m(15,10),m(23,5)],    inArrs:[m(2,25),m(7,50),m(15,45)],dur:440, nos:['NH 955','NH 957','NH 959'], partner:null,                             prices:{e:52000, pe:98000, bc:268000,fc:638000} },
+  PEK: { ac:[10,4,5], outDeps:[m(8,25),m(13,20),m(20,15)],    inArrs:[m(17,10),m(22,5),m(5)],   dur:210, nos:['NH 901','NH 903','NH 905'], partner:'Air China',   partnerNo:'CA 183', prices:{e:32000, pe:62000, bc:185000,fc:448000} },
+  PVG: { ac:[10,4,5], outDeps:[m(8,50),m(13,55),m(20,35)], inArrs:[m(16,15),m(21,20),m(4)],dur:170,nos:['NH 907','NH 909','NH 911'], partner:'Air China',   partnerNo:'CA 937', prices:{e:28000, pe:55000, bc:168000,fc:398000} },
+  HKG: { ac:[10,5,4,5,4], outDeps:[m(9,20),m(11,45),m(14,5),m(17,55),m(21,15)], inArrs:[m(20,5),m(22,30),m(0,50),m(4,40),m(8)], dur:270, nos:['NH 913','NH 969','NH 915','NH 971','NH 917'], partner:null, prices:{e:42000,pe:82000,bc:225000,fc:528000} },
+  ICN: { ac:[10,4,5,5,5], outDeps:[m(7,30),m(8,15),m(13,10),m(16,30),m(19,55)], inArrs:[m(10,30),m(14,45),m(17,45),m(19,40),m(2,25)], dur:150, nos:['NH 861','NH 919','NH 921','NH 863','NH 923'], partner:null, prices:{e:28000, pe:52000, bc:158000,fc:368000} },
+  SIN: { ac:[10,4,5], outDeps:[m(9,45),m(14,40),m(23,25)], inArrs:[m(2,15),m(7,10),m(15,55)], dur:450, nos:['NH 925','NH 927','NH 929'], partner:'Singapore Airlines', partnerNo:'SQ 11', prices:{e:55000,pe:108000,bc:288000,fc:698000} },
+  TPE: { ac:[10,4,5], outDeps:[m(8,5),m(13,10),m(20,15)],    inArrs:[m(15,50),m(20,55),m(4)],dur:180, nos:['NH 931','NH 933','NH 935'], partner:'EVA Air',     partnerNo:'BR 197', prices:{e:32000, pe:62000, bc:185000,fc:448000} },
+  BKK: { ac:[10,5,5], outDeps:[m(9,15),m(14,10),m(23,5)],    inArrs:[m(0,15),m(5,10),m(14,5)],   dur:390, nos:['NH 937','NH 939','NH 941'], partner:'Thai Airways', partnerNo:'TG 640', prices:{e:48000, pe:92000, bc:258000,fc:618000} },
+  MNL: { ac:[10,5,5], outDeps:[m(9,25),m(14,5),m(21,15)],    inArrs:[m(20,30),m(1,10),m(8,20)],dur:280, nos:['NH 943','NH 945','NH 947'], partner:null,                             prices:{e:38000, pe:72000, bc:198000,fc:478000} },
+  CGK: { ac:[10,5,5], outDeps:[m(9,20),m(15,25),m(23,10)],    inArrs:[m(2,20),m(8,25),m(16,10)],   dur:450, nos:['NH 949','NH 951','NH 953'], partner:null,                             prices:{e:52000, pe:98000, bc:268000,fc:638000} },
+  KUL: { ac:[10,5,5], outDeps:[m(9,45),m(15,10),m(23,5)],    inArrs:[m(2,25),m(7,50),m(15,45)],dur:440, nos:['NH 955','NH 957','NH 959'], partner:null,                             prices:{e:52000, pe:98000, bc:268000,fc:638000} },
   // ── Asia 2x daily ─────────────────────────────────────────────────────────
-  SGN: { ac:[4,5],   outDeps:[m(10,25),m(22,50)],           inArrs:[m(23,25),m(11,50)],         dur:330, nos:['NH 961','NH 963'],          partner:null,                             prices:{e:45000, pe:88000, bc:235000,fc:null} },
-  HAN: { ac:[4,5],   outDeps:[m(9,45),m(22,20)],              inArrs:[m(21,30),m(10,5)],            dur:300, nos:['NH 965','NH 967'],          partner:null,                             prices:{e:42000, pe:82000, bc:218000,fc:null} },
-  TSA: { ac:[4,5],   outDeps:[m(8,10),m(14,0)],               inArrs:[m(14,30),m(20,0)],             dur:165, nos:['NH 973','NH 975'],          partner:null,                             prices:{e:32000, pe:62000, bc:185000,fc:null} },
+  SGN: { ac:[10,5],   outDeps:[m(10,25),m(22,50)],           inArrs:[m(23,25),m(11,50)],         dur:330, nos:['NH 961','NH 963'],          partner:null,                             prices:{e:45000, pe:88000, bc:235000,fc:null} },
+  HAN: { ac:[10,5],   outDeps:[m(9,45),m(22,20)],              inArrs:[m(21,30),m(10,5)],            dur:300, nos:['NH 965','NH 967'],          partner:null,                             prices:{e:42000, pe:82000, bc:218000,fc:null} },
+  TSA: { ac:[10,5],   outDeps:[m(8,10),m(14,0)],               inArrs:[m(14,30),m(20,0)],             dur:165, nos:['NH 973','NH 975'],          partner:null,                             prices:{e:32000, pe:62000, bc:185000,fc:null} },
   // ── Asia 1x daily ─────────────────────────────────────────────────────────
   CAN: { ac:[5],     outDeps:[m(13,20)],                       inArrs:[m(23,15)],                     dur:245, nos:['NH 805'],                   partner:'Air China',   partnerNo:'CA 445', prices:{e:38000, pe:72000, bc:198000,fc:null} },
   SZX: { ac:[5],     outDeps:[m(13,15)],                       inArrs:[m(22,40)],                     dur:230, nos:['NH 801'],                   partner:'Shenzhen Airlines',partnerNo:'ZH 7012',prices:{e:38000,pe:72000,bc:198000,fc:null} },
   MFM: { ac:[5],     outDeps:[m(13,35)],                    inArrs:[m(23,10)],                  dur:235, nos:['NH 803'],                   partner:'Air China',   partnerNo:'CA 451', prices:{e:38000, pe:72000, bc:198000,fc:null} },
   HGH: { ac:[5],     outDeps:[m(9,55)],                     inArrs:[m(18,10)],                  dur:195, nos:['NH 807'],                   partner:'Air China',   partnerNo:'CA 441', prices:{e:32000, pe:62000, bc:178000,fc:null} },
-  GMP: { ac:[4,5,5], outDeps:[m(7,0),m(9,20),m(15,45)], inArrs:[m(10,30),m(14,50),m(21,15)], dur:120, nos:['NH 865','NH 857','NH 859'], partner:null, prices:{e:22000, pe:42000, bc:125000,fc:null} },
+  GMP: { ac:[10,5,5], outDeps:[m(7,0),m(9,20),m(15,45)], inArrs:[m(10,30),m(14,50),m(21,15)], dur:120, nos:['NH 865','NH 857','NH 859'], partner:null, prices:{e:22000, pe:42000, bc:125000,fc:null} },
   PUS: { ac:[5,5],   outDeps:[m(9,25),m(15,0)],             inArrs:[m(14,55),m(20,30)],            dur:120, nos:['NH 809','NH 871'],          partner:null,                             prices:{e:22000, pe:42000, bc:125000,fc:null} },
   TSN: { ac:[5],     outDeps:[m(9,20)],                        inArrs:[m(17,15)],                  dur:185, nos:['NH 811'],                   partner:'Air China',   partnerNo:'CA 435', prices:{e:28000, pe:55000, bc:162000,fc:null} },
   DAC: { ac:[5],     outDeps:[m(23,20)],                       inArrs:[m(18,50)],                     dur:420, nos:['NH 813'],                   partner:null,                             prices:{e:62000, pe:122000,bc:318000,fc:null} },
   KHI: { ac:[5],     outDeps:[m(23,15)],                       inArrs:[m(23,45)],                     dur:540, nos:['NH 815'],                   partner:null,                             prices:{e:72000, pe:142000,bc:368000,fc:null} },
-  DEL: { ac:[4],     outDeps:[m(22,40)],                    inArrs:[m(19,10)],                    dur:540, nos:['NH 817'],                   partner:'Air India',   partnerNo:'AI 307', prices:{e:65000, pe:125000,bc:338000,fc:798000} },
+  DEL: { ac:[10],     outDeps:[m(22,40)],                    inArrs:[m(19,10)],                    dur:540, nos:['NH 817'],                   partner:'Air India',   partnerNo:'AI 307', prices:{e:65000, pe:125000,bc:338000,fc:798000} },
   BOM: { ac:[5],     outDeps:[m(22,15)],                       inArrs:[m(20,45)],                  dur:600, nos:['NH 819'],                   partner:'Air India',   partnerNo:'AI 309', prices:{e:68000, pe:132000,bc:348000,fc:null} },
   HYD: { ac:[5],     outDeps:[m(22,5)],                       inArrs:[m(20,35)],                    dur:600, nos:['NH 821'],                   partner:'Air India',   partnerNo:'AI 311', prices:{e:65000, pe:125000,bc:338000,fc:null} },
   BLR: { ac:[5],     outDeps:[m(22,20)],                       inArrs:[m(21,50)],                    dur:630, nos:['NH 823'],                   partner:'Air India',   partnerNo:'AI 313', prices:{e:68000, pe:132000,bc:348000,fc:null} },
@@ -134,6 +141,7 @@ const SCHEDULE = {
   CJU: { ac:[5],     outDeps:[m(9,20)],                        inArrs:[m(15,10)],                     dur:130, nos:['NH 837'],                   partner:null,                             prices:{e:20000, pe:38000, bc:115000,fc:null}, days:[1,2,4,5,6] },
   HKT: { ac:[5],     outDeps:[m(10,10)],                       inArrs:[m(2,10)],                     dur:420, nos:['NH 839'],                   partner:null,                             prices:{e:48000, pe:92000, bc:248000,fc:null}, days:[2,4,5,6,0] },
   KHH: { ac:[5],     outDeps:[m(9,5)],                        inArrs:[m(16,20)],                     dur:195, nos:['NH 841'],                   partner:null,                             prices:{e:28000, pe:52000, bc:152000,fc:null}, days:[1,2,3,5,0] },
+  DPS: { ac:[5],     outDeps:[m(13,30)],                       inArrs:[m(6,0)],                     dur:445, nos:['NH 843'],                   partner:null,                             prices:{e:54000, pe:102000, bc:278000,fc:null} },
   RGN: { ac:[5],     outDeps:[m(10,5)],                       inArrs:[m(0,5)],                     dur:390, nos:['NH 843'],                   partner:null,                             prices:{e:45000, pe:88000, bc:228000,fc:null}, days:[1,3,5,6] },
   KTM: { ac:[5],     outDeps:[m(23,25)],                       inArrs:[m(17,25)],                     dur:480, nos:['NH 845'],                   partner:null,                             prices:{e:62000, pe:122000,bc:315000,fc:null}, days:[2,4,6,0] },
   MLE: { ac:[5],     outDeps:[m(23,20)],                       inArrs:[m(19,50)],                     dur:540, nos:['NH 847'],                   partner:null,                             prices:{e:68000, pe:132000,bc:338000,fc:null}, days:[1,3,5,0] },
@@ -142,20 +150,20 @@ const SCHEDULE = {
   PNH: { ac:[5],     outDeps:[m(10,25)],                       inArrs:[m(0,25)],                  dur:360, nos:['NH 853'],                   partner:null,                             prices:{e:42000, pe:82000, bc:215000,fc:null}, days:[2,4,5,6] },
   VTE: { ac:[5],     outDeps:[m(10,25)],                       inArrs:[m(0,25)],                  dur:360, nos:['NH 855'],                   partner:null,                             prices:{e:42000, pe:82000, bc:215000,fc:null}, days:[1,3,5,6] },
   // ── Domestic ──────────────────────────────────────────────────────────────────
-  // ac 6 = A350-900 domestic config (TBD), ac 7 = B787-8 domestic config (TBD)
-  OKA: { ac:[6,6,6,7,6,6,7,7], outDeps:[m(6,0),m(8,0),m(10,0),m(12,0),m(14,0),m(16,0),m(18,0),m(20,0)], inArrs:[m(12,15),m(14,15),m(16,15),m(18,15),m(20,15),m(22,15),m(0,15),m(2,15)], dur:165, nos:['NH 3001','NH 3003','NH 3005','NH 3007','NH 3009','NH 3011','NH 3013','NH 3015'], partner:null, prices:{e:22000,pe:null,bc:42000,fc:null}, domestic:true },
-  FUK: { ac:[6,6,6,7,6,7,6,7,7,7,7,7], outDeps:[m(6,0),m(7,30),m(9,0),m(10,30),m(12,0),m(13,30),m(15,0),m(16,30),m(18,0),m(19,30),m(21,0),m(22,30)], inArrs:[m(10,20),m(11,50),m(13,20),m(14,50),m(16,20),m(17,50),m(19,20),m(20,50),m(22,20),m(23,50),m(1,20),m(2,50)], dur:110, nos:['NH 3101','NH 3103','NH 3105','NH 3107','NH 3109','NH 3111','NH 3113','NH 3115','NH 3117','NH 3119','NH 3121','NH 3123'], partner:null, prices:{e:16000,pe:null,bc:32000,fc:null}, domestic:true },
-  ITM: { ac:[6,6,7,7,7,7,7,6,6,7], outDeps:[m(6,0),m(7,30),m(9,0),m(10,30),m(12,0),m(14,0),m(15,30),m(17,0),m(18,30),m(20,30)], inArrs:[m(9,0),m(10,30),m(12,0),m(13,30),m(15,0),m(17,0),m(18,30),m(20,0),m(21,30),m(23,30)], dur:75, nos:['NH 3201','NH 3203','NH 3205','NH 3207','NH 3209','NH 3211','NH 3213','NH 3215','NH 3217','NH 3219'], partner:null, prices:{e:12000,pe:null,bc:24000,fc:null}, domestic:true },
-  NGO: { ac:[6,7,6,7,7], outDeps:[m(8,0),m(10,30),m(13,0),m(15,30),m(18,0)], inArrs:[m(10,5),m(12,35),m(15,5),m(17,35),m(20,5)], dur:50, nos:['NH 3301','NH 3303','NH 3305','NH 3307','NH 3309'], partner:null, prices:{e:8000,pe:null,bc:16000,fc:null}, domestic:true },
-  CTS: { ac:[6,7,6,7,6,7,6,7,6,7,6,7], outDeps:[m(6,0),m(7,30),m(9,0),m(10,30),m(12,0),m(13,30),m(15,0),m(16,30),m(18,0),m(19,30),m(21,0),m(22,30)], inArrs:[m(9,55),m(11,25),m(12,55),m(14,25),m(15,55),m(17,25),m(18,55),m(20,25),m(21,55),m(23,25),m(0,55),m(2,25)], dur:100, nos:['NH 3401','NH 3403','NH 3405','NH 3407','NH 3409','NH 3411','NH 3413','NH 3415','NH 3417','NH 3419','NH 3421','NH 3423'], partner:null, prices:{e:18000,pe:null,bc:36000,fc:null}, domestic:true },
+  // ac 6 = A350-900 Domestic (FC 6 / Premium Class 40 / EC 270), ac 7 = B787-8 Domestic (Premium Class 35 / EC 243)
+  OKA: { ac:[6,6,6,7,6,6,7,7], outDeps:[m(6,0),m(8,0),m(10,0),m(12,0),m(14,0),m(16,0),m(18,0),m(20,0)], inArrs:[m(12,15),m(14,15),m(16,15),m(18,15),m(20,15),m(22,15),m(0,15),m(2,15)], dur:165, nos:['NH 3001','NH 3003','NH 3005','NH 3007','NH 3009','NH 3011','NH 3013','NH 3015'], partner:null, prices:{e:22000,pe:null,bc:42000,fc:58000}, domestic:true },
+  FUK: { ac:[6,6,6,7,6,7,6,7,7,7,7,7], outDeps:[m(6,0),m(7,30),m(9,0),m(10,30),m(12,0),m(13,30),m(15,0),m(16,30),m(18,0),m(19,30),m(21,0),m(22,30)], inArrs:[m(10,20),m(11,50),m(13,20),m(14,50),m(16,20),m(17,50),m(19,20),m(20,50),m(22,20),m(23,50),m(1,20),m(2,50)], dur:110, nos:['NH 3101','NH 3103','NH 3105','NH 3107','NH 3109','NH 3111','NH 3113','NH 3115','NH 3117','NH 3119','NH 3121','NH 3123'], partner:null, prices:{e:16000,pe:null,bc:32000,fc:45000}, domestic:true },
+  ITM: { ac:[6,6,7,7,7,7,7,6,6,7], outDeps:[m(6,0),m(7,30),m(9,0),m(10,30),m(12,0),m(14,0),m(15,30),m(17,0),m(18,30),m(20,30)], inArrs:[m(9,0),m(10,30),m(12,0),m(13,30),m(15,0),m(17,0),m(18,30),m(20,0),m(21,30),m(23,30)], dur:75, nos:['NH 3201','NH 3203','NH 3205','NH 3207','NH 3209','NH 3211','NH 3213','NH 3215','NH 3217','NH 3219'], partner:null, prices:{e:12000,pe:null,bc:24000,fc:34000}, domestic:true },
+  NGO: { ac:[6,7,6,7,7], outDeps:[m(8,0),m(10,30),m(13,0),m(15,30),m(18,0)], inArrs:[m(10,5),m(12,35),m(15,5),m(17,35),m(20,5)], dur:50, nos:['NH 3301','NH 3303','NH 3305','NH 3307','NH 3309'], partner:null, prices:{e:8000,pe:null,bc:16000,fc:22000}, domestic:true },
+  CTS: { ac:[6,7,6,7,6,7,6,7,6,7,6,7], outDeps:[m(6,0),m(7,30),m(9,0),m(10,30),m(12,0),m(13,30),m(15,0),m(16,30),m(18,0),m(19,30),m(21,0),m(22,30)], inArrs:[m(9,55),m(11,25),m(12,55),m(14,25),m(15,55),m(17,25),m(18,55),m(20,25),m(21,55),m(23,25),m(0,55),m(2,25)], dur:100, nos:['NH 3401','NH 3403','NH 3405','NH 3407','NH 3409','NH 3411','NH 3413','NH 3415','NH 3417','NH 3419','NH 3421','NH 3423'], partner:null, prices:{e:18000,pe:null,bc:36000,fc:50000}, domestic:true },
   // ── KIX ↔ NRT Hub Connector (3x daily, B787-8 domestic) ──────────────────
-  KIX: { ac:[6,6,7,7,7], outDeps:[m(9,30),m(11,0),m(13,0),m(16,30),m(20,0)], inArrs:[m(8,45),m(10,15),m(12,15),m(15,30),m(18,45)], dur:75, nos:['NH 9201','NH 9203','NH 9205','NH 9207','NH 9209'], partner:null, prices:{e:13000,pe:null,bc:26000,fc:null}, domestic:true },
+  KIX: { ac:[6,6,7,7,7], outDeps:[m(9,30),m(11,0),m(13,0),m(16,30),m(20,0)], inArrs:[m(8,45),m(10,15),m(12,15),m(15,30),m(18,45)], dur:75, nos:['NH 9201','NH 9203','NH 9205','NH 9207','NH 9209'], partner:null, prices:{e:13000,pe:null,bc:26000,fc:36000}, domestic:true },
   // ── Europe 2x daily ───────────────────────────────────────────────────────
-  LHR: { ac:[1,2],   outDeps:[m(11,20),m(22,45)],           inArrs:[m(14,50),m(2,15)],            dur:750, nos:['NH 211','NH 213'],          partner:null,                             prices:{e:168000,pe:335000,bc:848000,fc:2180000} },
-  CDG: { ac:[1,2],   outDeps:[m(11,55),m(22,50)],           inArrs:[m(14,55),m(1,50)],         dur:735, nos:['NH 201','NH 203'],          partner:null,                             prices:{e:165000,pe:328000,bc:828000,fc:2080000} },
-  FRA: { ac:[2,3],   outDeps:[m(12,5),m(22,40)],           inArrs:[m(14,35),m(1,10)],            dur:720, nos:['NH 205','NH 207'],          partner:'Lufthansa',   partnerNo:'LH 715', prices:{e:162000,pe:325000,bc:818000,fc:2050000} },
-  MUC: { ac:[2,3],   outDeps:[m(12,25),m(22,35)],           inArrs:[m(15,25),m(1,35)],         dur:735, nos:['NH 209','NH 215'],          partner:'Lufthansa',   partnerNo:'LH 723', prices:{e:162000,pe:325000,bc:818000,fc:2050000} },
-  IST: { ac:[2,3],   outDeps:[m(12,50),m(22,45)],           inArrs:[m(14,20),m(0,15)],         dur:720, nos:['NH 217','NH 219'],          partner:'Turkish Airlines',partnerNo:'TK 51',prices:{e:158000,pe:315000,bc:798000,fc:1980000} },
+  LHR: { ac:[1,9],   outDeps:[m(11,20),m(22,45)],           inArrs:[m(14,50),m(2,15)],            dur:750, nos:['NH 211','NH 213'],          partner:null,                             prices:{e:168000,pe:335000,bc:848000,fc:2180000} },
+  CDG: { ac:[8,9],   outDeps:[m(11,55),m(22,50)],           inArrs:[m(14,55),m(1,50)],         dur:735, nos:['NH 201','NH 203'],          partner:null,                             prices:{e:165000,pe:328000,bc:828000,fc:2080000} },
+  FRA: { ac:[9,3],   outDeps:[m(12,5),m(22,40)],           inArrs:[m(14,35),m(1,10)],            dur:720, nos:['NH 205','NH 207'],          partner:'Lufthansa',   partnerNo:'LH 715', prices:{e:162000,pe:325000,bc:818000,fc:2050000} },
+  MUC: { ac:[9,3],   outDeps:[m(12,25),m(22,35)],           inArrs:[m(15,25),m(1,35)],         dur:735, nos:['NH 209','NH 215'],          partner:'Lufthansa',   partnerNo:'LH 723', prices:{e:162000,pe:325000,bc:818000,fc:2050000} },
+  IST: { ac:[9,3],   outDeps:[m(12,50),m(22,45)],           inArrs:[m(14,20),m(0,15)],         dur:720, nos:['NH 217','NH 219'],          partner:'Turkish Airlines',partnerNo:'TK 51',prices:{e:158000,pe:315000,bc:798000,fc:1980000} },
   SYD: { ac:[2,3],   outDeps:[m(10,5),m(23,25)],              inArrs:[m(7,35),m(20,55)],         dur:570, nos:['NH 891','NH 893'],          partner:'Air New Zealand',partnerNo:'NZ 91',prices:{e:118000,pe:235000,bc:598000,fc:1480000} },
   // ── Europe 1x daily ───────────────────────────────────────────────────────
   // HEL served via WAW — see VIA_CONNECTIONS
@@ -200,6 +208,23 @@ const VIA_CONNECTIONS = {
   ZAG: { viaCode:'VIE', freedom:true, partner:'ANA', partnerNo:'NH 523', dur:70,  note:'ANA freedom flight via Vienna'     },
   AMS: { viaCode:'FRA', freedom:true, partner:'ANA', partnerNo:'NH 525', dur:60,  note:'ANA freedom flight via Frankfurt'  },
   JNB: { viaCode:'ADD', freedom:true, partner:'ANA', partnerNo:'NH 527', dur:240, note:'ANA freedom flight via Addis Ababa'},
+
+  // ── Codeshare-only connections ─────────────────────────────────────────────
+  // NOT ANA destinations/freedom flights — these are interline itineraries:
+  // ANA operates the NRT↔hub leg, the partner airline operates its own
+  // flight (own number, own metal) on to the final city. Shown in search
+  // results as "ANA / <Partner>", not counted in ANA route/destination stats.
+  CMN: { viaCode:'IST', partner:'Turkish Airlines',  partnerNo:'TK 559', dur:285, note:'Codeshare connection on Turkish Airlines', acName:'Airbus A321neo' },
+  LOS: { viaCode:'ADD', partner:'Ethiopian Airlines', partnerNo:'ET 901', dur:325, note:'Codeshare connection on Ethiopian Airlines', acName:'Boeing 787-9' },
+  NBO: { viaCode:'FRA', partner:'Lufthansa',          partnerNo:'LH 590', dur:490, note:'Codeshare connection on Lufthansa', acName:'Boeing 787-9' },
+  GRU: { viaCode:'FRA', partner:'Lufthansa',          partnerNo:'LH 506', dur:755, note:'Codeshare connection on Lufthansa', acName:'Boeing 777-300ER' },
+  SCL: { viaCode:'PTY', partner:'Copa Airlines',      partnerNo:'CM 195', dur:395, note:'Codeshare connection on Copa Airlines', acName:'Boeing 737 MAX 9' },
+  EZE: { viaCode:'PTY', partner:'Copa Airlines',      partnerNo:'CM 213', dur:432, note:'Codeshare connection on Copa Airlines', acName:'Boeing 737 MAX 9' },
+  GIG: { viaCode:'PTY', partner:'Copa Airlines',      partnerNo:'CM 231', dur:434, note:'Codeshare connection on Copa Airlines', acName:'Boeing 737-800' },
+  BOG: { viaCode:'IAH', partner:'United Airlines',    partnerNo:'UA 205', dur:295, note:'Codeshare connection on United Airlines', acName:'Boeing 737-900' },
+  LIM: { viaCode:'IAH', partner:'United Airlines',    partnerNo:'UA 843', dur:395, note:'Codeshare connection on United Airlines', acName:'Boeing 787-8' },
+  NAN: { viaCode:'AKL', partner:'Air New Zealand',    partnerNo:'NZ 851', dur:185, note:'Codeshare connection on Air New Zealand', acName:'Airbus A321neo' },
+  PPT: { viaCode:'AKL', partner:'Air New Zealand',    partnerNo:'NZ 71',  dur:300, note:'Codeshare connection on Air New Zealand', acName:'Boeing 787-9' },
 };
 
 // ── Partner own-flight operations ─────────────────────────────────────────────
@@ -238,21 +263,21 @@ const PARTNER_OPS = {
 // ── KIX Schedule (ANA-operated) ───────────────────────────────────────────────
 const KIX_SCHEDULE = {
   // ── Domestic ─────────────────────────────────────────────────────────────
-  OKA: { ac:[6,6,7,7,7], outDeps:[m(7,30),m(9,30),m(11,30),m(14,0),m(17,30)], inArrs:[m(8,40),m(10,40),m(12,40),m(15,10),m(18,40)], dur:100, nos:['NH 9051','NH 9053','NH 9055','NH 9057','NH 9059'], partner:null, prices:{e:20000,pe:null,bc:40000,fc:null}, domestic:true },
-  CTS: { ac:[6,6,7,7,7,7], outDeps:[m(7,0),m(9,30),m(12,0),m(14,0),m(16,30),m(19,0)], inArrs:[m(9,0),m(11,30),m(14,0),m(16,0),m(18,30),m(21,0)], dur:120, nos:['NH 9401','NH 9403','NH 9405','NH 9407','NH 9409','NH 9411'], partner:null, prices:{e:22000,pe:null,bc:44000,fc:null}, domestic:true },
+  OKA: { ac:[6,6,7,7,7], outDeps:[m(7,30),m(9,30),m(11,30),m(14,0),m(17,30)], inArrs:[m(8,40),m(10,40),m(12,40),m(15,10),m(18,40)], dur:100, nos:['NH 9051','NH 9053','NH 9055','NH 9057','NH 9059'], partner:null, prices:{e:20000,pe:null,bc:40000,fc:56000}, domestic:true },
+  CTS: { ac:[6,6,7,7,7,7], outDeps:[m(7,0),m(9,30),m(12,0),m(14,0),m(16,30),m(19,0)], inArrs:[m(9,0),m(11,30),m(14,0),m(16,0),m(18,30),m(21,0)], dur:120, nos:['NH 9401','NH 9403','NH 9405','NH 9407','NH 9409','NH 9411'], partner:null, prices:{e:22000,pe:null,bc:44000,fc:60000}, domestic:true },
   FUK: { ac:[7,7,7], outDeps:[m(7, 0),m(11,30),m(17, 0)], inArrs:[m(10,5),m(14,35),m(20,35)], dur:65,  nos:['NH 9101','NH 9103','NH 9105'], partner:null, prices:{e:12000,pe:null,bc:24000,fc:null}, domestic:true },
   // ── North America daily ───────────────────────────────────────────────────
-  JFK: { ac:[2], outDeps:[m(16, 0)], inArrs:[m(20,50)], dur:820, nos:['NH 8009'], partner:'United',           partnerNo:'UA 80',   prices:{e:148000,pe:295000,bc:748000,fc:1850000} },
-  LAX: { ac:[2], outDeps:[m(16,30)], inArrs:[m(14,40)], dur:620, nos:['NH 8005'], partner:'United',           partnerNo:'UA 8837', prices:{e:135000,pe:268000,bc:698000,fc:1720000} },
+  JFK: { ac:[9], outDeps:[m(16, 0)], inArrs:[m(20,50)], dur:820, nos:['NH 8009'], partner:'United',           partnerNo:'UA 80',   prices:{e:148000,pe:295000,bc:748000,fc:1850000} },
+  LAX: { ac:[9], outDeps:[m(16,30)], inArrs:[m(14,40)], dur:620, nos:['NH 8005'], partner:'United',           partnerNo:'UA 8837', prices:{e:135000,pe:268000,bc:698000,fc:1720000} },
   SFO: { ac:[3], outDeps:[m(16,30)], inArrs:[m(14, 0)], dur:600, nos:['NH 8001'], partner:'United',           partnerNo:'UA 8037', prices:{e:135000,pe:268000,bc:698000,fc:null} },
   ORD: { ac:[3], outDeps:[m(15,30)], inArrs:[m(18,20)], dur:760, nos:['NH 8101'], partner:'United',           partnerNo:'UA 8881', prices:{e:128000,pe:255000,bc:648000,fc:null} },
   SEA: { ac:[3], outDeps:[m(16, 0)], inArrs:[m(12,30)], dur:570, nos:['NH 8107'], partner:'United',           partnerNo:'UA 8849', prices:{e:128000,pe:255000,bc:648000,fc:null} },
   YVR: { ac:[3], outDeps:[m(16, 0)], inArrs:[m(13,30)], dur:600, nos:['NH 8117'], partner:'Air Canada',       partnerNo:'AC 85',   prices:{e:125000,pe:248000,bc:628000,fc:null} },
   YYZ: { ac:[3], outDeps:[m(15,30)], inArrs:[m(19,20)], dur:790, nos:['NH 8119'], partner:'Air Canada',       partnerNo:'AC 83',   prices:{e:138000,pe:275000,bc:698000,fc:null} },
-  MEX: { ac:[3,3,3,3], outDeps:[m(7,30),m(11,30),m(15,30),m(21,0)], inArrs:[m(7,0),m(11,30),m(17,30),m(22,20)], dur:880, nos:['NH 8143','NH 8145','NH 8147','NH 8149'], partner:null, prices:{e:138000,pe:275000,bc:698000,fc:null} },
+  MEX: { ac:[3], outDeps:[m(15,30)], inArrs:[m(17,30)], dur:880, nos:['NH 8147'], partner:null, prices:{e:138000,pe:275000,bc:698000,fc:null}, days:[1,3,5,0] },
   // ── Europe daily ──────────────────────────────────────────────────────────
-  LHR: { ac:[2], outDeps:[m(13, 0)], inArrs:[m(16,50)], dur:790, nos:['NH 8201'], partner:null,                                    prices:{e:152000,pe:305000,bc:768000,fc:1920000} },
-  CDG: { ac:[2], outDeps:[m(13, 0)], inArrs:[m(17,50)], dur:820, nos:['NH 8203'], partner:null,                                    prices:{e:152000,pe:305000,bc:768000,fc:1920000} },
+  LHR: { ac:[9], outDeps:[m(13, 0)], inArrs:[m(16,50)], dur:790, nos:['NH 8201'], partner:null,                                    prices:{e:152000,pe:305000,bc:768000,fc:1920000} },
+  CDG: { ac:[9], outDeps:[m(13, 0)], inArrs:[m(17,50)], dur:820, nos:['NH 8203'], partner:null,                                    prices:{e:152000,pe:305000,bc:768000,fc:1920000} },
   FRA: { ac:[3], outDeps:[m(13,30)], inArrs:[m(17, 0)], dur:780, nos:['NH 8205'], partner:'Lufthansa',        partnerNo:'LH 8715', prices:{e:148000,pe:295000,bc:748000,fc:null} },
   IST: { ac:[3], outDeps:[m(13,30)], inArrs:[m(15, 0)], dur:720, nos:['NH 8217'], partner:'Turkish Airlines', partnerNo:'TK 851',  prices:{e:145000,pe:290000,bc:738000,fc:null} },
   // ── Europe 4–5x weekly ────────────────────────────────────────────────────
@@ -267,27 +292,28 @@ const KIX_SCHEDULE = {
   // ── Oceania daily ─────────────────────────────────────────────────────────
   SYD: { ac:[3], outDeps:[m(18, 0)], inArrs:[m(14,50)], dur:580, nos:['NH 8891'], partner:'Air New Zealand', partnerNo:'NZ 891',  prices:{e:108000,pe:215000,bc:548000,fc:null} },
   // ── Korea ─────────────────────────────────────────────────────────────────
-  ICN: { ac:[4,5,5], outDeps:[m(8,0),m(14,0),m(19,0)], inArrs:[m(12,5),m(18,5),m(23,5)], dur:100, nos:['NH 8401','NH 8403','NH 8405'], partner:null,                                    prices:{e:28000, pe:55000, bc:168000,fc:null} },
+  ICN: { ac:[10,5,5], outDeps:[m(8,0),m(14,0),m(19,0)], inArrs:[m(12,5),m(18,5),m(23,5)], dur:100, nos:['NH 8401','NH 8403','NH 8405'], partner:null,                                    prices:{e:28000, pe:55000, bc:168000,fc:null} },
   GMP: { ac:[5],   outDeps:[m(11,0)],           inArrs:[m(15, 5)],            dur:100, nos:['NH 8411'],           partner:null,                                    prices:{e:28000, pe:55000, bc:168000,fc:null} },
   PUS: { ac:[5],   outDeps:[m(10,0)],           inArrs:[m(12,20)],            dur:55,  nos:['NH 8415'],           partner:null,                                    prices:{e:18000, pe:35000, bc:108000,fc:null} },
   // ── Taiwan ────────────────────────────────────────────────────────────────
-  TPE: { ac:[4,5], outDeps:[m(8,30),m(14,0)],   inArrs:[m(14,15),m(19,45)],  dur:150, nos:['NH 8421','NH 8423'], partner:'EVA Air',     partnerNo:'BR 117',        prices:{e:35000, pe:68000, bc:205000,fc:null} },
+  TPE: { ac:[10,5], outDeps:[m(8,30),m(14,0)],   inArrs:[m(14,15),m(19,45)],  dur:150, nos:['NH 8421','NH 8423'], partner:'EVA Air',     partnerNo:'BR 117',        prices:{e:35000, pe:68000, bc:205000,fc:null} },
   TSA: { ac:[5],   outDeps:[m(12, 0)],          inArrs:[m(17,45)],            dur:150, nos:['NH 8431'],           partner:null,                                    prices:{e:35000, pe:68000, bc:205000,fc:null} },
   // ── China ─────────────────────────────────────────────────────────────────
   PEK: { ac:[5,5], outDeps:[m(7,30),m(13, 0)], inArrs:[m(14,15),m(19,45)],  dur:180, nos:['NH 8451','NH 8453'], partner:'Air China',   partnerNo:'CA 419',        prices:{e:38000, pe:75000, bc:225000,fc:null} },
   PVG: { ac:[5,5], outDeps:[m(8, 0),m(14, 0)], inArrs:[m(13,45),m(19,45)],  dur:150, nos:['NH 8461','NH 8463'], partner:'Air China',   partnerNo:'CA 8935',       prices:{e:35000, pe:68000, bc:205000,fc:null} },
-  HKG: { ac:[4,5,5],outDeps:[m(7,30),m(11,30),m(16,0)],inArrs:[m(14,15),m(18,15),m(22,45)],dur:180,nos:['NH 8441','NH 8443','NH 8445'],partner:null,             prices:{e:42000, pe:82000, bc:248000,fc:null} },
+  HKG: { ac:[10,5,5],outDeps:[m(7,30),m(11,30),m(16,0)],inArrs:[m(14,15),m(18,15),m(22,45)],dur:180,nos:['NH 8441','NH 8443','NH 8445'],partner:null,             prices:{e:42000, pe:82000, bc:248000,fc:null} },
   // ── Southeast Asia ────────────────────────────────────────────────────────
-  SIN: { ac:[4,5], outDeps:[m(8,30),m(21, 0)], inArrs:[m(22,30),m(11, 0)],  dur:390, nos:['NH 8471','NH 8473'], partner:'Singapore Airlines',partnerNo:'SQ 611',  prices:{e:52000,pe:102000,bc:308000,fc:null} },
-  BKK: { ac:[4,5], outDeps:[m(8,30),m(19,30)], inArrs:[m(20,30),m( 7,30)],  dur:330, nos:['NH 8481','NH 8483'], partner:'Thai Airways', partnerNo:'TG 8640',      prices:{e:45000,pe:88000, bc:265000,fc:null} },
-  MNL: { ac:[4],   outDeps:[m(9, 0)],           inArrs:[m(18, 0)],            dur:240, nos:['NH 8491'],           partner:null,                                    prices:{e:40000, pe:78000, bc:238000,fc:null} },
+  SIN: { ac:[10,5], outDeps:[m(8,30),m(21, 0)], inArrs:[m(22,30),m(11, 0)],  dur:390, nos:['NH 8471','NH 8473'], partner:'Singapore Airlines',partnerNo:'SQ 611',  prices:{e:52000,pe:102000,bc:308000,fc:null} },
+  BKK: { ac:[10,5], outDeps:[m(8,30),m(19,30)], inArrs:[m(20,30),m( 7,30)],  dur:330, nos:['NH 8481','NH 8483'], partner:'Thai Airways', partnerNo:'TG 8640',      prices:{e:45000,pe:88000, bc:265000,fc:null} },
+  MNL: { ac:[10],   outDeps:[m(9, 0)],           inArrs:[m(18, 0)],            dur:240, nos:['NH 8491'],           partner:null,                                    prices:{e:40000, pe:78000, bc:238000,fc:null} },
   CEB: { ac:[5],   outDeps:[m(9,30)],           inArrs:[m(16,45)],            dur:195, nos:['NH 8495'],           partner:null,                                    prices:{e:40000, pe:78000, bc:238000,fc:null} },
-  KUL: { ac:[4],   outDeps:[m(9, 0)],           inArrs:[m(23, 0)],            dur:390, nos:['NH 8501'],           partner:null,                                    prices:{e:52000,pe:102000,bc:308000,fc:null} },
-  HAN: { ac:[4],   outDeps:[m(10,0)],           inArrs:[m(21, 0)],            dur:300, nos:['NH 8511'],           partner:null,                                    prices:{e:42000, pe:82000, bc:252000,fc:null} },
-  SGN: { ac:[4],   outDeps:[m(10,0)],           inArrs:[m(22, 0)],            dur:330, nos:['NH 8521'],           partner:null,                                    prices:{e:48000,pe:95000, bc:285000,fc:null} },
-  CGK: { ac:[4],   outDeps:[m(9, 0)],           inArrs:[m( 0, 0)],            dur:420, nos:['NH 8531'],           partner:null,                                    prices:{e:55000,pe:108000,bc:328000,fc:null} },
+  KUL: { ac:[10],   outDeps:[m(9, 0)],           inArrs:[m(23, 0)],            dur:390, nos:['NH 8501'],           partner:null,                                    prices:{e:52000,pe:102000,bc:308000,fc:null} },
+  HAN: { ac:[10],   outDeps:[m(10,0)],           inArrs:[m(21, 0)],            dur:300, nos:['NH 8511'],           partner:null,                                    prices:{e:42000, pe:82000, bc:252000,fc:null} },
+  SGN: { ac:[10],   outDeps:[m(10,0)],           inArrs:[m(22, 0)],            dur:330, nos:['NH 8521'],           partner:null,                                    prices:{e:48000,pe:95000, bc:285000,fc:null} },
+  CGK: { ac:[10],   outDeps:[m(9, 0)],           inArrs:[m( 0, 0)],            dur:420, nos:['NH 8531'],           partner:null,                                    prices:{e:55000,pe:108000,bc:328000,fc:null} },
+  DPS: { ac:[5],   outDeps:[m(19,30)],          inArrs:[m(16, 0)],             dur:420, nos:['NH 8536'],           partner:null,                                    prices:{e:56000,pe:110000,bc:295000,fc:null}, days:[2,4,6,0] },
   // ── South Asia ────────────────────────────────────────────────────────────
-  DEL: { ac:[4],   outDeps:[m(21, 0)],          inArrs:[m(13, 0)],            dur:450, nos:['NH 8541'],           partner:'Air India',   partnerNo:'AI 9307',       prices:{e:62000,pe:122000,bc:375000,fc:null} },
+  DEL: { ac:[10],   outDeps:[m(21, 0)],          inArrs:[m(13, 0)],            dur:450, nos:['NH 8541'],           partner:'Air India',   partnerNo:'AI 9307',       prices:{e:62000,pe:122000,bc:375000,fc:null} },
   // ── Middle East ───────────────────────────────────────────────────────────
   DXB: { ac:[3],   outDeps:[m(23, 0)],          inArrs:[m(20, 0)],            dur:600, nos:['NH 8275'],           partner:null,                                    prices:{e:88000,pe:175000,bc:448000,fc:null}, days:[1,2,4,5,6] },
   // ── Pacific ───────────────────────────────────────────────────────────────
@@ -319,7 +345,7 @@ const NA_CODES = new Set([
 const ASIA_CODES = new Set([
   'PEK','PVG','HKG','ICN','GMP','SIN','TPE','TSA','BKK','MNL','CGK','KUL','SGN','HAN','DEL','BOM','BLR','HYD','GUM',
   'CAN','SZX','MFM','HGH','PUS','TSN','DAC','KHI','CTU','XIY','CEB','SUB',
-  'TAE','KWJ','CJU','HKT','KHH','RGN','KTM','MLE','CMB','ULN','PNH','VTE',
+  'TAE','KWJ','CJU','HKT','KHH','RGN','KTM','MLE','CMB','ULN','PNH','VTE','DPS',
 ]);
 const DOMESTIC_CODES = new Set(['OKA','FUK','ITM','NGO','CTS','KIX']);
 
@@ -347,7 +373,7 @@ const GATE_IN_TABLE = {
   SGN:80,HAN:81,DEL:82,BOM:83,BLR:84,HYD:85,GUM:86,
   CAN:87,SZX:88,MFM:89,HGH:90,PUS:70,TSN:71,DAC:72,KHI:73,CTU:74,XIY:75,
   CEB:76,SUB:77,TAE:78,KWJ:79,CJU:80,HKT:81,KHH:82,RGN:83,KTM:84,MLE:85,
-  CMB:86,ULN:87,PNH:88,VTE:89,
+  CMB:86,ULN:87,PNH:88,VTE:89,DPS:91,
   LHR:168,CDG:169,FRA:170,MUC:171,IST:172,SYD:173,HEL:174,BRU:175,ARN:176,
   MXP:168,WAW:169,VIE:170,ZRH:171,GVA:172,FCO:173,
   DOH:174,AUH:175,DXB:176,CAI:177,ADD:168,MEL:170,BNE:171,PER:172,AKL:173,CNS:174,
@@ -363,7 +389,7 @@ const GATE_OUT_TABLE = {
   SGN:80,HAN:81,DEL:82,BOM:83,BLR:84,HYD:85,GUM:86,
   CAN:87,SZX:88,MFM:89,HGH:90,PUS:70,TSN:71,DAC:72,KHI:73,CTU:74,XIY:75,
   CEB:76,SUB:77,TAE:78,KWJ:79,CJU:80,HKT:81,KHH:82,RGN:83,KTM:84,MLE:85,
-  CMB:86,ULN:87,PNH:88,VTE:89,
+  CMB:86,ULN:87,PNH:88,VTE:89,DPS:91,
   LHR:168,CDG:169,FRA:170,MUC:171,IST:172,SYD:173,HEL:174,BRU:175,ARN:176,
   MXP:168,WAW:169,VIE:170,ZRH:171,GVA:172,FCO:173,
   DOH:174,AUH:175,DXB:176,CAI:177,ADD:168,MEL:170,BNE:171,PER:172,AKL:173,CNS:174,
@@ -468,7 +494,7 @@ const WORLD_TERMINAL = {
   PER:'Terminal 1', AKL:'International Terminal', CNS:'Terminal 1',
   PEK:'Terminal 3', PVG:'Terminal 2', HKG:'Terminal 1', ICN:'Terminal 1', GMP:'International Terminal',
   SIN:'Terminal 1', TPE:'Terminal 2', BKK:'Suvarnabhumi Terminal', MNL:'Terminal 1',
-  CGK:'Terminal 3', KUL:'KLIA Main Terminal', SGN:'Terminal 2', HAN:'Terminal 2',
+  CGK:'Terminal 3', KUL:'KLIA Main Terminal', SGN:'Terminal 2', HAN:'Terminal 2', DPS:'International Terminal',
   DEL:'Terminal 3', BOM:'Terminal 2', BLR:'Terminal 2', HYD:'Terminal 1', GUM:'Main Terminal',
   CAN:'Terminal 2', SZX:'Terminal 3', MFM:'Main Terminal', HGH:'Terminal 3',
   PUS:'International Terminal', TSN:'Terminal 2', CTU:'Terminal T2', XIY:'Terminal 3',
@@ -491,6 +517,20 @@ function durStr(mins) {
 }
 function inboundNo(outNo) {
   return outNo.replace(/(\d+)$/, n => Number(n) + 1);
+}
+
+// ── Segment/layover model for the expanded itinerary view ─────────────────────
+// Every card gets a `segments` array (one entry per REAL flight leg, in order)
+// and a `layovers` array (one entry per stop BETWEEN legs, length = segments-1).
+// This replaces the old approach of merging a hub transit into an adjacent
+// segment's duration, which is what caused stops to be mislabeled (e.g. a KIX
+// transit reported as NRT) — every real stop now gets its own honest entry.
+function mkLeg(from, to, flightNo, operator, aircraft, cabin, depTime, depTerm, arrTime, arrTerm, duration, codeshare) {
+  return { from, to, flightNo, operator, aircraft, cabin, depTime, depTerm, arrTime, arrTerm, duration, codeshare: codeshare || null };
+}
+function mkStop(code, wait, hubLabel, detail, note, overnight) {
+  const ap = AIRPORTS[code];
+  return { code, label: ap ? `${ap.city} (${code})` : code, wait, hubLabel, detail, note: note || null, overnight: !!overnight };
 }
 
 // ── Price helpers ─────────────────────────────────────────────────────────────
@@ -517,6 +557,12 @@ function buildViaFromHub(destCode, via) {
     const ac          = s.ac[i] || s.ac[0];
     const plusDays    = Math.floor(destArrLocal / 1440);
     const hubCity = AIRPORTS[via.viaCode]?.city || via.viaCode;
+    const termOut   = `Tokyo Mega Hub (NRT) — ${nrtGateOut(via.viaCode)}`;
+    const termHub1  = `${hubCity} (${via.viaCode}) — International Terminal`;
+    const termHub2  = `${hubCity} (${via.viaCode}) — International Terminal`;
+    const termDest  = `${AIRPORTS[destCode]?.city || destCode} (${destCode}) — ${worldTerm(destCode)}`;
+    const transfer  = via.freedom ? `ANA through-service — same aircraft continues from ${hubCity}` : `Connect in ${hubCity} (${via.viaCode}) — ${via.note}`;
+    const seg2Operator = via.freedom ? 'ANA' : via.partner;
     results.push({
       tag: i === 0 ? 'recommended' : null, direct:false,
       operator: via.freedom ? 'ANA' : `ANA / ${via.partner}`,
@@ -526,14 +572,17 @@ function buildViaFromHub(destCode, via) {
       depLocal:toHHMM(nrtDep), arrHub:toHHMM(viaArrLocal), hubDep:toHHMM(viaDepLocal), arrDest:toHHMM(destArrLocal),
       seg1Time:durStr(s.dur), seg2Time:durStr(via.dur), transitTime:durStr(CONN), totalTime:durStr(totalDur),
       aircraft1:ACFT[ac].name, aircraft2:ACFT[ac].name, cabinOut:cabinStr(ac), cabinIn:cabinStr(ac),
-      termOut:`Tokyo Mega Hub (NRT) — ${nrtGateOut(via.viaCode)}`,
-      termHub1:`${hubCity} (${via.viaCode}) — International Terminal`,
-      termHub2:`${hubCity} (${via.viaCode}) — International Terminal`,
-      termDest:`${AIRPORTS[destCode]?.city || destCode} (${destCode}) — ${worldTerm(destCode)}`,
-      transfer: via.freedom ? `ANA through-service — same aircraft continues from ${hubCity}` : `Connect in ${hubCity} (${via.viaCode}) — ${via.note}`,
+      termOut, termHub1, termHub2, termDest,
+      transfer,
       mct: via.freedom ? `Aircraft turn at ${hubCity} — approx. ${CONN} min · No terminal change required` : `Min. connection time at ${hubCity}: 60 min  ·  Recommended: 90min+`,
       note: plusDays > 0 ? `+${plusDays} day${plusDays>1?'s':''}` : null,
       prices:s.prices,
+      segments: [
+        mkLeg('NRT', via.viaCode, s.nos[i], 'ANA', ACFT[ac].name, cabinStr(ac), toHHMM(nrtDep), termOut, toHHMM(viaArrLocal), termHub1, durStr(s.dur)),
+        mkLeg(via.viaCode, destCode, via.partnerNo, seg2Operator, via.freedom ? ACFT[ac].name : (via.acName || '—'), via.freedom ? cabinStr(ac) : 'Economy · Business', toHHMM(viaDepLocal), termHub2, toHHMM(destArrLocal), termDest, durStr(via.dur)),
+      ],
+      layovers: [ mkStop(via.viaCode, durStr(CONN), `${hubCity.toUpperCase()} (${via.viaCode})`, transfer,
+        via.freedom ? `Aircraft turn at ${hubCity} — no terminal change required` : `Min. connection time at ${hubCity}: 60 min · Recommended: 90min+`) ],
     });
   }
   return results.length > 0 ? results : null;
@@ -554,23 +603,37 @@ function buildViaToHub(fromCode, via) {
     const totalDur    = via.dur + CONN + s.dur;
     const ac          = s.ac[i] || s.ac[0];
     const hubCity2 = AIRPORTS[via.viaCode]?.city || via.viaCode;
+    const termOut  = `${AIRPORTS[fromCode]?.city || fromCode} (${fromCode}) — ${worldTerm(fromCode)}`;
+    const termHub1 = `${hubCity2} (${via.viaCode}) — International Terminal`;
+    const termHub2 = `${hubCity2} (${via.viaCode}) — International Terminal`;
+    const termDest = `Tokyo Mega Hub (NRT) — ${nrtGateIn(via.viaCode, false)}`;
+    const transfer = via.freedom ? `ANA through-service — same aircraft continues from ${hubCity2}` : `Connect in ${hubCity2} (${via.viaCode}) — ${via.note}`;
+    const seg1Operator = via.freedom ? 'ANA' : via.partner;
+    const seg1Flight = via.freedom ? inboundNo(via.partnerNo) : via.partnerNo;
     results.push({
       tag: i === 0 ? 'recommended' : null, direct:false,
       operator: via.freedom ? 'ANA' : `${via.partner} / ANA`,
       _seg1Label:`${fromCode} → ${via.viaCode}`, _seg2Label:`${via.viaCode} → NRT`,
       _hubLabel:`${(hubCity2).toUpperCase()} (${via.viaCode})`,
-      flightOut: via.freedom ? inboundNo(via.partnerNo) : via.partnerNo,
+      flightOut: seg1Flight,
       flightIn:inboundNo(s.nos[i]),
       depLocal:toHHMM(fromDepLocal), arrHub:toHHMM(viaArrLocal), hubDep:toHHMM(viaDepLocal), arrDest:toHHMM(nrtArr),
       seg1Time:durStr(via.dur), seg2Time:durStr(s.dur), transitTime:durStr(CONN), totalTime:durStr(totalDur),
       aircraft1:ACFT[ac].name, aircraft2:ACFT[ac].name, cabinOut:cabinStr(ac), cabinIn:cabinStr(ac),
-      termOut:`${AIRPORTS[fromCode]?.city || fromCode} (${fromCode}) — ${worldTerm(fromCode)}`,
-      termHub1:`${hubCity2} (${via.viaCode}) — International Terminal`,
-      termHub2:`${hubCity2} (${via.viaCode}) — International Terminal`,
-      termDest:`Tokyo Mega Hub (NRT) — ${nrtGateIn(via.viaCode, false)}`,
-      transfer: via.freedom ? `ANA through-service — same aircraft continues from ${hubCity2}` : `Connect in ${hubCity2} (${via.viaCode}) — ${via.note}`,
+      termOut, termHub1, termHub2, termDest,
+      transfer,
       mct: via.freedom ? `Aircraft turn at ${hubCity2} — approx. ${CONN} min · No terminal change required` : `Min. connection time at ${hubCity2}: 60 min  ·  Recommended: 90min+`,
       note:null, prices:s.prices,
+      // Raw (unformatted) minute-of-day values so a caller chaining a further
+      // onward leg (e.g. codeshare city → real ANA destination) can compute a
+      // real, feasible connection instead of guessing at a departure time.
+      _nrtArrRaw: nrtArr, _fromDepRaw: fromDepLocal,
+      segments: [
+        mkLeg(fromCode, via.viaCode, seg1Flight, seg1Operator, via.freedom ? ACFT[ac].name : (via.acName || '—'), via.freedom ? cabinStr(ac) : 'Economy · Business', toHHMM(fromDepLocal), termOut, toHHMM(viaArrLocal), termHub1, durStr(via.dur)),
+        mkLeg(via.viaCode, 'NRT', inboundNo(s.nos[i]), 'ANA', ACFT[ac].name, cabinStr(ac), toHHMM(viaDepLocal), termHub2, toHHMM(nrtArr), termDest, durStr(s.dur)),
+      ],
+      layovers: [ mkStop(via.viaCode, durStr(CONN), `${hubCity2.toUpperCase()} (${via.viaCode})`, transfer,
+        via.freedom ? `Aircraft turn at ${hubCity2} — no terminal change required` : `Min. connection time at ${hubCity2}: 60 min · Recommended: 90min+`) ],
     });
   }
   return results.length > 0 ? results : null;
@@ -591,19 +654,98 @@ function buildFlights(fromCode, toCode) {
     if (!s1 || !s2) return null;
     const cards = buildConnecting(fromCode, s1, viaTo.viaCode, s2, po2);
     if (cards) {
+      const viaCity = AIRPORTS[viaTo.viaCode]?.city || viaTo.viaCode;
+      const seg3Term = `${AIRPORTS[toCode]?.city || toCode} (${toCode}) — ${worldTerm(toCode)}`;
+      const tzVia = TZ[viaTo.viaCode] || 0, tzDest = TZ[toCode] || 0, tzFrom2 = TZ[fromCode] || 0;
+      const CONN = 75; // realistic minimum connection buffer for an interline transfer
       cards.forEach(c => {
+        // Real timing: this leg departs CONN minutes after the base card's
+        // actual arrival at viaCode — not an instant copy of that arrival time.
+        const viaArrRaw  = c._destArrRaw;
+        const viaDepRaw  = viaArrRaw + CONN;
+        const destArrRaw = viaDepRaw + viaTo.dur + (tzDest - tzVia) * 60;
+        const origDepUTC = c._origDepRaw - tzFrom2 * 60;
+        const destArrUTC = destArrRaw - tzDest * 60;
+        const plusDays   = Math.floor(destArrUTC / 1440) - Math.floor(origDepUTC / 1440);
+
         c._seg3Label    = `${viaTo.viaCode} → ${toCode}`;
         c._seg3Flight   = viaTo.partnerNo;
         c._seg3Operator = viaTo.partner;
         c._seg3Aircraft = viaTo.acName;
         c._seg3Duration = durStr(viaTo.dur);
         c._seg3Note     = viaTo.note;
-        c._seg3Term     = `${AIRPORTS[toCode]?.city || toCode} (${toCode}) — ${worldTerm(toCode)}`;
-        c.termDest = `${AIRPORTS[viaTo.viaCode]?.city} (${viaTo.viaCode}) → ${AIRPORTS[toCode]?.city || toCode} (${toCode}) via ${viaTo.partner}`;
-        c.note = (c.note && !c.note.startsWith('Onward') ? c.note + ' · ' : '') + `Connects ${viaTo.viaCode}→${toCode} on ${viaTo.partner}`;
+        c._seg3Term     = seg3Term;
+        c.termDest = `${viaCity} (${viaTo.viaCode}) → ${AIRPORTS[toCode]?.city || toCode} (${toCode}) via ${viaTo.partner}`;
+        c.note = plusDays > 0 ? `+${plusDays} day${plusDays > 1 ? 's' : ''}` : null;
+        const lastLeg = c.segments[c.segments.length - 1];
+        c.segments.push(mkLeg(viaTo.viaCode, toCode, viaTo.partnerNo, viaTo.partner, viaTo.acName || '—', 'Economy · Business',
+          toHHMM(viaDepRaw), lastLeg.arrTerm, toHHMM(destArrRaw), seg3Term, durStr(viaTo.dur)));
+        c.layovers.push(mkStop(viaTo.viaCode, durStr(CONN), `${viaCity.toUpperCase()} (${viaTo.viaCode})`,
+          `Connect in ${viaCity} (${viaTo.viaCode}) — ${viaTo.note}`, 'Minimum connection time: 75 min'));
       });
     }
     return cards;
+  }
+  // Origin is a codeshare-only city (e.g. Santiago) and destination is a real
+  // ANA destination that isn't NRT (e.g. Hong Kong) — chain the partner leg
+  // into NRT with buildViaToHub, then continue onward on ANA's own NRT→dest
+  // service, mirroring the viaTo case above. The onward leg has its own real
+  // schedule (possibly a single flight/day), so we have to actually check the
+  // connection is feasible — not just glue it onto every base card.
+  if (!isFromNRT && !isToNRT && viaFrom) {
+    const baseCards = buildViaToHub(fromCode, viaFrom);
+    if (!baseCards) return null;
+    const s3 = SCHEDULE[toCode], po3 = PARTNER_OPS[toCode];
+    if (!s3 && !po3) return null;
+    const onwardDeps = s3 ? s3.outDeps : po3.outDeps;
+    const onwardDur  = s3 ? s3.dur : (po3.dur || 600);
+    const onwardOperator = s3 ? 'ANA' : po3.name;
+    const tzDest = TZ[toCode] || 0, tzFrom2 = TZ[fromCode] || 0;
+    const MCT = 90, MAX_TRANSIT = 18 * 60;
+    const seg3Term = `${AIRPORTS[toCode]?.city || toCode} (${toCode}) — ${worldTerm(toCode)}`;
+    const feasible = [];
+    baseCards.forEach(c => {
+      // Find the best onward departure this arrival can actually catch —
+      // wraps to the next day if every same-day departure has already left.
+      let bestK = -1, bestWait = Infinity;
+      for (let k = 0; k < onwardDeps.length; k++) {
+        const wait = ((onwardDeps[k] - c._nrtArrRaw) % 1440 + 1440) % 1440;
+        if (wait >= MCT && wait <= MAX_TRANSIT && wait < bestWait) { bestWait = wait; bestK = k; }
+      }
+      if (bestK < 0) return; // no feasible connection for this arrival — drop it
+      const ac3     = s3 ? (s3.ac[bestK] || s3.ac[0]) : null;
+      const flightNo3 = s3 ? s3.nos[bestK] : po3.nos[bestK];
+      const acName3 = s3 ? ACFT[ac3].name : po3.acName;
+      const cabin3  = s3 ? cabinStr(ac3) : 'Economy · Business';
+      const depMin  = onwardDeps[bestK];
+      const destArrRaw = depMin + onwardDur + (tzDest - 9) * 60;
+      const origDepUTC = c._fromDepRaw - tzFrom2 * 60;
+      const destArrUTC = destArrRaw - tzDest * 60;
+      const plusDays   = Math.floor(destArrUTC / 1440) - Math.floor(origDepUTC / 1440);
+      const isOvernight = bestWait > 8 * 60;
+
+      c._seg3Label    = `NRT → ${toCode}`;
+      c._seg3Flight   = flightNo3;
+      c._seg3Operator = onwardOperator;
+      c._seg3Aircraft = acName3;
+      c._seg3Duration = durStr(onwardDur);
+      c._seg3Note     = 'Continue onward from Tokyo Mega Hub';
+      c._seg3Term     = seg3Term;
+      c.termDest = `Tokyo Mega Hub (NRT) → ${AIRPORTS[toCode]?.city || toCode} (${toCode}) via ${onwardOperator}`;
+      c.note = isOvernight ? 'Overnight at Tokyo' : (plusDays > 0 ? `+${plusDays} day${plusDays > 1 ? 's' : ''}` : null);
+      const lastLeg = c.segments[c.segments.length - 1];
+      c.segments.push(mkLeg('NRT', toCode, flightNo3, onwardOperator, acName3, cabin3,
+        toHHMM(depMin), lastLeg.arrTerm, toHHMM(destArrRaw), seg3Term, durStr(onwardDur)));
+      c.layovers.push(mkStop('NRT', durStr(bestWait), 'TOKYO HUB',
+        `Connect at Tokyo Mega Hub (NRT) to the onward flight to ${AIRPORTS[toCode]?.city || toCode}`,
+        isOvernight ? 'Long layover — consider an airport hotel' : 'Domestic/international transfer as required', isOvernight));
+      feasible.push({ card: c, wait: bestWait });
+    });
+    if (!feasible.length) return null;
+    feasible.sort((a, b) => a.wait - b.wait);
+    const results = feasible.map(f => f.card);
+    results.forEach((c, i) => { c.tag = i === 0 ? 'recommended' : null; });
+    return results;
   }
   if (isFromNRT || isToNRT) {
     const code = isFromNRT ? toCode : fromCode;
@@ -683,7 +825,7 @@ function buildFlights(fromCode, toCode) {
 function buildDirect(code, s, outbound, po) {
   const tz = TZ[code] || 0;
   const results = [];
-  function makeDirectCard(dep, dur, flightNo, acName, prices, isPartner, pName) {
+  function makeDirectCard(dep, dur, flightNo, acName, cabin, prices, isPartner, pName) {
     let depLocal, arrLocal, plusDays = 0;
     if (outbound) {
       const rawArr = dep + dur + (tz - 9) * 60;
@@ -692,29 +834,39 @@ function buildDirect(code, s, outbound, po) {
       const rawDep = dep - dur + (tz - 9) * 60;
       depLocal = toHHMM(rawDep); arrLocal = toHHMM(dep); plusDays = Math.floor((dur - (tz - 9) * 60) / 1440);
     }
+    const termOut = outbound ? 'Tokyo Mega Hub (NRT) — '+nrtGateOut(code) : `${AIRPORTS[code]?.city||code} (${code}) — ${worldTerm(code)}`;
+    const termDest = outbound ? `${AIRPORTS[code]?.city||code} (${code}) — ${worldTerm(code)}` : 'Tokyo Mega Hub (NRT)';
+    const operator = isPartner ? pName : 'ANA';
     return {
       tag: isPartner ? 'partner' : null, _partner: isPartner ? pName : null, direct:true,
-      operator: isPartner ? pName : 'ANA', flightOut:flightNo, flightIn:'—',
+      operator, flightOut:flightNo, flightIn:'—',
       depLocal, arrHub:toHHMM(dep), hubDep:outbound ? toHHMM(dep) : '—',
       arrDest:arrLocal, seg1Time:outbound?'—':durStr(dur), seg2Time:outbound?durStr(dur):'—',
       transitTime:'—', totalTime:durStr(dur), aircraft1:acName, aircraft2:acName,
-      cabinOut:'Business · Economy', cabinIn:'Business · Economy',
-      termOut: outbound ? 'Tokyo Mega Hub (NRT) — '+nrtGateOut(code) : `${AIRPORTS[code]?.city||code} (${code}) — ${worldTerm(code)}`,
+      cabinOut:cabin, cabinIn:cabin,
+      termOut,
       termHub1: outbound ? 'Tokyo Mega Hub (NRT) — '+nrtGateOut(code) : 'Tokyo Mega Hub (NRT) — '+nrtGateIn(code, isPartner),
       termHub2: outbound ? 'Tokyo Mega Hub (NRT) — '+nrtGateOut(code) : '—',
-      termDest: outbound ? `${AIRPORTS[code]?.city||code} (${code}) — ${worldTerm(code)}` : 'Tokyo Mega Hub (NRT)',
+      termDest,
       transfer:'Direct service — no transfer required', mct:'Direct flight',
       note: plusDays > 0 ? `+${plusDays} day${plusDays>1?'s':''}` : null, prices,
+      segments: [ outbound
+        ? mkLeg('NRT', code, flightNo, operator, acName, cabin, depLocal, termOut, arrLocal, termDest, durStr(dur))
+        : mkLeg(code, 'NRT', flightNo, operator, acName, cabin, depLocal, termOut, arrLocal, termDest, durStr(dur))
+      ],
+      layovers: [],
     };
   }
   if (s) {
     const count = Math.min(s.outDeps.length, 3);
     for (let i = 0; i < count; i++) {
       const ac = s.ac[i] || s.ac[0];
+      const cabin = cabinStr(ac);
+      const prices = {...s.prices};
+      if (!ACFT[ac].hasPe) prices.pe = null;
+      if (!ACFT[ac].hasFc) prices.fc = null;
       const card = makeDirectCard(outbound ? s.outDeps[i] : s.inArrs[i], s.dur,
-        outbound ? s.nos[i] : inboundNo(s.nos[i]), ACFT[ac].name, s.prices, false, null);
-      card.cabinOut = cabinStr(ac); card.cabinIn = cabinStr(ac);
-      if (!ACFT[ac].hasPe) card.prices = {...card.prices, pe: null};
+        outbound ? s.nos[i] : inboundNo(s.nos[i]), ACFT[ac].name, cabin, prices, false, null);
       if (i === 0) card.tag = 'recommended';
       results.push(card);
     }
@@ -725,7 +877,7 @@ function buildDirect(code, s, outbound, po) {
     const nos  = outbound ? po.nos : po.nos.map(inboundNo);
     const prices = po.prices ?? (s ? s.prices : {e:null,pe:null,bc:null,fc:null});
     for (let i = 0; i < deps.length; i++)
-      results.push(makeDirectCard(deps[i], dur, nos[i], po.acName, prices, true, po.name));
+      results.push(makeDirectCard(deps[i], dur, nos[i], po.acName, 'Business · Economy', prices, true, po.name));
   }
   return results.length > 0 ? results : null;
 }
@@ -738,7 +890,7 @@ function buildKixDirect(code, s, outbound, po) {
   const KIX_TERM = isDomestic
     ? 'Osaka Kansai Hub (KIX) — Domestic Terminal'
     : 'Osaka Kansai Hub (KIX) — International Terminal';
-  function makeKixCard(dep, dur, flightNo, acName, prices, isPartner, pName) {
+  function makeKixCard(dep, dur, flightNo, acName, cabin, prices, isPartner, pName) {
     let depLocal, arrLocal, plusDays = 0;
     if (outbound) {
       const rawArr = dep + dur + (tz - 9) * 60;
@@ -747,28 +899,38 @@ function buildKixDirect(code, s, outbound, po) {
       const rawDep = dep - dur + (tz - 9) * 60;
       depLocal = toHHMM(rawDep); arrLocal = toHHMM(dep); plusDays = Math.floor((dur - (tz - 9) * 60) / 1440);
     }
+    const termOut = outbound ? KIX_TERM : `${AIRPORTS[code]?.city||code} (${code}) — ${worldTerm(code)}`;
+    const termDest = outbound ? `${AIRPORTS[code]?.city||code} (${code}) — ${worldTerm(code)}` : KIX_TERM;
+    const operator = isPartner ? pName : 'ANA';
     return {
       tag: isPartner ? 'partner' : null, _partner: isPartner ? pName : null, direct:true,
-      operator: isPartner ? pName : 'ANA', flightOut:flightNo, flightIn:'—',
+      operator, flightOut:flightNo, flightIn:'—',
       depLocal, arrHub:toHHMM(dep), hubDep:outbound ? toHHMM(dep) : '—',
       arrDest:arrLocal, seg1Time:outbound?'—':durStr(dur), seg2Time:outbound?durStr(dur):'—',
       transitTime:'—', totalTime:durStr(dur), aircraft1:acName, aircraft2:acName,
-      cabinOut:'Business · Economy', cabinIn:'Business · Economy',
-      termOut: outbound ? KIX_TERM : `${AIRPORTS[code]?.city||code} (${code}) — ${worldTerm(code)}`,
+      cabinOut:cabin, cabinIn:cabin,
+      termOut,
       termHub1: KIX_TERM, termHub2: outbound ? KIX_TERM : '—',
-      termDest: outbound ? `${AIRPORTS[code]?.city||code} (${code}) — ${worldTerm(code)}` : KIX_TERM,
+      termDest,
       transfer:'Direct service — no transfer required', mct:'Direct flight',
       note: plusDays > 0 ? `+${plusDays} day${plusDays>1?'s':''}` : null, prices,
+      segments: [ outbound
+        ? mkLeg('KIX', code, flightNo, operator, acName, cabin, depLocal, termOut, arrLocal, termDest, durStr(dur))
+        : mkLeg(code, 'KIX', flightNo, operator, acName, cabin, depLocal, termOut, arrLocal, termDest, durStr(dur))
+      ],
+      layovers: [],
     };
   }
   if (s) {
     const count = Math.min(s.outDeps.length, 3);
     for (let i = 0; i < count; i++) {
       const ac = s.ac[i] || s.ac[0];
+      const cabin = cabinStr(ac);
+      const prices = {...s.prices};
+      if (!ACFT[ac].hasPe) prices.pe = null;
+      if (!ACFT[ac].hasFc) prices.fc = null;
       const card = makeKixCard(outbound ? s.outDeps[i] : s.inArrs[i], s.dur,
-        outbound ? s.nos[i] : inboundNo(s.nos[i]), ACFT[ac].name, s.prices, false, null);
-      card.cabinOut = cabinStr(ac); card.cabinIn = cabinStr(ac);
-      if (!ACFT[ac].hasPe) card.prices = {...card.prices, pe: null};
+        outbound ? s.nos[i] : inboundNo(s.nos[i]), ACFT[ac].name, cabin, prices, false, null);
       if (i === 0) card.tag = 'recommended';
       results.push(card);
     }
@@ -779,7 +941,7 @@ function buildKixDirect(code, s, outbound, po) {
     const nos  = outbound ? po.nos : po.nos.map(inboundNo);
     const prices = po.prices ?? (s ? s.prices : {e:null,pe:null,bc:null,fc:null});
     for (let i = 0; i < deps.length; i++)
-      results.push(makeKixCard(deps[i], dur, nos[i], po.acName, prices, true, po.name));
+      results.push(makeKixCard(deps[i], dur, nos[i], po.acName, 'Business · Economy', prices, true, po.name));
   }
   return results.length > 0 ? results : null;
 }
@@ -821,10 +983,17 @@ function buildKixConnecting(fromCode, s1kix, toCode, s2kix) {
     const p = connectPrices(s1kix.prices, s2kix.prices);
     if (ac1 && (!ACFT[ac1].hasPe || !ACFT[ac2].hasPe)) p.pe = null;
     if (!ac1) p.pe = null;
+    if ((ac1 && !ACFT[ac1].hasFc) || !ACFT[ac2].hasFc) p.fc = null;
+    const flightOut1 = s1kix.nos ? (s1kix.nos[bestI] ? inboundNo(s1kix.nos[bestI]) : '—') : (s1kix.partnerNo || '—');
+    const seg1Operator = s1kix._partner || 'ANA';
+    const termOut = `${AIRPORTS[fromCode]?.city||fromCode} (${fromCode}) — ${worldTerm(fromCode)}`;
+    const termHub1 = isDomFrom ? kixDomTerm : kixIntlTerm;
+    const termDest = `${AIRPORTS[toCode]?.city||toCode} (${toCode}) — ${worldTerm(toCode)}`;
+    const mct = `${MCT} min minimum connection time at Osaka Hub`;
     options.push({
       tag: 'kix',
       _kixHub: true, _transit: bestTransit, direct: false, operator: 'ANA',
-      flightOut: s1kix.nos ? (s1kix.nos[bestI] ? inboundNo(s1kix.nos[bestI]) : '—') : (s1kix.partnerNo || '—'),
+      flightOut: flightOut1,
       flightIn: s2kix.nos[j],
       depLocal: toHHMM(rawOrigDep), arrHub: toHHMM(kixArr),
       hubDep: toHHMM(kixDep), arrDest: toHHMM(rawDestArr),
@@ -832,17 +1001,18 @@ function buildKixConnecting(fromCode, s1kix, toCode, s2kix) {
       transitTime: durStr(bestTransit), totalTime: durStr(s1kix.dur + bestTransit + s2kix.dur),
       aircraft1: ac1Name, aircraft2: ACFT[ac2].name,
       cabinOut: cabin1, cabinIn: cabinStr(ac2),
-      termOut: `${AIRPORTS[fromCode]?.city||fromCode} (${fromCode}) — ${worldTerm(fromCode)}`,
-      termHub1: isDomFrom ? kixDomTerm : kixIntlTerm,
-      termHub2: kixIntlTerm,
-      termDest: `${AIRPORTS[toCode]?.city||toCode} (${toCode}) — ${worldTerm(toCode)}`,
-      transfer,
-      mct: `${MCT} min minimum connection time at Osaka Hub`,
+      termOut, termHub1, termHub2: kixIntlTerm, termDest,
+      transfer, mct,
       note: plusDays > 0 ? `+${plusDays} day${plusDays > 1 ? 's' : ''}` : null,
       _seg1Label: `${fromCode} → KIX`,
       _seg2Label: `KIX → ${toCode}`,
       _hubLabel: 'OSAKA HUB',
       prices: p,
+      segments: [
+        mkLeg(fromCode, 'KIX', flightOut1, seg1Operator, ac1Name, cabin1, toHHMM(rawOrigDep), termOut, toHHMM(kixArr), termHub1, durStr(s1kix.dur)),
+        mkLeg('KIX', toCode, s2kix.nos[j], 'ANA', ACFT[ac2].name, cabinStr(ac2), toHHMM(kixDep), kixIntlTerm, toHHMM(rawDestArr), termDest, durStr(s2kix.dur)),
+      ],
+      layovers: [ mkStop('KIX', durStr(bestTransit), 'OSAKA HUB', transfer, mct) ],
     });
   }
   return options.length > 0 ? options : null;
@@ -895,10 +1065,28 @@ function buildKixViaHub(fromCode, s1, toCode, s2kix) {
     const plusDays = Math.floor(destArrLocalAbs / 1440) - Math.floor(origDepUTC / 1440);
     const p = connectPrices(s1.prices, s2kix.prices);
     if (!ACFT[ac1].hasPe || !ACFT[ac2].hasPe) p.pe = null;
+    if (!ACFT[ac1].hasFc || !ACFT[ac2].hasFc) p.fc = null;
+
+    // Real stops: fromCode→NRT (int'l arrival), NRT→KIX (domestic shuttle),
+    // KIX→toCode (int'l departure) — three genuine legs, two genuine layovers.
+    const acShuttle = shuttle.ac ? (shuttle.ac[si] || shuttle.ac[0]) : null;
+    const shuttleAcName = acShuttle ? ACFT[acShuttle].name : (shuttle.acName || 'Boeing 787-9');
+    const shuttleCabin  = acShuttle ? cabinStr(acShuttle) : 'Business · Economy';
+    const isNrtOvernight = bestCombo.nrtWait > 8 * 60;
+    const termOut    = `${AIRPORTS[fromCode]?.city||fromCode} (${fromCode}) — ${worldTerm(fromCode)}`;
+    const termNrtArr = `Tokyo Mega Hub (NRT) — ${nrtGateIn(fromCode, false)}`;
+    const termNrtDep = `Tokyo Mega Hub (NRT) — ${nrtGateOut('KIX')}`;
+    const termKixArr = 'Osaka Kansai Hub (KIX) — Domestic Terminal';
+    const termKixDep = 'Osaka Kansai Hub (KIX) — International Terminal';
+    const termDest   = `${AIRPORTS[toCode]?.city||toCode} (${toCode}) — ${worldTerm(toCode)}`;
+    const nrtTransfer = isNrtOvernight
+      ? `Overnight connection at Tokyo Hub — Airport hotel from ¥10,000/night · then domestic transfer to Osaka Hub (KIX)`
+      : `Domestic transfer at Tokyo Hub (NRT) to the Osaka Hub (KIX) shuttle`;
+    const kixTransfer = 'Kansai International Airport — Domestic → International Terminal · allow 90 min for customs';
 
     options.push({
       tag: 'kix',
-      _kixHub: true, _kixViaNrt: true, _nrtTransit: durStr(bestCombo.nrtWait),
+      _kixHub: true, _kixViaNrt: true, _nrtTransit: durStr(bestCombo.nrtWait), _stopCount: 2,
       direct: false, operator: 'ANA',
       flightOut: s1.nos[ni] ? inboundNo(s1.nos[ni]) : '—',
       flightIn: s2kix.nos[k],
@@ -909,17 +1097,26 @@ function buildKixViaHub(fromCode, s1, toCode, s2kix) {
       totalTime: durStr(seg1Dur + bestCombo.kixWait + s2kix.dur),
       aircraft1: ACFT[ac1].name, aircraft2: ACFT[ac2].name,
       cabinOut: cabinStr(ac1), cabinIn: cabinStr(ac2),
-      termOut: `${AIRPORTS[fromCode]?.city||fromCode} (${fromCode}) — ${worldTerm(fromCode)}`,
-      termHub1: 'Osaka Kansai Hub (KIX) — International Terminal',
-      termHub2: 'Osaka Kansai Hub (KIX) — International Terminal',
-      termDest: `${AIRPORTS[toCode]?.city||toCode} (${toCode}) — ${worldTerm(toCode)}`,
-      transfer: `Via Tokyo Hub (NRT) — ${durStr(bestCombo.nrtWait)} NRT overnight transit · then ANA shuttle to Osaka Hub (KIX)`,
+      termOut,
+      termHub1: termKixDep,
+      termHub2: termKixDep,
+      termDest,
+      transfer: `Via Tokyo Hub (NRT) — ${durStr(bestCombo.nrtWait)} transit · then ANA shuttle to Osaka Hub (KIX)`,
       mct: '90 min minimum connection time at each hub',
       note: plusDays > 0 ? `+${plusDays} day${plusDays > 1 ? 's' : ''}` : null,
       _seg1Label: `${fromCode} → NRT → KIX`,
       _seg2Label: `KIX → ${toCode}`,
       _hubLabel: 'OSAKA HUB',
       prices: p,
+      segments: [
+        mkLeg(fromCode, 'NRT', s1.nos[ni] ? inboundNo(s1.nos[ni]) : '—', 'ANA', ACFT[ac1].name, cabinStr(ac1), toHHMM(rawOrigDep), termOut, toHHMM(nrtArr), termNrtArr, durStr(s1.dur)),
+        mkLeg('NRT', 'KIX', shuttle.nos[si], 'ANA', shuttleAcName, shuttleCabin, toHHMM(shuttleDep), termNrtDep, toHHMM(kixShuttleArr), termKixArr, durStr(shuttle.dur)),
+        mkLeg('KIX', toCode, s2kix.nos[k], 'ANA', ACFT[ac2].name, cabinStr(ac2), toHHMM(kixDep), termKixDep, toHHMM(rawDestArr), termDest, durStr(s2kix.dur)),
+      ],
+      layovers: [
+        mkStop('NRT', durStr(bestCombo.nrtWait), 'TOKYO HUB', nrtTransfer, 'Domestic transfer — no customs re-check needed', isNrtOvernight),
+        mkStop('KIX', durStr(bestCombo.kixWait), 'OSAKA HUB', kixTransfer, '90 min minimum connection time'),
+      ],
     });
   }
   return options.length > 0 ? options : null;
@@ -975,12 +1172,32 @@ function buildKixViaHubReverse(fromCode, s1kix, toCode, s2) {
     const p = connectPrices(s1kix.prices, s2.prices);
     if (ac1 && !ACFT[ac1].hasPe) p.pe = null;
     if (!ac1 || !ACFT[ac2].hasPe) p.pe = null;
+    if ((ac1 && !ACFT[ac1].hasFc) || !ACFT[ac2].hasFc) p.fc = null;
+
+    // Real stops: fromCode→KIX (int'l arrival), KIX→NRT (domestic shuttle),
+    // NRT→toCode (int'l departure) — three genuine legs, two genuine layovers.
+    const acShuttle = shuttle.ac ? (shuttle.ac[si] || shuttle.ac[0]) : null;
+    const shuttleAcName = acShuttle ? ACFT[acShuttle].name : (shuttle.acName || 'Boeing 787-9');
+    const shuttleCabin  = acShuttle ? cabinStr(acShuttle) : 'Business · Economy';
+    const isNrtOvernight = bestCombo.nrtWait > 8 * 60;
+    const flightOut1 = s1kix.nos ? (s1kix.nos[ni] ? inboundNo(s1kix.nos[ni]) : '—') : '—';
+    const seg1Operator = s1kix._partner || 'ANA';
+    const termOut     = `${AIRPORTS[fromCode]?.city||fromCode} (${fromCode}) — ${worldTerm(fromCode)}`;
+    const termKixArr  = 'Osaka Kansai Hub (KIX) — International Terminal';
+    const termKixDep  = 'Osaka Kansai Hub (KIX) — Domestic Terminal';
+    const termNrtArr  = `Tokyo Mega Hub (NRT) — ${nrtGateIn('KIX', false)}`;
+    const termNrtDep  = `Tokyo Mega Hub (NRT) — ${nrtGateOut(toCode)}`;
+    const termDest    = `${AIRPORTS[toCode]?.city||toCode} (${toCode}) — ${worldTerm(toCode)}`;
+    const kixTransfer = 'Kansai International Airport — International → Domestic Terminal · allow time to clear customs first';
+    const nrtTransfer = isNrtOvernight
+      ? `Overnight connection at Tokyo Hub — Airport hotel from ¥10,000/night · then international departure to ${toCode}`
+      : `Domestic arrival at Tokyo Hub (NRT), transfer to international departure`;
 
     options.push({
       tag: 'kix',
-      _kixHub: true, _kixThenNrt: true, _nrtTransit: durStr(bestCombo.nrtWait),
+      _kixHub: true, _kixThenNrt: true, _nrtTransit: durStr(bestCombo.nrtWait), _stopCount: 2,
       direct: false, operator: 'ANA',
-      flightOut: s1kix.nos ? (s1kix.nos[ni] ? inboundNo(s1kix.nos[ni]) : '—') : '—',
+      flightOut: flightOut1,
       flightIn: s2.nos[k],
       depLocal: toHHMM(rawOrigDep), arrHub: toHHMM(kixArr),
       hubDep: toHHMM(kixDepShuttle), arrDest: toHHMM(rawDestArr),
@@ -989,10 +1206,10 @@ function buildKixViaHubReverse(fromCode, s1kix, toCode, s2) {
       totalTime: durStr(s1kix.dur + bestCombo.kixWait + seg2Dur),
       aircraft1: ac1Name, aircraft2: ACFT[ac2].name,
       cabinOut: cabin1, cabinIn: cabinStr(ac2),
-      termOut: `${AIRPORTS[fromCode]?.city||fromCode} (${fromCode}) — ${worldTerm(fromCode)}`,
-      termHub1: 'Osaka Kansai Hub (KIX) — International Terminal',
-      termHub2: 'Osaka Kansai Hub (KIX) — International Terminal',
-      termDest: `${AIRPORTS[toCode]?.city||toCode} (${toCode}) — ${worldTerm(toCode)}`,
+      termOut,
+      termHub1: termKixArr,
+      termHub2: termKixArr,
+      termDest,
       transfer: `Via Tokyo Hub (NRT) — ANA shuttle KIX→NRT · ${durStr(bestCombo.nrtWait)} NRT transit to ${toCode}`,
       mct: '90 min minimum connection time at each hub',
       note: plusDays > 0 ? `+${plusDays} day${plusDays > 1 ? 's' : ''}` : null,
@@ -1000,6 +1217,15 @@ function buildKixViaHubReverse(fromCode, s1kix, toCode, s2) {
       _seg2Label: `KIX → NRT → ${toCode}`,
       _hubLabel: 'OSAKA HUB',
       prices: p,
+      segments: [
+        mkLeg(fromCode, 'KIX', flightOut1, seg1Operator, ac1Name, cabin1, toHHMM(rawOrigDep), termOut, toHHMM(kixArr), termKixArr, durStr(s1kix.dur)),
+        mkLeg('KIX', 'NRT', inboundNo(shuttle.nos[si]), 'ANA', shuttleAcName, shuttleCabin, toHHMM(kixDepShuttle), termKixDep, toHHMM(nrtArr), termNrtArr, durStr(shuttle.dur)),
+        mkLeg('NRT', toCode, s2.nos[k], 'ANA', ACFT[ac2].name, cabinStr(ac2), toHHMM(nrtDep), termNrtDep, toHHMM(rawDestArr), termDest, durStr(s2.dur)),
+      ],
+      layovers: [
+        mkStop('KIX', durStr(bestCombo.kixWait), 'OSAKA HUB', kixTransfer, '90 min minimum connection time'),
+        mkStop('NRT', durStr(bestCombo.nrtWait), 'TOKYO HUB', nrtTransfer, 'Domestic transfer — no customs re-check needed', isNrtOvernight),
+      ],
     });
   }
   return options.length > 0 ? options : null;
@@ -1035,25 +1261,33 @@ function buildConnecting(fromCode, s1, toCode, s2, po2) {
     const destArrLocalAbs = (outDep - 9*60 + s2.dur) + tz2 * 60;
     const plusDays = Math.floor(destArrLocalAbs / 1440) - Math.floor(origDepUTC / 1440);
     const isOvernight = transit > 8 * 60;
+    const termOut  = `${AIRPORTS[fromCode]?.city||fromCode} (${fromCode}) — ${worldTerm(fromCode)}`;
+    const termHub1 = `Tokyo Mega Hub (NRT) — ${nrtGateIn(fromCode, false)}`;
+    const termHub2 = `Tokyo Mega Hub (NRT) — ${nrtGateOut(toCode)}`;
+    const termDest = `${AIRPORTS[toCode]?.city||toCode} (${toCode}) — ${worldTerm(toCode)}`;
+    const transfer = transferPath(fromCode, toCode);
+    const mct = isOvernight ? `Overnight connection at Tokyo Hub  ·  Airport hotel from ¥10,000/night  ·  ${mctLabel(fromCode,toCode)}` : mctLabel(fromCode,toCode);
     options.push({
       _outDepIdx:j, tag: null, _transit: transit, direct:false, operator:'ANA',
       flightOut:s1.nos[bestI] ? inboundNo(s1.nos[bestI]) : '—', flightIn:s2.nos[j],
       depLocal:toHHMM(rawOrigDep), arrHub:toHHMM(inArr), hubDep:toHHMM(outDep), arrDest:toHHMM(rawDestArr),
       seg1Time:durStr(s1.dur), seg2Time:durStr(s2.dur), transitTime:durStr(transit), totalTime:durStr(s1.dur+transit+s2.dur),
       aircraft1:ACFT[ac1].name, aircraft2:ACFT[ac2].name, cabinOut:cabinStr(ac1), cabinIn:cabinStr(ac2),
-      termOut:`${AIRPORTS[fromCode]?.city||fromCode} (${fromCode}) — ${worldTerm(fromCode)}`,
-      termHub1:`Tokyo Mega Hub (NRT) — ${nrtGateIn(fromCode, false)}`,
-      termHub2:`Tokyo Mega Hub (NRT) — ${nrtGateOut(toCode)}`,
-      termDest:`${AIRPORTS[toCode]?.city||toCode} (${toCode}) — ${worldTerm(toCode)}`,
-      transfer:transferPath(fromCode, toCode),
-      mct: isOvernight ? `Overnight connection at Tokyo Hub  ·  Airport hotel from ¥10,000/night  ·  ${mctLabel(fromCode,toCode)}` : mctLabel(fromCode,toCode),
+      termOut, termHub1, termHub2, termDest, transfer, mct,
       note: isOvernight ? 'Overnight at Tokyo' : (plusDays > 0 ? `+${plusDays} day${plusDays>1?'s':''}` : null),
+      _destArrRaw: rawDestArr, _origDepRaw: rawOrigDep,
       prices: (() => {
         const p = connectPrices(s1.prices, s2.prices);
-        // Null out PE if either leg uses an aircraft without PE (e.g. B777-9)
+        // Null out PE/FC if either leg's aircraft doesn't carry that cabin
         if (!ACFT[ac1].hasPe || !ACFT[ac2].hasPe) p.pe = null;
+        if (!ACFT[ac1].hasFc || !ACFT[ac2].hasFc) p.fc = null;
         return p;
       })(),
+      segments: [
+        mkLeg(fromCode, 'NRT', s1.nos[bestI] ? inboundNo(s1.nos[bestI]) : '—', 'ANA', ACFT[ac1].name, cabinStr(ac1), toHHMM(rawOrigDep), termOut, toHHMM(inArr), termHub1, durStr(s1.dur)),
+        mkLeg('NRT', toCode, s2.nos[j], 'ANA', ACFT[ac2].name, cabinStr(ac2), toHHMM(outDep), termHub2, toHHMM(rawDestArr), termDest, durStr(s2.dur)),
+      ],
+      layovers: [ mkStop('NRT', durStr(transit), 'TOKYO HUB', transfer, mct, isOvernight) ],
     });
   }
 
@@ -1080,6 +1314,12 @@ function buildConnecting(fromCode, s1, toCode, s2, po2) {
       const isOvernight = transit > 8 * 60;
       const pPrices = po2.prices ?? s2.prices;
       const merged = connectPrices(s1.prices, pPrices);
+      const termOut  = `${AIRPORTS[fromCode]?.city||fromCode} (${fromCode}) — ${worldTerm(fromCode)}`;
+      const termHub1 = `Tokyo Mega Hub (NRT) — ${nrtGateIn(fromCode, false)}`;
+      const termHub2 = `Tokyo Mega Hub (NRT) — ${nrtGateOut(toCode)}`;
+      const termDest = `${AIRPORTS[toCode]?.city||toCode} (${toCode}) — ${worldTerm(toCode)}`;
+      const transfer = transferPath(fromCode, toCode);
+      const mct = isOvernight ? `Overnight at Tokyo Hub  ·  Airport hotel from ¥10,000/night  ·  ${mctLabel(fromCode,toCode)}` : mctLabel(fromCode,toCode);
       options.push({
         _outDepIdx:-1, tag:'partner', _partner:po2.name, direct:false,
         operator:`ANA / ${po2.name}`,
@@ -1087,14 +1327,15 @@ function buildConnecting(fromCode, s1, toCode, s2, po2) {
         depLocal:toHHMM(rawOrigDep), arrHub:toHHMM(inArr), hubDep:toHHMM(outDep), arrDest:toHHMM(destArrLocalAbs),
         seg1Time:durStr(s1.dur), seg2Time:durStr(pDur), transitTime:durStr(transit), totalTime:durStr(s1.dur+transit+pDur),
         aircraft1:ACFT[ac1].name, aircraft2:po2.acName, cabinOut:cabinStr(ac1), cabinIn:'Business · Economy',
-        termOut:`${AIRPORTS[fromCode]?.city||fromCode} (${fromCode}) — ${worldTerm(fromCode)}`,
-        termHub1:`Tokyo Mega Hub (NRT) — ${nrtGateIn(fromCode, false)}`,
-        termHub2:`Tokyo Mega Hub (NRT) — ${nrtGateOut(toCode)}`,
-        termDest:`${AIRPORTS[toCode]?.city||toCode} (${toCode}) — ${worldTerm(toCode)}`,
-        transfer:transferPath(fromCode, toCode),
-        mct: isOvernight ? `Overnight at Tokyo Hub  ·  Airport hotel from ¥10,000/night  ·  ${mctLabel(fromCode,toCode)}` : mctLabel(fromCode,toCode),
+        termOut, termHub1, termHub2, termDest, transfer, mct,
         note: isOvernight ? 'Overnight at Tokyo' : (plusDays > 0 ? `+${plusDays} day${plusDays>1?'s':''}` : null),
+        _destArrRaw: destArrLocalAbs, _origDepRaw: rawOrigDep,
         prices:{ e:Math.round(merged.e*0.9), pe:null, bc:merged.bc, fc:null },
+        segments: [
+          mkLeg(fromCode, 'NRT', s1.nos[bestI] ? inboundNo(s1.nos[bestI]) : '—', 'ANA', ACFT[ac1].name, cabinStr(ac1), toHHMM(rawOrigDep), termOut, toHHMM(inArr), termHub1, durStr(s1.dur)),
+          mkLeg('NRT', toCode, po2.nos[pj], po2.name, po2.acName, 'Business · Economy', toHHMM(outDep), termHub2, toHHMM(destArrLocalAbs), termDest, durStr(pDur)),
+        ],
+        layovers: [ mkStop('NRT', durStr(transit), 'TOKYO HUB', transfer, mct, isOvernight) ],
       });
     }
   }
@@ -1119,6 +1360,12 @@ function buildConnecting(fromCode, s1, toCode, s2, po2) {
       const isOvernight = transit > 8 * 60;
       const pPrices = po1.prices ?? s1?.prices ?? {e:100000,pe:null,bc:500000,fc:null};
       const merged = connectPrices(pPrices, s2.prices);
+      const termOut  = `${AIRPORTS[fromCode]?.city||fromCode} (${fromCode}) — ${worldTerm(fromCode)}`;
+      const termHub1 = `Tokyo Mega Hub (NRT) — ${nrtGateIn(fromCode, true)}`;
+      const termHub2 = `Tokyo Mega Hub (NRT) — ${nrtGateOut(toCode)}`;
+      const termDest = `${AIRPORTS[toCode]?.city||toCode} (${toCode}) — ${worldTerm(toCode)}`;
+      const transfer = transferPath(fromCode, toCode);
+      const mct = isOvernight ? `Overnight at Tokyo Hub  ·  Airport hotel from ¥10,000/night  ·  ${mctLabel(fromCode,toCode)}` : mctLabel(fromCode,toCode);
       options.push({
         _outDepIdx:-2, tag:'partner', _partner:po1.name, direct:false,
         operator:`${po1.name} / ANA`,
@@ -1126,14 +1373,15 @@ function buildConnecting(fromCode, s1, toCode, s2, po2) {
         depLocal:toHHMM(rawOrigDep), arrHub:toHHMM(inArr), hubDep:toHHMM(outDep), arrDest:toHHMM(rawDestArr),
         seg1Time:durStr(p1Dur), seg2Time:durStr(s2.dur), transitTime:durStr(transit), totalTime:durStr(p1Dur+transit+s2.dur),
         aircraft1:po1.acName, aircraft2:ACFT[ac2].name, cabinOut:'Business · Economy', cabinIn:cabinStr(ac2),
-        termOut:`${AIRPORTS[fromCode]?.city||fromCode} (${fromCode}) — ${worldTerm(fromCode)}`,
-        termHub1:`Tokyo Mega Hub (NRT) — ${nrtGateIn(fromCode, true)}`,
-        termHub2:`Tokyo Mega Hub (NRT) — ${nrtGateOut(toCode)}`,
-        termDest:`${AIRPORTS[toCode]?.city||toCode} (${toCode}) — ${worldTerm(toCode)}`,
-        transfer:transferPath(fromCode, toCode),
-        mct: isOvernight ? `Overnight at Tokyo Hub  ·  Airport hotel from ¥10,000/night  ·  ${mctLabel(fromCode,toCode)}` : mctLabel(fromCode,toCode),
+        termOut, termHub1, termHub2, termDest, transfer, mct,
         note: isOvernight ? 'Overnight at Tokyo' : (plusDays > 0 ? `+${plusDays} day${plusDays>1?'s':''}` : null),
+        _destArrRaw: rawDestArr, _origDepRaw: rawOrigDep,
         prices:{ e:Math.round(merged.e*0.9), pe:null, bc:merged.bc, fc:null },
+        segments: [
+          mkLeg(fromCode, 'NRT', po1.nos[pi], po1.name, po1.acName, 'Business · Economy', toHHMM(rawOrigDep), termOut, toHHMM(inArr), termHub1, durStr(p1Dur)),
+          mkLeg('NRT', toCode, s2.nos[bestJ], 'ANA', ACFT[ac2].name, cabinStr(ac2), toHHMM(outDep), termHub2, toHHMM(rawDestArr), termDest, durStr(s2.dur)),
+        ],
+        layovers: [ mkStop('NRT', durStr(transit), 'TOKYO HUB', transfer, mct, isOvernight) ],
       });
     }
   }

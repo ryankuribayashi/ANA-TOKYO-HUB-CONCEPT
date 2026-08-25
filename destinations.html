@@ -247,6 +247,7 @@
       <a href="destinations.html" class="nav-link" style="color:var(--gold);font-weight:700;">Destinations</a>
       <a href="fleet.html" class="nav-link">Our Fleet</a>
       <a href="news.html" class="nav-link">News</a>
+      <a href="terminal.html" class="nav-link">Terminal Map</a>
       <a href="#" class="nav-link">Experience</a>
     </div>
     <div class="nav-actions">
@@ -264,6 +265,7 @@
   <a href="destinations.html" class="mobile-nav-link" style="color:var(--gold);">Destinations</a>
   <a href="fleet.html" class="mobile-nav-link">Our Fleet</a>
   <a href="news.html" class="mobile-nav-link">News</a>
+  <a href="terminal.html" class="mobile-nav-link">Terminal Map</a>
   <a href="#" class="mobile-nav-link">Experience</a>
   <div class="mobile-nav-bottom">
     <a href="index.html" class="mobile-nav-book">Book Now</a>
@@ -374,14 +376,14 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="js/airports.js"></script>
-<script src="js/flights.js?v=10"></script>
+<script src="js/airports.js?v=11"></script>
+<script src="js/flights.js?v=11"></script>
 <script>
 /* ─── Shared data ─────────────────────────────────────────── */
 const DEST_REGIONS = {
   asia:    ['PEK','PVG','HKG','ICN','SIN','TPE','TSA','BKK','MNL','CGK','KUL','SGN','HAN','DEL','BOM','BLR','HYD','GUM',
             'CAN','SZX','MFM','HGH','GMP','PUS','TSN','DAC','KHI','CTU','XIY','CEB','SUB','TAE','KWJ','CJU','HKT','KHH',
-            'RGN','KTM','MLE','CMB','ULN','PNH','VTE'],
+            'RGN','KTM','MLE','CMB','ULN','PNH','VTE','DPS'],
   domestic:['OKA','FUK','ITM','NGO','CTS'],
   na:      ['JFK','LAX','SFO','ORD','SEA','IAH','BOS','IAD','DEN','DTW','ATL','DFW','MSP','SAN','HNL','EWR','AUS',
             'YVR','YYZ','YYC','YUL','MEX','PHL','LAS','SLC','PHX','CLT','PDX','MTY','SJC','PTY','MIA','MCO','IND','STL','MCI','ANC'],
@@ -626,7 +628,7 @@ const WEEKLY_4_5_SET = new Set(['PHL','LAS','SLC','PHX','CLT','PDX','MTY','SJC',
 const RT_CATEGORIES = [
   { id:'domestic',  label:'Domestic Routes',        color:'#EC4899', codes:['OKA','FUK','ITM','NGO','CTS'] },
   { id:'eastasia',  label:'East Asia & Pacific',    color:'#F59E0B', codes:['ICN','GMP','PUS','TAE','KWJ','CJU','PEK','PVG','HGH','TSN','CTU','XIY','CAN','SZX','MFM','HKG','TPE','TSA','KHH','GUM','ULN'] },
-  { id:'seastasia', label:'Southeast Asia',          color:'#F97316', codes:['BKK','HKT','MNL','CEB','SIN','KUL','CGK','SUB','HAN','SGN','PNH','VTE','RGN'] },
+  { id:'seastasia', label:'Southeast Asia',          color:'#F97316', codes:['BKK','HKT','MNL','CEB','SIN','KUL','CGK','SUB','HAN','SGN','PNH','VTE','RGN','DPS'] },
   { id:'southasia', label:'South & Central Asia',   color:'#A78BFA', codes:['DEL','BOM','BLR','HYD','DAC','KHI','KTM','CMB','MLE'] },
   { id:'na',        label:'North America',           color:'#3B82F6', codes:['HNL','ANC','JFK','EWR','LAX','SFO','SEA','ORD','BOS','IAH','IAD','DTW','DFW','ATL','MSP','DEN','SAN','YVR','YYZ','YYC','YUL','MEX','PHL','LAS','SLC','PHX','CLT','PDX','MTY','SJC','PTY','MIA','MCO','IND','STL','MCI','AUS'] },
   { id:'europe',    label:'Europe',                  color:'#10B981', codes:['LHR','CDG','FRA','MUC','IST','BRU','ARN','MXP','WAW','VIE','ZRH','GVA','FCO','DUB','CPH','HEL','OSL','BER','PRG','LIS','MAD','BCN','ATH','BUD','ZAG','AMS'] },

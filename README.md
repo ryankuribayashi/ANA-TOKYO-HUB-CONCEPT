@@ -48,6 +48,8 @@ Freedom Flights creates single-ticket, fully connected itineraries from Tokyo to
 
 **Newsroom** (`news.html`) — Editorially designed press page with featured story, article grid, and press release archive — written in real ANA press release style referencing actual route data from the site.
 
+**Terminal Map** (`terminal.html`) — Interactive, zoomable/pannable SVG diagram of the full airport layout (T1 Asia, T1/JAL Domestic, T2 Main Concourse, and the T2A/T2B isolated satellites), with each zone clickable for its gate range, remote stands, region served, peak-bank demand, and a capacity read (comfortable / near capacity / over capacity) driven by the actual route data. Every zone's carrier list is broken out by alliance — Star Alliance, Oneworld, SkyTeam, and unaligned independents — each with its own numbered gate range, reflecting every international airline actually operating in and out of Haneda/Narita today, not just ANA's own Star Alliance partners.
+
 ## Tech Stack
 
 | Layer | Technology |

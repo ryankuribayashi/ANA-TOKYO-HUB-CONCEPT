@@ -600,6 +600,7 @@ body {
 .exp-val-gold { color: var(--navy); font-weight: 600; }
 .exp-val em { font-style: italic; color: var(--text-muted); }
 .exp-row-cs { opacity: 0.85; }
+.exp-operator { color: var(--text-muted); font-weight: 500; }
 .cs-badge {
   display: inline-block; padding: 1px 7px; border-radius: 4px;
   background: #EEF2FF; color: #3730A3;
@@ -618,6 +619,12 @@ body {
     color: var(--gold); white-space: nowrap; padding-top: 2px;
 }
 .exp-transit-detail { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+.exp-layover-head { display: flex; align-items: center; gap: 8px; }
+.exp-overnight-badge {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 10px;
+    background: rgba(220,38,38,0.1); color: #B91C1C;
+}
 
 /* Results map panel */
 .map-panel { position: sticky; top: 100px; }

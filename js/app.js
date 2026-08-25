@@ -136,16 +136,21 @@ if (depart) depart.value = fmt(new Date(today.getTime() + 7 * 86400000));
 if (ret) ret.value = fmt(new Date(today.getTime() + 14 * 86400000));
 
 // Search button
+function extractCode(val) { const m = (val||'').match(/\(([A-Z]{3})\)$/); return m?m[1]:''; }
+
 document.getElementById('searchBtn')?.addEventListener('click', () => {
-    const from = selectedFrom || document.getElementById('input-from')?.value;
-    const to = selectedTo || document.getElementById('input-to')?.value;
+    // Fall back to parsing "City (XXX)" out of the raw input if the user
+    // typed a city but never clicked the dropdown suggestion — previously
+    // this silently sent the display text instead of the airport code.
+    const fromCode = selectedFrom || extractCode(document.getElementById('input-from')?.value);
+    const toCode   = selectedTo   || extractCode(document.getElementById('input-to')?.value);
     const date = document.getElementById('input-depart')?.value;
     const cabin = document.getElementById('input-class')?.value || 'Economy';
-    if (!from || !to) {
-        alert(currentLang === 'jp' ? '出発地と目的地を入力してください' : 'Please enter origin and destination');
+    if (!fromCode || !toCode) {
+        alert(currentLang === 'jp' ? '出発地と目的地を入力してください（候補から選択してください）' : 'Please select an origin and destination from the dropdown suggestions');
         return;
     }
-    const url = `results.html?from=${selectedFrom || from}&to=${selectedTo || to}&date=${date}&cabin=${cabin}`;
+    const url = `results.html?from=${fromCode}&to=${toCode}&date=${date}&cabin=${cabin}`;
     const overlay = document.getElementById('loadingOverlay');
     const bar = document.getElementById('loadingBar');
     if (!overlay) { window.location.href = url; return; }

@@ -189,135 +189,8 @@ function priceHtml(yen) {
     return `<span class="price-yen" data-yen="${yen}">${formatCurrency(yen)}</span>`;
 }
 
-// Returns a codeshare row if ANA operates this segment and the schedule shows a partner
-function csRow(schedCode) {
-    if (!schedCode) return '';
-    const s = typeof SCHEDULE !== 'undefined' ? SCHEDULE[schedCode] : null;
-    if (!s?.partner) return '';
-    return `<div class="exp-row exp-row-cs"><span class="exp-label">Codeshare</span>` +
-           `<span class="exp-val"><span class="cs-badge">${s.partnerNo}</span> also marketed by ${s.partner}</span></div>`;
-}
-
-function kixCsRow(destCode) {
-    if (!destCode) return '';
-    const s = typeof KIX_SCHEDULE !== 'undefined' ? KIX_SCHEDULE[destCode] : null;
-    if (!s?.partner) return '';
-    return `<div class="exp-row exp-row-cs"><span class="exp-label">Codeshare</span>` +
-           `<span class="exp-val"><span class="cs-badge">${s.partnerNo}</span> also marketed by ${s.partner}</span></div>`;
-}
-
-function expandedHtml(f) {
-    // Determine which schedule codes to use for codeshare lookups
-    let cs1 = '', cs2 = '';
-    const isKixRoute = fromCode === 'KIX' || toCode === 'KIX';
-    if (f.direct) {
-        const cityCode = isKixRoute
-            ? (fromCode === 'KIX' ? toCode : fromCode)
-            : (fromCode === 'NRT') ? toCode : fromCode;
-        if (f.operator === 'ANA') cs1 = isKixRoute ? kixCsRow(cityCode) : csRow(cityCode);
-    } else if (f._viaCode) {
-        // Via connection — seg1 is ANA operating NRT↔viaCode
-        if (f.flightOut.startsWith('NH')) cs1 = csRow(f._viaCode);
-    } else {
-        // Normal connecting flight
-        if (f.flightOut.startsWith('NH')) cs1 = csRow(fromCode);
-        if (f.flightIn.startsWith('NH') && typeof VIA_CONNECTIONS !== 'undefined' && !VIA_CONNECTIONS[toCode])
-            cs2 = csRow(toCode);
-    }
-
-    if (f.direct) {
-        return `
-    <div class="flight-expanded-content">
-      <div class="exp-segments">
-        <div class="exp-segment">
-          <div class="exp-seg-header">
-            <span class="exp-seg-badge">Direct Flight</span>
-            <span class="exp-seg-route">${fromCode} → ${toCode}</span>
-            <span class="exp-seg-time">${f.totalTime}</span>
-          </div>
-          <div class="exp-seg-body">
-            <div class="exp-row"><span class="exp-label">Flight</span><span class="exp-val">${f.flightOut}</span></div>
-            ${cs1}
-            <div class="exp-row"><span class="exp-label">Aircraft</span><span class="exp-val">${f.aircraft1}</span></div>
-            <div class="exp-row"><span class="exp-label">Departs</span><span class="exp-val">${f.depLocal} local · ${f.termOut}</span></div>
-            <div class="exp-row"><span class="exp-label">Arrives</span><span class="exp-val">${f.arrDest} local${f.note ? ' ('+f.note+')' : ''} · ${f.termDest}</span></div>
-            <div class="exp-row"><span class="exp-label">Cabins</span><span class="exp-val">${f.cabinOut}</span></div>
-          </div>
-        </div>
-      </div>
-    </div>`;
-    }
-
-    return `
-    <div class="flight-expanded-content">
-      <div class="exp-segments">
-        <div class="exp-segment">
-          <div class="exp-seg-header">
-            <span class="exp-seg-badge">Segment 1</span>
-            <span class="exp-seg-route">${f._seg1Label || (fromCode + ' → NRT')}</span>
-            <span class="exp-seg-time">${f.seg1Time}</span>
-          </div>
-          <div class="exp-seg-body">
-            <div class="exp-row"><span class="exp-label">Flight</span><span class="exp-val">${f.flightOut}</span></div>
-            ${cs1}
-            <div class="exp-row"><span class="exp-label">Aircraft</span><span class="exp-val">${f.aircraft1}</span></div>
-            <div class="exp-row"><span class="exp-label">Departs</span><span class="exp-val">${f.depLocal} local · ${f.termOut}</span></div>
-            <div class="exp-row"><span class="exp-label">Arrives</span><span class="exp-val">${f.arrHub} JST · ${f.termHub1}</span></div>
-            <div class="exp-row"><span class="exp-label">Cabins</span><span class="exp-val">${f.cabinOut}</span></div>
-          </div>
-        </div>
-
-        <div class="exp-transit">
-          <div class="exp-transit-icon">✈ ${f._hubLabel || 'TOKYO HUB'}</div>
-          <div class="exp-transit-detail">
-            <div class="exp-row">
-              <span class="exp-label">Transit</span>
-              <span class="exp-val exp-val-gold">${f.transitTime}${f.note ? ' · <em>'+f.note+'</em>' : ''}</span>
-            </div>
-            <div class="exp-row"><span class="exp-label">Connection</span><span class="exp-val">${f.transfer}</span></div>
-            ${f._nrtTransit ? `<div class="exp-row"><span class="exp-label">NRT Transit</span><span class="exp-val" style="color:#6B7280;">${f._nrtTransit} included in ${f._kixViaNrt ? 'Segment 1' : 'Segment 2'} duration</span></div>` : ''}
-            <div class="exp-row"><span class="exp-label">Note</span><span class="exp-val">${f.mct}</span></div>
-          </div>
-        </div>
-
-        <div class="exp-segment">
-          <div class="exp-seg-header">
-            <span class="exp-seg-badge">Segment 2</span>
-            <span class="exp-seg-route">${f._seg2Label || ('NRT → ' + toCode)}</span>
-            <span class="exp-seg-time">${f.seg2Time}</span>
-          </div>
-          <div class="exp-seg-body">
-            <div class="exp-row"><span class="exp-label">Flight</span><span class="exp-val">${f.flightIn}</span></div>
-            ${cs2}
-            <div class="exp-row"><span class="exp-label">Aircraft</span><span class="exp-val">${f.aircraft2}</span></div>
-            <div class="exp-row"><span class="exp-label">Departs</span><span class="exp-val">${f.hubDep} JST · ${f.termHub2}</span></div>
-            <div class="exp-row"><span class="exp-label">Arrives</span><span class="exp-val">${f.arrDest} local · ${f.termDest}</span></div>
-            <div class="exp-row"><span class="exp-label">Cabins</span><span class="exp-val">${f.cabinIn}</span></div>
-          </div>
-        </div>
-        ${f._seg3Label ? `
-        <div class="exp-transit">
-          <div class="exp-transit-icon">✈ ${f._seg3Label.split(' → ')[0].toUpperCase()}</div>
-          <div class="exp-transit-detail">
-            <div class="exp-row"><span class="exp-label">Connection</span><span class="exp-val exp-val-gold">${f._seg3Note} — short connection</span></div>
-          </div>
-        </div>
-        <div class="exp-segment">
-          <div class="exp-seg-header">
-            <span class="exp-seg-badge">Segment 3</span>
-            <span class="exp-seg-route">${f._seg3Label}</span>
-            <span class="exp-seg-time">${f._seg3Duration}</span>
-          </div>
-          <div class="exp-seg-body">
-            <div class="exp-row"><span class="exp-label">Flight</span><span class="exp-val">${f._seg3Flight}</span></div>
-            <div class="exp-row"><span class="exp-label">Operator</span><span class="exp-val">${f._seg3Operator}</span></div>
-            <div class="exp-row"><span class="exp-label">Aircraft</span><span class="exp-val">${f._seg3Aircraft}</span></div>
-            <div class="exp-row"><span class="exp-label">Arrives</span><span class="exp-val">${f._seg3Term}</span></div>
-          </div>
-        </div>` : ''}
-      </div>
-    </div>`;
-}
+// Expanded flight-details rendering now lives in js/itinerary-view.js
+// (shared with booking.js) — see renderItinerarySegments(f).
 
 function renderFlights() {
     const container = document.getElementById('flightList');
@@ -351,7 +224,21 @@ function renderFlights() {
           return;
         }
 
-        container.innerHTML = `
+        // Both endpoints are codeshare-only cities (reachable from ANA's hub
+        // network individually, but not to each other) — explain why, rather
+        // than showing the generic message as if it were a data gap.
+        const bothCodeshareOnly = typeof VIA_CONNECTIONS !== 'undefined'
+            && VIA_CONNECTIONS[fromCode] && VIA_CONNECTIONS[toCode]
+            && !SCHEDULE[fromCode] && !SCHEDULE[toCode];
+
+        container.innerHTML = bothCodeshareOnly ? `
+        <div style="padding:40px 24px;text-align:center;color:#6B7280;">
+          <div style="font-size:48px;margin-bottom:16px;">🌐</div>
+          <h3 style="color:#1A1A2E;margin-bottom:8px;">Not bookable via ANA</h3>
+          <p><strong>${fromCity}</strong> and <strong>${toCity}</strong> are both reachable through ANA's partner network individually, but not to each other — connecting them would mean routing through Tokyo, which isn't a realistic itinerary for this city pair.</p>
+          <p style="margin-top:8px;font-size:13px;">Try searching each one against Tokyo (NRT) or another ANA destination instead.</p>
+          <a href="index.html" style="display:inline-block;margin-top:20px;padding:10px 24px;background:#0B3D91;color:#fff;border-radius:8px;text-decoration:none;">New Search</a>
+        </div>` : `
         <div style="padding:40px 24px;text-align:center;color:#6B7280;">
           <div style="font-size:48px;margin-bottom:16px;">✈</div>
           <h3 style="color:#1A1A2E;margin-bottom:8px;">No service found</h3>
@@ -367,11 +254,12 @@ function renderFlights() {
                          f.tag === 'kix'          ? '✦ Via Osaka Hub' :
                          f.tag === 'partner'      ? `✈ ${f._partner || 'Star Alliance Partner'}` : '';
         const price = f.prices[selectedKey];
+        // Derive stop count/labels straight from the real layovers list —
+        // works for 0, 1 or 2 stops without special-casing each combination.
+        const stops = f.layovers || [];
+        const hubName = code => code === 'NRT' ? 'Tokyo Hub' : code === 'KIX' ? 'Osaka Hub' : (AIRPORTS[code]?.city || code);
         const stopsLabel = f.direct ? 'Nonstop' :
-          f._kixViaNrt  ? '2 stops · via Tokyo Hub & Osaka Hub' :
-          f._kixThenNrt ? '2 stops · via Osaka Hub & Tokyo Hub' :
-          f._kixHub     ? '1 stop · via Osaka Hub (KIX)' :
-                          '1 stop · via Tokyo Hub (NRT)';
+          `${stops.length} stop${stops.length > 1 ? 's' : ''} · via ${stops.map(s => hubName(s.code)).join(' & ')}`;
         const plusMark = f.note && !f.note.startsWith('Overnight')
             ? ` <span class="plus-day">${f.note}</span>` : '';
 
@@ -393,7 +281,7 @@ function renderFlights() {
             <div class="duration-bar">
               <div class="duration-dot"></div>
               <div class="duration-line"></div>
-              ${f.direct ? '' : `<div class="duration-hub"><span>${f._kixHub ? 'KIX' : 'NRT'}</span><span class="transit-time">${f.transitTime}</span></div><div class="duration-line"></div>`}
+              ${stops.map(s => `<div class="duration-hub"><span>${s.code}</span><span class="transit-time">${s.wait}</span></div><div class="duration-line"></div>`).join('')}
               <div class="duration-dot"></div>
             </div>
             <span class="stops-label">${stopsLabel}</span>
@@ -414,7 +302,7 @@ function renderFlights() {
         <span class="flight-aircraft-hint">${f.aircraft1}${f.direct ? '' : ' · ' + f.aircraft2}</span>
         <button class="details-toggle" data-index="${i}">Flight details ▾</button>
       </div>
-      ${expandedHtml(f)}
+      ${renderItinerarySegments(f)}
     </div>`;
     }).join('');
 

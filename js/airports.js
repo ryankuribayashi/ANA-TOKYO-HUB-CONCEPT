@@ -67,6 +67,7 @@ const AIRPORTS = {
     'CEB': { name: 'Mactan-Cebu Intl', nameJP: 'マクタン・セブ国際空港', city: 'Cebu', country: 'Philippines', lat: 10.3075, lng: 123.9791 },
     'CGK': { name: 'Soekarno-Hatta Intl', nameJP: 'スカルノ・ハッタ国際空港', city: 'Jakarta', country: 'Indonesia', lat: -6.1256, lng: 106.6559 },
     'SUB': { name: 'Juanda Intl', nameJP: 'ジュアンダ国際空港', city: 'Surabaya', country: 'Indonesia', lat: -7.3798, lng: 112.7869 },
+    'DPS': { name: 'Ngurah Rai Intl', nameJP: 'デンパサール・ングラライ国際空港', city: 'Denpasar', country: 'Indonesia', lat: -8.7482, lng: 115.1672 },
     'KUL': { name: 'Kuala Lumpur Intl', nameJP: 'クアラルンプール国際空港', city: 'Kuala Lumpur', country: 'Malaysia', lat: 2.7456, lng: 101.7099 },
     'SIN': { name: 'Singapore Changi', nameJP: 'シンガポール・チャンギ空港', city: 'Singapore', country: 'Singapore', lat: 1.3644, lng: 103.9915 },
     'SGN': { name: 'Tan Son Nhat Intl', nameJP: 'タンソンニャット国際空港', city: 'Ho Chi Minh City', country: 'Vietnam', lat: 10.8188, lng: 106.6520 },
@@ -139,6 +140,18 @@ const AIRPORTS = {
     'ITM': { name: 'Osaka Itami Airport', nameJP: '大阪伊丹空港', city: 'Osaka', country: 'Japan', lat: 34.7854, lng: 135.4382 },
     'NGO': { name: 'Chubu Centrair International Airport', nameJP: '中部国際空港', city: 'Nagoya', country: 'Japan', lat: 34.8583, lng: 136.8050 },
     'CTS': { name: 'New Chitose Airport', nameJP: '新千歳空港', city: 'Sapporo', country: 'Japan', lat: 42.7752, lng: 141.6922 },
+    // ── Codeshare-only cities (booked via partner connection, not ANA-served) ──
+    'CMN': { name: 'Mohammed V Intl', nameJP: 'カサブランカ・モハメド5世国際空港', city: 'Casablanca', country: 'Morocco', lat: 33.3675, lng: -7.5900 },
+    'LOS': { name: 'Murtala Muhammed Intl', nameJP: 'ラゴス・ムルタラ・ムハンマド国際空港', city: 'Lagos', country: 'Nigeria', lat: 6.5774, lng: 3.3212 },
+    'NBO': { name: 'Jomo Kenyatta Intl', nameJP: 'ナイロビ・ジョモケニヤッタ国際空港', city: 'Nairobi', country: 'Kenya', lat: -1.3192, lng: 36.9278 },
+    'GRU': { name: 'São Paulo/Guarulhos Intl', nameJP: 'サンパウロ・グアルーリョス国際空港', city: 'São Paulo', country: 'Brazil', lat: -23.4356, lng: -46.4731 },
+    'SCL': { name: 'Arturo Merino Benítez Intl', nameJP: 'サンティアゴ国際空港', city: 'Santiago', country: 'Chile', lat: -33.3930, lng: -70.7858 },
+    'EZE': { name: 'Ministro Pistarini Intl', nameJP: 'ブエノスアイレス・エセイサ国際空港', city: 'Buenos Aires', country: 'Argentina', lat: -34.8222, lng: -58.5358 },
+    'GIG': { name: 'Rio de Janeiro/Galeão Intl', nameJP: 'リオデジャネイロ・ガレアン国際空港', city: 'Rio de Janeiro', country: 'Brazil', lat: -22.8090, lng: -43.2436 },
+    'BOG': { name: 'El Dorado Intl', nameJP: 'ボゴタ・エルドラード国際空港', city: 'Bogotá', country: 'Colombia', lat: 4.7016, lng: -74.1469 },
+    'LIM': { name: 'Jorge Chávez Intl', nameJP: 'リマ・ホルヘチャベス国際空港', city: 'Lima', country: 'Peru', lat: -12.0219, lng: -77.1143 },
+    'NAN': { name: 'Nadi Intl', nameJP: 'ナンディ国際空港', city: 'Nadi', country: 'Fiji', lat: -17.7554, lng: 177.4434 },
+    'PPT': { name: 'Faa\'a Intl', nameJP: 'パペーテ・ファアア国際空港', city: 'Papeete', country: 'French Polynesia', lat: -17.5537, lng: -149.6069 },
 };
 
 function searchAirports(query) {
