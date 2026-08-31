@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANA | Help & Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+.help-page { background: var(--off-white); min-height: 100vh; }
+
+/* ── Hero ── */
+.help-hero {
+  padding: 120px 0 56px;
+  background:
+    radial-gradient(ellipse at 70% 40%, rgba(11,61,145,0.07) 0%, transparent 55%),
+    linear-gradient(160deg, #E8ECF7 0%, #DDE3F0 45%, #D8E0EE 100%);
+  border-bottom: 1px solid rgba(11,61,145,0.08);
+}
+.help-hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.help-hero-tag {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+  color: var(--navy); text-transform: uppercase; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.help-hero-tag::before { content:''; width: 28px; height: 2px; background: var(--gold); }
+.help-hero-title {
+  font-size: clamp(36px, 4.5vw, 58px); font-weight: 900;
+  color: var(--navy-dark); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 12px;
+}
+.help-hero-sub { font-size: 15px; color: #4B5563; max-width: 540px; line-height: 1.7; }
+
+/* ── Quick links ── */
+.help-quicklinks {
+  max-width: 1200px; margin: 0 auto; padding: 28px 24px 0;
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
+}
+.help-quicklink {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 14px 8px; background: #fff; border: 1.5px solid #E5E7EB; border-radius: 8px;
+  text-decoration: none; text-align: center; transition: border-color 0.15s, transform 0.15s;
+}
+.help-quicklink:hover { border-color: var(--gold); transform: translateY(-2px); }
+.help-quicklink-icon { font-size: 18px; }
+.help-quicklink-label { font-size: 10.5px; font-weight: 700; color: var(--navy-dark); letter-spacing: 0.01em; }
+
+/* ── FAQ body ── */
+.help-body { max-width: 860px; margin: 0 auto; padding: 56px 24px 24px; }
+.help-cat { margin-bottom: 44px; }
+.help-cat-title {
+  font-size: 12px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 6px; display: flex; align-items: center; gap: 10px;
+}
+.help-cat-sub { font-size: 13px; color: #9CA3AF; margin-bottom: 18px; }
+
+details.help-faq {
+  background: #fff; border: 1.5px solid #E5E7EB; border-radius: 8px;
+  margin-bottom: 10px; overflow: hidden;
+}
+details.help-faq[open] { border-color: rgba(201,168,76,0.45); }
+details.help-faq summary {
+  padding: 16px 20px; cursor: pointer; list-style: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  font-size: 14px; font-weight: 700; color: var(--navy-dark);
+}
+details.help-faq summary::-webkit-details-marker { display: none; }
+details.help-faq summary::after {
+  content: '+'; font-size: 20px; font-weight: 400; color: var(--gold);
+  flex-shrink: 0; transition: transform 0.2s; line-height: 1;
+}
+details.help-faq[open] summary::after { transform: rotate(45deg); }
+.help-faq-body { padding: 0 20px 18px; font-size: 13px; color: #6B7280; line-height: 1.75; }
+.help-faq-body a { color: var(--navy); font-weight: 700; text-decoration: none; }
+.help-faq-body a:hover { text-decoration: underline; }
+
+/* ── Contact ── */
+.help-contact {
+  background: linear-gradient(140deg, var(--navy-dark) 0%, var(--navy) 100%);
+  padding: 56px 24px;
+}
+.help-contact-inner { max-width: 1000px; margin: 0 auto; }
+.help-contact-title { font-size: clamp(22px, 3vw, 30px); font-weight: 900; color: #fff; letter-spacing: -0.02em; margin-bottom: 8px; text-align: center; }
+.help-contact-sub { font-size: 14px; color: rgba(255,255,255,0.6); text-align: center; margin-bottom: 34px; }
+.help-contact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.help-contact-card {
+  background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.14); border-radius: 10px;
+  padding: 24px 20px; text-align: center;
+}
+.help-contact-icon { font-size: 22px; margin-bottom: 10px; }
+.help-contact-label { font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+.help-contact-val { font-size: 13px; color: var(--gold-light); font-weight: 700; }
+.help-contact-note { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 6px; }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .help-quicklinks { grid-template-columns: repeat(3, 1fr); }
+  .help-contact-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .help-quicklinks { grid-template-columns: repeat(2, 1fr); }
+  .help-hero { padding: 80px 0 36px; }
+  .help-hero-title { font-size: clamp(28px, 8vw, 40px); }
+}
+</style>
+</head>
+<body class="help-page">
+
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo" style="text-decoration:none;">
+      <img src="assets/ana-tail.png" class="ana-logo-img" alt="ANA All Nippon Airways">
+      <div class="logo-divider"></div>
+      <div class="sa-badge">
+        <svg class="sa-ring" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g transform="translate(16,16)"><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(72)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(72)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(144)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(144)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(216)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(216)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(288)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(288)"/></g></svg>
+        <div class="sa-text">
+          <span class="sa-name">star alliance</span>
+          <span class="sa-member">a star alliance member</span>
+        </div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Book</a>
+      <a href="destinations.html" class="nav-link">Destinations</a>
+      <a href="fleet.html" class="nav-link">Our Fleet</a>
+      <a href="news.html" class="nav-link">News</a>
+      <a href="terminal.html" class="nav-link">Terminal Map</a>
+      <a href="experience.html" class="nav-link">Experience</a>
+      <a href="help.html" class="nav-link" style="color:var(--gold);font-weight:700;">Help</a>
+    </div>
+    <div class="nav-actions">
+      <a href="index.html#search-widget" class="btn-book-nav">Book Now</a>
+    </div>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" id="mobileNavClose">✕</button>
+  <a href="index.html" class="mobile-nav-link">Book</a>
+  <a href="destinations.html" class="mobile-nav-link">Destinations</a>
+  <a href="fleet.html" class="mobile-nav-link">Our Fleet</a>
+  <a href="news.html" class="mobile-nav-link">News</a>
+  <a href="terminal.html" class="mobile-nav-link">Terminal Map</a>
+  <a href="experience.html" class="mobile-nav-link">Experience</a>
+  <a href="help.html" class="mobile-nav-link" style="color:var(--gold);">Help</a>
+  <div class="mobile-nav-bottom">
+    <a href="index.html#search-widget" class="mobile-nav-book">Book Now</a>
+  </div>
+</div>
+
+<!-- Hero -->
+<div class="help-hero">
+  <div class="help-hero-inner">
+    <div class="help-hero-tag">Help & Support</div>
+    <h1 class="help-hero-title">We're Here<br>to Help</h1>
+    <p class="help-hero-sub">Answers on booking, baggage, connecting through the Tokyo Mega Hub, and ANA Mileage Club — or reach a real person below.</p>
+  </div>
+</div>
+
+<!-- Quick links -->
+<div class="help-quicklinks">
+  <a href="#booking" class="help-quicklink"><span class="help-quicklink-icon">🎫</span><span class="help-quicklink-label">Booking & Fares</span></a>
+  <a href="#baggage" class="help-quicklink"><span class="help-quicklink-icon">🧳</span><span class="help-quicklink-label">Baggage</span></a>
+  <a href="#airport" class="help-quicklink"><span class="help-quicklink-icon">🛫</span><span class="help-quicklink-label">Airport & Connections</span></a>
+  <a href="#freedom" class="help-quicklink"><span class="help-quicklink-icon">🌐</span><span class="help-quicklink-label">Freedom Flights</span></a>
+  <a href="#mileage" class="help-quicklink"><span class="help-quicklink-icon">⭐</span><span class="help-quicklink-label">Mileage Club</span></a>
+  <a href="#assistance" class="help-quicklink"><span class="help-quicklink-icon">🤝</span><span class="help-quicklink-label">Special Assistance</span></a>
+</div>
+
+<!-- FAQ body -->
+<div class="help-body">
+
+  <div class="help-cat" id="booking">
+    <div class="help-cat-title">🎫 Booking & Fares</div>
+    <details class="help-faq" open>
+      <summary>How do I book a flight?</summary>
+      <div class="help-faq-body">Use the search widget on the <a href="index.html#search-widget">homepage</a> — enter your route, dates, and cabin, and you'll see every matching itinerary, including connections through the Tokyo Mega Hub, on the results page.</div>
+    </details>
+    <details class="help-faq">
+      <summary>Can I change or cancel my booking?</summary>
+      <div class="help-faq-body">Most fares allow date changes for a fee; our most flexible Business and First Class fares allow free changes and cancellation up to 24 hours before departure. Fare rules are shown at checkout before you pay.</div>
+    </details>
+    <details class="help-faq">
+      <summary>What payment methods are accepted?</summary>
+      <div class="help-faq-body">Major credit and debit cards, plus ANA Mileage Club miles for award bookings. Prices are shown in your selected currency at checkout using live conversion rates.</div>
+    </details>
+    <details class="help-faq">
+      <summary>Do fares include checked baggage?</summary>
+      <div class="help-faq-body">Premium Economy, Business, and First Class fares include checked baggage. Economy allowances vary by route and fare class — see <a href="#baggage">Baggage</a> below.</div>
+    </details>
+  </div>
+
+  <div class="help-cat" id="baggage">
+    <div class="help-cat-title">🧳 Baggage</div>
+    <details class="help-faq">
+      <summary>What are the checked baggage allowances?</summary>
+      <div class="help-faq-body">International Economy: 1 piece up to 23 kg. Premium Economy: 2 pieces up to 23 kg each. Business and First: 2–3 pieces up to 32 kg each, depending on route. Domestic connections follow ANA's standard domestic allowance.</div>
+    </details>
+    <details class="help-faq">
+      <summary>What can I bring in carry-on?</summary>
+      <div class="help-faq-body">One carry-on bag up to 10 kg plus one personal item, within standard international dimensions. Duty-free purchases made after security don't count against this limit.</div>
+    </details>
+    <details class="help-faq">
+      <summary>What if my bag is delayed or damaged?</summary>
+      <div class="help-faq-body">Report it at the baggage service desk in your arrival terminal before leaving the airport — every terminal zone at the Tokyo Mega Hub has one. On connecting itineraries booked as a single ticket, including <a href="#freedom">Freedom Flights</a>, your bag is checked through to your final destination.</div>
+    </details>
+  </div>
+
+  <div class="help-cat" id="airport">
+    <div class="help-cat-title">🛫 Airport & Connections</div>
+    <details class="help-faq">
+      <summary>What's the minimum connection time at the hub?</summary>
+      <div class="help-faq-body">45 minutes, backed by a one-minute-frequency people mover linking every terminal zone and biometric FastTrack boarding at all international gates. See the <a href="terminal.html">Terminal Map</a> for the full layout.</div>
+    </details>
+    <details class="help-faq">
+      <summary>Which terminal do I depart from?</summary>
+      <div class="help-faq-body">It depends on your route: T1 Asia for East/Southeast/South Asia, T2A for North America, T2B for Europe/Middle East/Africa/Oceania, and T2 Main for international low-cost carriers. Your terminal and gate are shown on your boarding pass and itinerary. Full breakdown, including every airline by terminal, is on the <a href="terminal.html">Terminal Map</a>.</div>
+    </details>
+    <details class="help-faq">
+      <summary>Do I need to reclear security when connecting?</summary>
+      <div class="help-faq-body">Not within the same terminal complex. Connections between T1 and the T2 complex (T2 Main, T2A, T2B) use the people mover behind security, so you generally won't need to reclear — check your boarding pass, as this can vary for certain international-to-international routings.</div>
+    </details>
+    <details class="help-faq">
+      <summary>How early should I arrive before my flight?</summary>
+      <div class="help-faq-body">3 hours before international departure, 90 minutes before domestic. If you're connecting into an outbound flight on a single ticket, your minimum connection time already accounts for this.</div>
+    </details>
+  </div>
+
+  <div class="help-cat" id="freedom">
+    <div class="help-cat-title">🌐 Freedom Flights & Codeshares</div>
+    <details class="help-faq">
+      <summary>What is the Freedom Flights program?</summary>
+      <div class="help-faq-body">Single-ticket itineraries from Tokyo to cities ANA doesn't serve directly, routed through Star Alliance partner hubs — for example Dublin via Brussels, or Budapest via Istanbul. One booking, one baggage check-in, and full ANA Mileage Club earning across every segment. Full route list on the <a href="destinations.html">Destinations</a> page.</div>
+    </details>
+    <details class="help-faq">
+      <summary>Will I need to collect and recheck baggage on a Freedom Flight?</summary>
+      <div class="help-faq-body">No — baggage is checked through to your final destination on the single ticket, the same as any other connecting itinerary.</div>
+    </details>
+    <details class="help-faq">
+      <summary>Do I earn miles on partner-operated segments?</summary>
+      <div class="help-faq-body">Yes, in full, on any Star Alliance partner segment booked on an ANA ticket. Codeshare or interline segments with Oneworld, SkyTeam, or independent carriers may earn under that carrier's own program instead — check the fare rules shown at booking.</div>
+    </details>
+  </div>
+
+  <div class="help-cat" id="mileage">
+    <div class="help-cat-title">⭐ ANA Mileage Club</div>
+    <details class="help-faq">
+      <summary>How do I join ANA Mileage Club?</summary>
+      <div class="help-faq-body">Membership is free — sign up during checkout or from your account settings. Miles from this and future bookings will apply automatically once your membership number is on file.</div>
+    </details>
+    <details class="help-faq">
+      <summary>How do I redeem miles?</summary>
+      <div class="help-faq-body">Award seats are bookable on ANA-operated flights and Star Alliance partner flights through the same search flow as a paid ticket — just switch to "Award Booking" before you search.</div>
+    </details>
+  </div>
+
+  <div class="help-cat" id="assistance">
+    <div class="help-cat-title">🤝 Special Assistance</div>
+    <details class="help-faq">
+      <summary>Traveling with infants or young children?</summary>
+      <div class="help-faq-body">Bassinets are available on request for long-haul flights (subject to aircraft type and availability), and children's amenity kits are provided in every cabin. Add details during booking or contact us in advance.</div>
+    </details>
+    <details class="help-faq">
+      <summary>Wheelchair or mobility assistance?</summary>
+      <div class="help-faq-body">Every terminal zone at the hub offers wheelchair assistance from check-in through to your connecting gate. Request this during booking or at least 48 hours before departure for guaranteed service.</div>
+    </details>
+    <details class="help-faq">
+      <summary>Traveling with pets?</summary>
+      <div class="help-faq-body">Small pets may travel in-cabin on select routes; larger animals travel as checked or cargo pets depending on aircraft type. Requirements vary by destination — contact us before booking to confirm eligibility.</div>
+    </details>
+  </div>
+
+</div>
+
+<!-- Contact -->
+<div class="help-contact">
+  <div class="help-contact-inner">
+    <div class="help-contact-title">Still Need a Hand?</div>
+    <p class="help-contact-sub">Our support team is based at the hub and available around every bank departure.</p>
+    <div class="help-contact-grid">
+      <div class="help-contact-card">
+        <div class="help-contact-icon">📞</div>
+        <div class="help-contact-label">Phone</div>
+        <div class="help-contact-val">+81 3-6741-1120</div>
+        <div class="help-contact-note">Daily, 06:00–23:30 JST</div>
+      </div>
+      <div class="help-contact-card">
+        <div class="help-contact-icon">✉️</div>
+        <div class="help-contact-label">Email</div>
+        <div class="help-contact-val">support@ana-hub.example</div>
+        <div class="help-contact-note">Replies within 24 hours</div>
+      </div>
+      <div class="help-contact-card">
+        <div class="help-contact-icon">💬</div>
+        <div class="help-contact-label">Live Chat</div>
+        <div class="help-contact-val">Available at every bank</div>
+        <div class="help-contact-note">06:30–23:30 JST</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+window.addEventListener('scroll', function() {
+  var nav = document.getElementById('navbar');
+  if (nav) nav.classList.toggle('scrolled', window.scrollY > 10);
+});
+</script>
+<script src="js/nav.js"></script>
+</body>
+</html>
