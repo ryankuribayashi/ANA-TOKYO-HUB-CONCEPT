@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANA | Flight Status</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+.fs-page { background: var(--off-white); min-height: 100vh; }
+
+/* ── Hero + search ── */
+.fs-hero {
+  padding: 120px 0 40px;
+  background:
+    radial-gradient(ellipse at 70% 40%, rgba(11,61,145,0.07) 0%, transparent 55%),
+    linear-gradient(160deg, #E8ECF7 0%, #DDE3F0 45%, #D8E0EE 100%);
+  border-bottom: 1px solid rgba(11,61,145,0.08);
+}
+.fs-hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.fs-hero-tag {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+  color: var(--navy); text-transform: uppercase; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.fs-hero-tag::before { content:''; width: 28px; height: 2px; background: var(--gold); }
+.fs-hero-title {
+  font-size: clamp(32px, 4vw, 48px); font-weight: 900;
+  color: var(--navy-dark); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 20px;
+}
+.fs-search-card {
+  background: #fff; border: 1.5px solid #E5E7EB; border-radius: 12px; padding: 22px;
+  display: flex; gap: 14px; align-items: end; flex-wrap: wrap; box-shadow: 0 8px 30px rgba(11,61,145,0.08);
+}
+.fs-field { flex: 1; min-width: 180px; }
+.fs-field label { display: block; font-size: 10.5px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+.fs-field input {
+  width: 100%; padding: 11px 12px; border: 1.5px solid #E5E7EB; border-radius: 6px;
+  font-size: 14px; font-family: inherit; color: var(--text);
+}
+.fs-field input:focus { outline: none; border-color: var(--navy); }
+.fs-swap { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid #E5E7EB; background: #fff; cursor: pointer; font-size: 15px; color: #6B7280; flex-shrink: 0; }
+.fs-swap:hover { border-color: var(--navy); color: var(--navy); }
+.fs-search-btn {
+  padding: 12px 26px; border-radius: 8px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, #0B3D91, #1565C0); color: #fff;
+  font-size: 13px; font-weight: 800; letter-spacing: 0.02em; flex-shrink: 0;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.fs-search-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(11,61,145,0.3); }
+
+/* ── Body ── */
+.fs-body { max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px; display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; }
+.fs-empty { grid-column: 1/-1; text-align: center; padding: 60px 24px; color: #9CA3AF; }
+.fs-empty-icon { font-size: 48px; margin-bottom: 14px; }
+
+.fs-list { display: flex; flex-direction: column; gap: 10px; }
+.fs-list-title { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #9CA3AF; margin-bottom: 4px; }
+.fs-flight-card {
+  background: #fff; border: 1.5px solid #E5E7EB; border-radius: 10px; padding: 14px 16px; cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.fs-flight-card:hover { border-color: rgba(11,61,145,0.4); transform: translateX(2px); }
+.fs-flight-card.active { border-color: var(--navy); background: rgba(11,61,145,0.03); }
+.fs-flight-card-top { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 800; color: var(--navy-dark); }
+.fs-flight-card-meta { font-size: 11.5px; color: #6B7280; margin-top: 4px; }
+.fs-flight-card-badge {
+  font-size: 9.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 10px;
+}
+.fs-badge-inflight { background: rgba(11,61,145,0.12); color: var(--navy); }
+.fs-badge-boarding { background: rgba(245,158,11,0.14); color: #B45309; }
+.fs-badge-scheduled { background: #F3F4F6; color: #6B7280; }
+.fs-badge-landed { background: rgba(16,185,129,0.12); color: #059669; }
+
+/* ── Status panel ── */
+.fs-panel { background: #fff; border: 1.5px solid #E5E7EB; border-radius: 12px; overflow: hidden; }
+.fs-panel-head { padding: 22px 24px; border-bottom: 1px solid #EEF0F8; }
+.fs-panel-route { font-size: 22px; font-weight: 900; color: var(--navy-dark); letter-spacing: -0.01em; display: flex; align-items: center; gap: 12px; }
+.fs-panel-route-arrow { color: var(--gold); }
+.fs-panel-flightno { font-size: 13px; color: #6B7280; margin-top: 4px; }
+.fs-panel-status-row { display: flex; align-items: center; gap: 14px; margin-top: 14px; flex-wrap: wrap; }
+.fs-status-badge {
+  font-size: 12px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 6px 14px; border-radius: 20px;
+}
+.fs-ontime { font-size: 12px; font-weight: 700; color: #059669; }
+.fs-delay { font-size: 12px; font-weight: 700; color: #B45309; }
+
+.fs-progress-wrap { padding: 20px 24px; border-bottom: 1px solid #EEF0F8; }
+.fs-progress-track { height: 6px; background: #EEF0F8; border-radius: 3px; overflow: hidden; position: relative; }
+.fs-progress-fill { height: 100%; background: linear-gradient(90deg, #0B3D91, #C9A84C); border-radius: 3px; transition: width 0.3s; }
+.fs-progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: #9CA3AF; margin-top: 8px; }
+.fs-progress-pct { text-align: center; font-size: 12px; color: var(--navy); font-weight: 700; margin-top: 6px; }
+
+.fs-detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 18px; padding: 22px 24px; }
+.fs-detail-label { font-size: 10.5px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.fs-detail-val { font-size: 14px; font-weight: 700; color: var(--navy-dark); }
+
+.fs-map-wrap { padding: 0 24px 24px; }
+#results-map { height: 340px; border-radius: 10px; overflow: hidden; }
+
+.fs-sim-note {
+  margin: 0 24px 22px; padding: 10px 14px; background: rgba(201,168,76,0.08);
+  border: 1px solid rgba(201,168,76,0.3); border-radius: 8px; font-size: 11.5px; color: #7A5D1E;
+}
+
+@media (max-width: 900px) {
+  .fs-body { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body class="fs-page">
+
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo" style="text-decoration:none;">
+      <img src="assets/ana-tail.png" class="ana-logo-img" alt="ANA All Nippon Airways">
+      <div class="logo-divider"></div>
+      <div class="sa-badge">
+        <svg class="sa-ring" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g transform="translate(16,16)"><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(72)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(72)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(144)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(144)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(216)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(216)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(288)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(288)"/></g></svg>
+        <div class="sa-text">
+          <span class="sa-name">star alliance</span>
+          <span class="sa-member">a star alliance member</span>
+        </div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Book</a>
+      <a href="destinations.html" class="nav-link">Destinations</a>
+      <a href="fleet.html" class="nav-link">Our Fleet</a>
+      <a href="news.html" class="nav-link">News</a>
+      <a href="terminal.html" class="nav-link">Terminal Map</a>
+      <a href="experience.html" class="nav-link">Experience</a>
+      <a href="help.html" class="nav-link">Help</a>
+    </div>
+    <div class="nav-actions">
+      <div class="nav-utility">
+        <a href="my-trips.html" class="nav-utility-link">🧳 <span class="nu-label">My Trips</span></a>
+        <a href="flight-status.html" class="nav-utility-link" style="color:var(--gold);">📡 <span class="nu-label">Status</span></a>
+        <a href="mileage-club.html" class="nav-utility-link">⭐ <span class="nu-label">Mileage Club</span></a>
+      </div>
+      <a href="index.html#search-widget" class="btn-book-nav">Book Now</a>
+    </div>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" id="mobileNavClose">✕</button>
+  <a href="index.html" class="mobile-nav-link">Book</a>
+  <a href="destinations.html" class="mobile-nav-link">Destinations</a>
+  <a href="fleet.html" class="mobile-nav-link">Our Fleet</a>
+  <a href="news.html" class="mobile-nav-link">News</a>
+  <a href="terminal.html" class="mobile-nav-link">Terminal Map</a>
+  <a href="experience.html" class="mobile-nav-link">Experience</a>
+  <a href="help.html" class="mobile-nav-link">Help</a>
+  <a href="my-trips.html" class="mobile-nav-link">My Trips</a>
+  <a href="flight-status.html" class="mobile-nav-link" style="color:var(--gold);">Flight Status</a>
+  <a href="mileage-club.html" class="mobile-nav-link">Mileage Club</a>
+  <div class="mobile-nav-bottom">
+    <a href="index.html#search-widget" class="mobile-nav-book">Book Now</a>
+  </div>
+</div>
+
+<!-- Hero + search -->
+<div class="fs-hero">
+  <div class="fs-hero-inner">
+    <div class="fs-hero-tag">Flight Status</div>
+    <h1 class="fs-hero-title">Track Your Flight</h1>
+    <form class="fs-search-card" id="fsForm">
+      <div class="fs-field">
+        <label>From</label>
+        <input id="fsFrom" list="fsAirportList" placeholder="City or airport code" autocomplete="off" value="Tokyo (NRT)">
+      </div>
+      <button type="button" class="fs-swap" id="fsSwap" title="Swap">⇄</button>
+      <div class="fs-field">
+        <label>To</label>
+        <input id="fsTo" list="fsAirportList" placeholder="City or airport code" autocomplete="off" value="New York (JFK)">
+      </div>
+      <datalist id="fsAirportList"></datalist>
+      <button type="submit" class="fs-search-btn">Track Flights →</button>
+    </form>
+  </div>
+</div>
+
+<!-- Body -->
+<div class="fs-body" id="fsBody">
+  <div class="fs-empty">
+    <div class="fs-empty-icon">📡</div>
+    <div>Search a route above to see today's flights and live simulated status.</div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/airports.js?v=11"></script>
+<script src="js/flights.js?v=11"></script>
+<script src="js/map.js?v=11"></script>
+<script src="js/flight-status.js?v=1"></script>
+<script src="js/nav.js?v=11"></script>
+</body>
+</html>

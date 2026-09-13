@@ -260,6 +260,132 @@ const PARTNER_OPS = {
   YUL: { name:'Air Canada',         nos:['AC 7'],              outDeps:[m(22,30)],          inArrs:[m(8)],              dur:870,   acName:'Boeing 787-9' },
 };
 
+// ── JAL Schedule (direct NRT↔dest only — JAL is modeled as a leaner, more
+// selective second carrier: 3 widebody types (A350-1000/787-9/787-8, reusing
+// ACFT codes 2/3/5), no connecting-hub or codeshare network of its own in this
+// model. Frequencies below are the daily-departure count nearest each route's
+// real weekly total (e.g. a 10/week route shows as 2x/day, a 4/week route as
+// 1x/day) — the demo has no weekly-calendar view, so day-of-week gating is not
+// modeled for these routes; they show every day they're searched. ─────────────
+const JAL_SCHEDULE = {
+  // ── Asia 5x daily (787-9) ────────────────────────────────────────────────
+  ICN: { ac:[3,3,3,3,3], outDeps:[m(7,20),m(9,50),m(13,15),m(16,40),m(20,20)], inArrs:[m(10,15),m(12,45),m(17,30),m(21,10),m(0,45)], dur:150, nos:['JL 701','JL 703','JL 705','JL 707','JL 709'], prices:{e:28000,pe:52000,bc:158000,fc:null} },
+  HKG: { ac:[3,3,3,3,3], outDeps:[m(7,20),m(9,50),m(13,15),m(16,40),m(20,20)], inArrs:[m(10,15),m(12,45),m(17,30),m(21,10),m(0,45)], dur:270, nos:['JL 711','JL 713','JL 715','JL 717','JL 719'], prices:{e:42000,pe:82000,bc:225000,fc:null} },
+  SIN: { ac:[3,3,3,3,3], outDeps:[m(7,20),m(9,50),m(13,15),m(16,40),m(20,20)], inArrs:[m(10,15),m(12,45),m(17,30),m(21,10),m(0,45)], dur:450, nos:['JL 721','JL 723','JL 725','JL 727','JL 729'], prices:{e:55000,pe:108000,bc:288000,fc:null} },
+  // ── Asia 3x daily ────────────────────────────────────────────────────────
+  BKK: { ac:[3,3,3],   outDeps:[m(8,45),m(14,20),m(22,5)], inArrs:[m(11,30),m(17,50),m(1,20)], dur:390, nos:['JL 731','JL 733','JL 735'], prices:{e:48000,pe:92000,bc:258000,fc:null} },
+  CGK: { ac:[3,3,3],   outDeps:[m(8,45),m(14,20),m(22,5)], inArrs:[m(11,30),m(17,50),m(1,20)], dur:450, nos:['JL 741','JL 743','JL 745'], prices:{e:52000,pe:98000,bc:268000,fc:null} },
+  KUL: { ac:[3,3,3],   outDeps:[m(8,45),m(14,20),m(22,5)], inArrs:[m(11,30),m(17,50),m(1,20)], dur:440, nos:['JL 751','JL 753','JL 755'], prices:{e:52000,pe:98000,bc:268000,fc:null} },
+  GMP: { ac:[5,5,5],   outDeps:[m(8,45),m(14,20),m(22,5)], inArrs:[m(11,30),m(17,50),m(1,20)], dur:120, nos:['JL 761','JL 763','JL 765'], prices:{e:22000,pe:42000,bc:125000,fc:null} },
+  // ── Asia 2x daily ────────────────────────────────────────────────────────
+  PUS: { ac:[5,5],     outDeps:[m(8,55),m(15,20)],         inArrs:[m(12,10),m(19,35)],         dur:120, nos:['JL 801','JL 803'], prices:{e:22000,pe:42000,bc:125000,fc:null} },
+  PEK: { ac:[5,5],     outDeps:[m(8,55),m(15,20)],         inArrs:[m(12,10),m(19,35)],         dur:210, nos:['JL 811','JL 813'], prices:{e:32000,pe:62000,bc:185000,fc:null} },
+  PVG: { ac:[5,5],     outDeps:[m(8,55),m(15,20)],         inArrs:[m(12,10),m(19,35)],         dur:170, nos:['JL 821','JL 823'], prices:{e:28000,pe:55000,bc:168000,fc:null} },
+  HAN: { ac:[3,3],     outDeps:[m(8,55),m(15,20)],         inArrs:[m(12,10),m(19,35)],         dur:300, nos:['JL 831','JL 833'], prices:{e:42000,pe:82000,bc:218000,fc:null} },
+  SGN: { ac:[3,3],     outDeps:[m(8,55),m(15,20)],         inArrs:[m(12,10),m(19,35)],         dur:330, nos:['JL 841','JL 843'], prices:{e:45000,pe:88000,bc:235000,fc:null} },
+  MNL: { ac:[3,3],     outDeps:[m(8,55),m(15,20)],         inArrs:[m(12,10),m(19,35)],         dur:280, nos:['JL 851','JL 853'], prices:{e:38000,pe:72000,bc:198000,fc:null} },
+  TPE: { ac:[3,5],     outDeps:[m(8,55),m(15,20)],         inArrs:[m(12,10),m(19,35)],         dur:180, nos:['JL 861','JL 863'], prices:{e:32000,pe:62000,bc:185000,fc:null} },
+  // ── Asia 1x daily, day bank (787-8) ──────────────────────────────────────
+  HGH: { ac:[5],       outDeps:[m(9,40)],                  inArrs:[m(18,20)],                  dur:195, nos:['JL 901'], prices:{e:32000,pe:62000,bc:178000,fc:null} },
+  CTU: { ac:[5],       outDeps:[m(9,40)],                  inArrs:[m(18,20)],                  dur:270, nos:['JL 911'], prices:{e:38000,pe:72000,bc:198000,fc:null} },
+  CAN: { ac:[5],       outDeps:[m(9,40)],                  inArrs:[m(18,20)],                  dur:245, nos:['JL 921'], prices:{e:38000,pe:72000,bc:198000,fc:null} },
+  MFM: { ac:[5],       outDeps:[m(9,40)],                  inArrs:[m(18,20)],                  dur:235, nos:['JL 931'], prices:{e:38000,pe:72000,bc:198000,fc:null} },
+  CEB: { ac:[5],       outDeps:[m(9,40)],                  inArrs:[m(18,20)],                  dur:280, nos:['JL 881'], prices:{e:42000,pe:82000,bc:215000,fc:null} },
+  // ── Asia 1x daily, night bank (long thin routes) ─────────────────────────
+  DEL: { ac:[3],       outDeps:[m(22,45)],                 inArrs:[m(13,30)],                  dur:540, nos:['JL 871'], prices:{e:65000,pe:125000,bc:338000,fc:null} },
+  DOH: { ac:[3],       outDeps:[m(22,45)],                 inArrs:[m(13,30)],                  dur:660, nos:['JL 891'], prices:{e:88000,pe:175000,bc:448000,fc:null} },
+  BOM: { ac:[5],       outDeps:[m(22,45)],                 inArrs:[m(13,30)],                  dur:600, nos:['JL 941'], prices:{e:68000,pe:132000,bc:348000,fc:null} },
+  // ── North America 2x daily (A350-1000) ───────────────────────────────────
+  LAX: { ac:[2,2],     outDeps:[m(11,40),m(20,15)],        inArrs:[m(9,15),m(18,50)],          dur:600, nos:['JL 001','JL 003'], prices:{e:145000,pe:295000,bc:748000,fc:1820000} },
+  SFO: { ac:[2,2],     outDeps:[m(11,40),m(20,15)],        inArrs:[m(9,15),m(18,50)],          dur:600, nos:['JL 011','JL 013'], prices:{e:145000,pe:295000,bc:748000,fc:1820000} },
+  ORD: { ac:[2,2],     outDeps:[m(11,40),m(20,15)],        inArrs:[m(9,15),m(18,50)],          dur:750, nos:['JL 021','JL 023'], prices:{e:138000,pe:278000,bc:698000,fc:1680000} },
+  JFK: { ac:[2,2],     outDeps:[m(11,40),m(20,15)],        inArrs:[m(9,15),m(18,50)],          dur:810, nos:['JL 031','JL 033'], prices:{e:158000,pe:318000,bc:798000,fc:1980000} },
+  HNL: { ac:[2,2],     outDeps:[m(11,40),m(20,15)],        inArrs:[m(9,15),m(18,50)],          dur:450, nos:['JL 041','JL 043'], prices:{e:92000, pe:185000,bc:468000,fc:1198000} },
+  DFW: { ac:[2,2],     outDeps:[m(11,40),m(20,15)],        inArrs:[m(9,15),m(18,50)],          dur:810, nos:['JL 051','JL 053'], prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
+  // ── North America 2x daily (787-9, thinner) ──────────────────────────────
+  SEA: { ac:[3,3],     outDeps:[m(11,40),m(20,15)],        inArrs:[m(9,15),m(18,50)],          dur:540, nos:['JL 061','JL 063'], prices:{e:138000,pe:278000,bc:698000,fc:null} },
+  // ── North America 1x daily (787-9) ───────────────────────────────────────
+  SAN: { ac:[3],       outDeps:[m(14,50)],                 inArrs:[m(16,35)],                  dur:630, nos:['JL 071'], prices:{e:132000,pe:268000,bc:668000,fc:null} },
+  BOS: { ac:[3],       outDeps:[m(14,50)],                 inArrs:[m(16,35)],                  dur:840, nos:['JL 081'], prices:{e:142000,pe:285000,bc:718000,fc:null} },
+  YVR: { ac:[3],       outDeps:[m(14,50)],                 inArrs:[m(16,35)],                  dur:570, nos:['JL 091'], prices:{e:135000,pe:272000,bc:678000,fc:null} },
+  MUC: { ac:[3],       outDeps:[m(22,30)],                 inArrs:[m(0,40)],                   dur:735, nos:['JL 431'], prices:{e:162000,pe:325000,bc:818000,fc:null} },
+  YUL: { ac:[3],       outDeps:[m(14,50)],                 inArrs:[m(16,35)],                  dur:870, nos:['JL 111'], prices:{e:148000,pe:298000,bc:748000,fc:null} },
+  MEX: { ac:[3],       outDeps:[m(14,50)],                 inArrs:[m(16,35)],                  dur:900, nos:['JL 121'], prices:{e:148000,pe:298000,bc:748000,fc:null} },
+  // ── North America 1x daily (A350-1000) ───────────────────────────────────
+  YYZ: { ac:[2],       outDeps:[m(14,50)],                 inArrs:[m(16,35)],                  dur:810, nos:['JL 101'], prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
+  // ── Europe 2x daily (A350-1000) ───────────────────────────────────────────
+  LHR: { ac:[2,2],     outDeps:[m(10,5),m(22,0)],          inArrs:[m(13,20),m(1,45)],          dur:750, nos:['JL 401','JL 403'], prices:{e:168000,pe:335000,bc:848000,fc:2180000} },
+  CDG: { ac:[2,2],     outDeps:[m(10,5),m(22,0)],          inArrs:[m(13,20),m(1,45)],          dur:735, nos:['JL 411','JL 413'], prices:{e:165000,pe:328000,bc:828000,fc:2080000} },
+  // ── Europe 1x daily, night bank (A350-1000) ──────────────────────────────
+  FRA: { ac:[2],       outDeps:[m(22,30)],                 inArrs:[m(0,40)],                   dur:720, nos:['JL 421'], prices:{e:162000,pe:325000,bc:818000,fc:2050000} },
+  HEL: { ac:[2],       outDeps:[m(22,30)],                 inArrs:[m(0,40)],                   dur:585, nos:['JL 441'], prices:{e:155000,pe:310000,bc:780000,fc:1900000} },
+  // ── Oceania 1x daily (A350-1000 / 787-9) ─────────────────────────────────
+  SYD: { ac:[2],       outDeps:[m(10,45)],                 inArrs:[m(9,5)],                    dur:570, nos:['JL 771'], prices:{e:118000,pe:235000,bc:598000,fc:1480000} },
+  MEL: { ac:[3],       outDeps:[m(10,45)],                 inArrs:[m(9,5)],                    dur:600, nos:['JL 775'], prices:{e:108000,pe:215000,bc:548000,fc:null} },
+  BNE: { ac:[3],       outDeps:[m(10,45)],                 inArrs:[m(9,5)],                    dur:570, nos:['JL 779'], prices:{e:102000,pe:202000,bc:518000,fc:null} },
+  PER: { ac:[3],       outDeps:[m(10,45)],                 inArrs:[m(9,5)],                    dur:630, nos:['JL 783'], prices:{e:98000, pe:195000,bc:498000,fc:null} },
+  AKL: { ac:[3],       outDeps:[m(10,45)],                 inArrs:[m(9,5)],                    dur:690, nos:['JL 787'], prices:{e:125000,pe:248000,bc:628000,fc:null} },
+};
+
+// ── JAL direct NRT↔dest builder — mirrors buildDirect's structure/timing
+// logic exactly, without the KIX/partner/via-connection branches this pass
+// doesn't model for JAL. Cards carry the same segments/layovers shape so they
+// render through the existing itinerary-view.js path unmodified. ─────────────
+// nrtGateOut/nrtGateIn label gates "(ANA)"/"(Star Alliance)" since they were
+// written before JAL existed in this model — relabel for JAL's own cards
+// rather than touching the shared helper ANA's own rendering still relies on.
+function jalGateLabel(raw) {
+  return raw.replace(/\(ANA\)$/, '(JAL)').replace(/\(Star Alliance\)$/, '(JAL)');
+}
+
+function buildJalDirect(code, s, outbound) {
+  const tz = TZ[code] || 0;
+  const results = [];
+  const count = Math.min(s.outDeps.length, 3);
+  for (let i = 0; i < count; i++) {
+    const ac = s.ac[i] || s.ac[0];
+    const cabin = cabinStr(ac);
+    const prices = {...s.prices};
+    if (!ACFT[ac].hasPe) prices.pe = null;
+    if (!ACFT[ac].hasFc) prices.fc = null;
+    const dep = outbound ? s.outDeps[i] : s.inArrs[i];
+    let depLocal, arrLocal, plusDays = 0;
+    if (outbound) {
+      const rawArr = dep + s.dur + (tz - 9) * 60;
+      arrLocal = toHHMM(rawArr); plusDays = Math.floor(rawArr / 1440); depLocal = toHHMM(dep);
+    } else {
+      const rawDep = dep - s.dur + (tz - 9) * 60;
+      depLocal = toHHMM(rawDep); arrLocal = toHHMM(dep); plusDays = Math.floor((s.dur - (tz - 9) * 60) / 1440);
+    }
+    const flightNo = outbound ? s.nos[i] : inboundNo(s.nos[i]);
+    const acName = ACFT[ac].name;
+    const nrtGateOutJal = jalGateLabel(nrtGateOut(code));
+    const nrtGateInJal  = jalGateLabel(nrtGateIn(code, false));
+    const termOut = outbound ? 'Tokyo Mega Hub (NRT) — '+nrtGateOutJal : `${AIRPORTS[code]?.city||code} (${code}) — ${worldTerm(code)}`;
+    const termDest = outbound ? `${AIRPORTS[code]?.city||code} (${code}) — ${worldTerm(code)}` : 'Tokyo Mega Hub (NRT)';
+    results.push({
+      tag: null, direct:true,
+      operator:'JAL', flightOut:flightNo, flightIn:'—',
+      depLocal, arrHub:toHHMM(dep), hubDep:outbound ? toHHMM(dep) : '—',
+      arrDest:arrLocal, seg1Time:outbound?'—':durStr(s.dur), seg2Time:outbound?durStr(s.dur):'—',
+      transitTime:'—', totalTime:durStr(s.dur), aircraft1:acName, aircraft2:acName,
+      cabinOut:cabin, cabinIn:cabin,
+      termOut,
+      termHub1: outbound ? 'Tokyo Mega Hub (NRT) — '+nrtGateOutJal : 'Tokyo Mega Hub (NRT) — '+nrtGateInJal,
+      termHub2: outbound ? 'Tokyo Mega Hub (NRT) — '+nrtGateOutJal : '—',
+      termDest,
+      transfer:'Direct service — no transfer required', mct:'Direct flight',
+      note: plusDays > 0 ? `+${plusDays} day${plusDays>1?'s':''}` : null, prices,
+      segments: [ outbound
+        ? mkLeg('NRT', code, flightNo, 'JAL', acName, cabin, depLocal, termOut, arrLocal, termDest, durStr(s.dur))
+        : mkLeg(code, 'NRT', flightNo, 'JAL', acName, cabin, depLocal, termOut, arrLocal, termDest, durStr(s.dur))
+      ],
+      layovers: [],
+    });
+  }
+  return results.length > 0 ? results : null;
+}
+
 // ── KIX Schedule (ANA-operated) ───────────────────────────────────────────────
 const KIX_SCHEDULE = {
   // ── Domestic ─────────────────────────────────────────────────────────────
@@ -639,8 +765,8 @@ function buildViaToHub(fromCode, via) {
   return results.length > 0 ? results : null;
 }
 
-// ── Core builder ─────────────────────────────────────────────────────────────
-function buildFlights(fromCode, toCode) {
+// ── Core builder (ANA — unchanged) ────────────────────────────────────────────
+function buildFlightsANA(fromCode, toCode) {
   if (!fromCode || !toCode || fromCode === toCode) return null;
   const isFromNRT = fromCode === 'NRT';
   const isToNRT   = toCode   === 'NRT';
@@ -819,6 +945,24 @@ function buildFlights(fromCode, toCode) {
     return [...nrtAna, ...allKixCards, ...nrtPartner];
   }
   return allNrtCards;
+}
+
+// ── Core builder (public entry point) ────────────────────────────────────────
+// Wraps the ANA engine above, unmodified, and additively appends JAL's direct
+// NRT↔dest flights (JAL_SCHEDULE) whenever one endpoint is NRT and the other
+// has JAL service — including routes ANA only reaches via a connection (e.g.
+// HEL, where JAL flies direct and ANA doesn't), since this runs after, not
+// instead of, the full ANA branch logic above.
+function buildFlights(fromCode, toCode) {
+  const anaCards = buildFlightsANA(fromCode, toCode);
+  const isFromNRT = fromCode === 'NRT', isToNRT = toCode === 'NRT';
+  if (!isFromNRT && !isToNRT) return anaCards;
+  const code = isFromNRT ? toCode : fromCode;
+  const jalS = JAL_SCHEDULE[code];
+  if (!jalS) return anaCards;
+  const jalCards = buildJalDirect(code, jalS, isFromNRT);
+  if (!jalCards) return anaCards;
+  return [...(anaCards || []), ...jalCards];
 }
 
 // ── Direct NRT↔dest ──────────────────────────────────────────────────────────

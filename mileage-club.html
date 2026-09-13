@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANA | Mileage Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+.mc-page { background: var(--off-white); min-height: 100vh; }
+
+.mc-hero {
+  padding: 120px 0 44px;
+  background: linear-gradient(140deg, var(--navy-dark) 0%, var(--navy) 55%, #1a5276 100%);
+  color: #fff;
+}
+.mc-hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.mc-hero-tag {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+  color: var(--gold-light); text-transform: uppercase; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.mc-hero-tag::before { content:''; width: 28px; height: 2px; background: var(--gold); }
+.mc-hero-title { font-size: clamp(32px, 4vw, 46px); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 20px; }
+
+/* ── Member card ── */
+.mc-card {
+  background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.16); border-radius: 14px;
+  padding: 26px 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;
+}
+.mc-card-id { font-size: 11px; color: rgba(255,255,255,0.55); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.mc-card-name { font-size: 22px; font-weight: 900; letter-spacing: -0.01em; }
+.mc-card-num { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; letter-spacing: 0.06em; }
+.mc-tier-badge {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 24px;
+  font-size: 13px; font-weight: 800; letter-spacing: 0.03em; margin-top: 10px;
+}
+.mc-card-miles { text-align: right; }
+.mc-card-miles-val { font-size: 30px; font-weight: 900; color: var(--gold-light); letter-spacing: -0.02em; }
+.mc-card-miles-lbl { font-size: 10.5px; font-weight: 700; color: rgba(255,255,255,0.55); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+.mc-progress-wrap { margin-top: 14px; }
+.mc-progress-track { height: 6px; background: rgba(255,255,255,0.15); border-radius: 3px; overflow: hidden; }
+.mc-progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 3px; }
+.mc-progress-note { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 6px; }
+
+/* ── Body ── */
+.mc-body { max-width: 1200px; margin: 0 auto; padding: 48px 24px 80px; }
+.mc-section { margin-bottom: 48px; }
+.mc-section-title { font-size: 20px; font-weight: 900; color: var(--navy-dark); margin-bottom: 6px; letter-spacing: -0.01em; }
+.mc-section-sub { font-size: 13px; color: #6B7280; margin-bottom: 22px; }
+
+/* Tier table */
+.mc-tier-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.mc-tier-card { background: #fff; border: 1.5px solid #E5E7EB; border-radius: 10px; padding: 20px; }
+.mc-tier-card.current { border-color: var(--gold); box-shadow: 0 8px 26px rgba(201,168,76,0.18); }
+.mc-tier-card-name { font-size: 15px; font-weight: 900; margin-bottom: 4px; }
+.mc-tier-card-req { font-size: 11px; color: #9CA3AF; margin-bottom: 14px; }
+.mc-tier-card ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.mc-tier-card li { font-size: 12px; color: #4B5563; padding-left: 16px; position: relative; }
+.mc-tier-card li::before { content: '✓'; position: absolute; left: 0; color: #059669; font-weight: 800; }
+
+/* Calculator */
+.mc-calc-card { background: #fff; border: 1.5px solid #E5E7EB; border-radius: 12px; padding: 24px; }
+.mc-calc-row { display: flex; gap: 14px; align-items: end; flex-wrap: wrap; }
+.mc-field { flex: 1; min-width: 160px; }
+.mc-field label { display: block; font-size: 10.5px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+.mc-field input, .mc-field select {
+  width: 100%; padding: 11px 12px; border: 1.5px solid #E5E7EB; border-radius: 6px;
+  font-size: 13px; font-family: inherit; color: var(--text);
+}
+.mc-calc-btn {
+  padding: 11px 24px; border-radius: 8px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, #0B3D91, #1565C0); color: #fff;
+  font-size: 13px; font-weight: 800; flex-shrink: 0;
+}
+.mc-calc-result {
+  margin-top: 18px; padding: 16px 18px; background: rgba(201,168,76,0.08);
+  border: 1px solid rgba(201,168,76,0.3); border-radius: 8px; display: none;
+}
+.mc-calc-result.show { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.mc-calc-result-miles { font-size: 22px; font-weight: 900; color: var(--navy); }
+.mc-calc-result-note { font-size: 12px; color: #6B7280; }
+
+/* Activity */
+.mc-activity-list { display: flex; flex-direction: column; gap: 10px; }
+.mc-activity-row { background: #fff; border: 1.5px solid #E5E7EB; border-radius: 10px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.mc-activity-route { font-size: 13px; font-weight: 800; color: var(--navy-dark); }
+.mc-activity-meta { font-size: 11.5px; color: #9CA3AF; margin-top: 2px; }
+.mc-activity-miles { font-size: 14px; font-weight: 800; color: #059669; }
+.mc-activity-empty { text-align: center; padding: 30px; color: #9CA3AF; font-size: 13px; }
+
+@media (max-width: 900px) {
+  .mc-tier-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .mc-tier-grid { grid-template-columns: 1fr; }
+  .mc-card { flex-direction: column; align-items: flex-start; }
+  .mc-card-miles { text-align: left; }
+}
+</style>
+</head>
+<body class="mc-page">
+
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo" style="text-decoration:none;">
+      <img src="assets/ana-tail.png" class="ana-logo-img" alt="ANA All Nippon Airways">
+      <div class="logo-divider"></div>
+      <div class="sa-badge">
+        <svg class="sa-ring" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g transform="translate(16,16)"><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(72)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(72)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(144)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(144)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(216)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(216)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(288)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(288)"/></g></svg>
+        <div class="sa-text">
+          <span class="sa-name">star alliance</span>
+          <span class="sa-member">a star alliance member</span>
+        </div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Book</a>
+      <a href="destinations.html" class="nav-link">Destinations</a>
+      <a href="fleet.html" class="nav-link">Our Fleet</a>
+      <a href="news.html" class="nav-link">News</a>
+      <a href="terminal.html" class="nav-link">Terminal Map</a>
+      <a href="experience.html" class="nav-link">Experience</a>
+      <a href="help.html" class="nav-link">Help</a>
+    </div>
+    <div class="nav-actions">
+      <div class="nav-utility">
+        <a href="my-trips.html" class="nav-utility-link">🧳 <span class="nu-label">My Trips</span></a>
+        <a href="flight-status.html" class="nav-utility-link">📡 <span class="nu-label">Status</span></a>
+        <a href="mileage-club.html" class="nav-utility-link" style="color:var(--gold);">⭐ <span class="nu-label">Mileage Club</span></a>
+      </div>
+      <a href="index.html#search-widget" class="btn-book-nav">Book Now</a>
+    </div>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" id="mobileNavClose">✕</button>
+  <a href="index.html" class="mobile-nav-link">Book</a>
+  <a href="destinations.html" class="mobile-nav-link">Destinations</a>
+  <a href="fleet.html" class="mobile-nav-link">Our Fleet</a>
+  <a href="news.html" class="mobile-nav-link">News</a>
+  <a href="terminal.html" class="mobile-nav-link">Terminal Map</a>
+  <a href="experience.html" class="mobile-nav-link">Experience</a>
+  <a href="help.html" class="mobile-nav-link">Help</a>
+  <a href="my-trips.html" class="mobile-nav-link">My Trips</a>
+  <a href="flight-status.html" class="mobile-nav-link">Flight Status</a>
+  <a href="mileage-club.html" class="mobile-nav-link" style="color:var(--gold);">Mileage Club</a>
+  <div class="mobile-nav-bottom">
+    <a href="index.html#search-widget" class="mobile-nav-book">Book Now</a>
+  </div>
+</div>
+
+<!-- Hero + member card -->
+<div class="mc-hero">
+  <div class="mc-hero-inner">
+    <div class="mc-hero-tag">ANA Mileage Club</div>
+    <h1 class="mc-hero-title">Your Miles, Your Status</h1>
+    <div class="mc-card" id="mcCard"><!-- filled by JS --></div>
+  </div>
+</div>
+
+<!-- Body -->
+<div class="mc-body">
+
+  <div class="mc-section">
+    <div class="mc-section-title">Membership Tiers</div>
+    <div class="mc-section-sub">Status is based on miles earned in the last 12 months. Higher tiers carry reciprocal Star Alliance status.</div>
+    <div class="mc-tier-grid" id="mcTierGrid"><!-- filled by JS --></div>
+  </div>
+
+  <div class="mc-section">
+    <div class="mc-section-title">Miles Calculator</div>
+    <div class="mc-section-sub">Estimate how many miles you'd earn on a route before you book.</div>
+    <div class="mc-calc-card">
+      <div class="mc-calc-row">
+        <div class="mc-field">
+          <label>From</label>
+          <input id="mcCalcFrom" list="mcAirportList" placeholder="City or airport code" autocomplete="off" value="Tokyo (NRT)">
+        </div>
+        <div class="mc-field">
+          <label>To</label>
+          <input id="mcCalcTo" list="mcAirportList" placeholder="City or airport code" autocomplete="off" value="London (LHR)">
+        </div>
+        <datalist id="mcAirportList"></datalist>
+        <div class="mc-field">
+          <label>Cabin</label>
+          <select id="mcCalcCabin">
+            <option>Economy</option>
+            <option>Premium Economy</option>
+            <option selected>Business</option>
+            <option>First Class</option>
+          </select>
+        </div>
+        <div class="mc-field">
+          <label>Round Trip?</label>
+          <select id="mcCalcRT">
+            <option value="1">Yes</option>
+            <option value="0">One way</option>
+          </select>
+        </div>
+        <button class="mc-calc-btn" id="mcCalcBtn">Calculate →</button>
+      </div>
+      <div class="mc-calc-result" id="mcCalcResult"></div>
+    </div>
+  </div>
+
+  <div class="mc-section">
+    <div class="mc-section-title">Recent Activity</div>
+    <div class="mc-section-sub">Miles earned from bookings made on this device.</div>
+    <div class="mc-activity-list" id="mcActivityList"><!-- filled by JS --></div>
+  </div>
+
+</div>
+
+<script src="js/airports.js?v=11"></script>
+<script src="js/currencies.js?v=11"></script>
+<script src="js/mileage-club.js?v=1"></script>
+<script src="js/nav.js?v=11"></script>
+</body>
+</html>

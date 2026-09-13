@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANA | Checkout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+.co-page { background: var(--off-white); min-height: 100vh; }
+
+/* ── Step bar (5-step, extends booking.html's flow) ── */
+.booking-steps { background: var(--white); border-bottom: 1px solid #E5E7EB; }
+.booking-steps-inner {
+  max-width: 1200px; margin: 0 auto; padding: 0 24px;
+  display: flex; align-items: stretch; gap: 0; overflow-x: auto;
+}
+.bstep { display: flex; align-items: center; gap: 9px; padding: 14px 22px 14px 0; font-size: 12.5px; font-weight: 600; color: #9CA3AF; white-space: nowrap; }
+.bstep + .bstep { border-left: 1px solid #E5E7EB; padding-left: 22px; }
+.bstep.done { color: #059669; }
+.bstep.active { color: var(--navy); }
+.bstep-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; background: #E5E7EB; color: #9CA3AF; flex-shrink: 0;
+}
+.bstep.done .bstep-num { background: #059669; color: #fff; }
+.bstep.active .bstep-num { background: var(--navy); color: #fff; }
+
+/* ── Trip summary banner ── */
+.co-summary {
+  background: linear-gradient(135deg, #0B3D91 0%, #1a5276 100%); color: #fff; padding: 18px 0;
+}
+.co-summary-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; gap: 28px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.co-summary-legs { display: flex; gap: 28px; flex-wrap: wrap; }
+.co-leg-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #C9A84C; margin-bottom: 3px; }
+.co-leg-route { font-size: 16px; font-weight: 800; }
+.co-leg-meta { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+.co-summary-total { text-align: right; }
+.co-summary-total-lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.6); }
+.co-summary-total-val { font-size: 22px; font-weight: 900; color: var(--gold-light); }
+
+/* ── Body shell ── */
+.co-body { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
+.co-step-title { font-size: 22px; font-weight: 900; color: var(--navy-dark); margin-bottom: 6px; letter-spacing: -0.01em; }
+.co-step-sub { font-size: 13px; color: #6B7280; margin-bottom: 24px; }
+
+/* ── Seat map ── */
+.seat-map-wrap { background: #fff; border: 1.5px solid #E5E7EB; border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+.seat-map-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px; }
+.seat-leg-title { font-size: 15px; font-weight: 800; color: var(--navy-dark); }
+.seat-leg-title span { color: #9CA3AF; font-weight: 600; font-size: 12px; }
+.seat-pax-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.seat-pax-chip {
+  padding: 6px 14px; border-radius: 20px; border: 1.5px solid #E5E7EB; font-size: 11.5px; font-weight: 700;
+  cursor: pointer; background: #fff; color: #6B7280; transition: all 0.15s;
+}
+.seat-pax-chip.active { border-color: var(--navy); background: var(--navy); color: #fff; }
+.seat-pax-chip.filled { border-color: #059669; color: #059669; }
+.seat-pax-chip.filled.active { background: #059669; color: #fff; border-color: #059669; }
+.seat-grid { display: flex; flex-direction: column; gap: 6px; align-items: center; overflow-x: auto; padding: 10px 4px; }
+.seat-row { display: flex; align-items: center; gap: 6px; }
+.seat-row-num { width: 26px; text-align: center; font-size: 10.5px; font-weight: 700; color: #9CA3AF; flex-shrink: 0; }
+.seat-group { display: flex; gap: 4px; }
+.seat-aisle { width: 18px; flex-shrink: 0; }
+.seat-btn {
+  width: 30px; height: 30px; border-radius: 6px 6px 10px 10px; border: 1.5px solid #D1D5DB;
+  background: #F9FAFB; font-size: 9px; font-weight: 800; color: #6B7280; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all 0.12s; flex-shrink: 0;
+}
+.seat-btn:hover:not(.seat-unavail):not(.seat-taken) { border-color: var(--navy); transform: translateY(-1px); }
+.seat-btn.seat-unavail { background: #E5E7EB; border-color: #E5E7EB; cursor: not-allowed; color: #B0B5BE; }
+.seat-btn.seat-exit { border-color: #059669; }
+.seat-btn.seat-taken { background: var(--navy); border-color: var(--navy); color: #fff; }
+.seat-legend { display: flex; gap: 18px; margin-top: 16px; flex-wrap: wrap; font-size: 11px; color: #6B7280; }
+.seat-legend-item { display: flex; align-items: center; gap: 6px; }
+.seat-legend-swatch { width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid #D1D5DB; background: #F9FAFB; }
+.seat-legend-swatch.taken { background: var(--navy); border-color: var(--navy); }
+.seat-legend-swatch.unavail { background: #E5E7EB; border-color: #E5E7EB; }
+.seat-legend-swatch.exit { border-color: #059669; }
+
+/* ── Passenger form ── */
+.pax-form-card { background: #fff; border: 1.5px solid #E5E7EB; border-radius: 10px; padding: 22px 24px; margin-bottom: 16px; }
+.pax-form-title { font-size: 14px; font-weight: 800; color: var(--navy-dark); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.pax-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 14px; }
+.pax-field label { display: block; font-size: 10.5px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px; }
+.pax-field input, .pax-field select {
+  width: 100%; padding: 10px 12px; border: 1.5px solid #E5E7EB; border-radius: 6px;
+  font-size: 13px; font-family: inherit; color: var(--text); background: #fff;
+}
+.pax-field input:focus, .pax-field select:focus { outline: none; border-color: var(--navy); }
+
+/* ── Payment ── */
+.pay-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; align-items: start; }
+.pay-card { background: #fff; border: 1.5px solid #E5E7EB; border-radius: 10px; padding: 24px; }
+.pay-notice {
+  background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.35); border-radius: 8px;
+  padding: 12px 14px; font-size: 12px; color: #7A5D1E; margin-bottom: 20px; display: flex; gap: 10px; align-items: flex-start;
+}
+.pay-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 14px; margin-bottom: 14px; }
+.order-summary-card { background: #F9FAFB; border: 1.5px solid #E5E7EB; border-radius: 10px; padding: 22px; position: sticky; top: 90px; }
+.order-summary-title { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #9CA3AF; margin-bottom: 12px; }
+.order-line { display: flex; justify-content: space-between; font-size: 12.5px; color: #6B7280; padding: 8px 0; border-bottom: 1px solid #EEF0F8; gap: 10px; }
+.order-total { display: flex; justify-content: space-between; font-size: 17px; font-weight: 900; color: var(--navy); padding-top: 14px; }
+.order-total-note { font-size: 10px; color: #9CA3AF; margin-top: 4px; }
+
+/* ── Actions ── */
+.co-actions { display: flex; justify-content: space-between; margin-top: 24px; }
+.co-btn { padding: 13px 28px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; border: none; letter-spacing: 0.02em; transition: transform 0.15s, box-shadow 0.15s; }
+.co-btn-primary { background: linear-gradient(135deg, #0B3D91, #1565C0); color: #fff; }
+.co-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(11,61,145,0.3); }
+.co-btn-secondary { background: #fff; border: 1.5px solid #E5E7EB; color: #6B7280; }
+.co-btn-secondary:hover { border-color: #9CA3AF; }
+.co-hint { font-size: 11.5px; color: #9CA3AF; margin-top: 10px; text-align: center; }
+
+/* ── Confirmation ── */
+.co-confirm { text-align: center; padding: 50px 24px 20px; max-width: 640px; margin: 0 auto; }
+.co-confirm-icon { font-size: 60px; margin-bottom: 14px; }
+.co-confirm-title { font-size: 27px; font-weight: 900; color: var(--navy-dark); margin-bottom: 10px; letter-spacing: -0.01em; }
+.co-confirm-ref { font-size: 14px; color: #6B7280; margin-bottom: 26px; }
+.co-confirm-ref strong { color: var(--navy); font-size: 19px; letter-spacing: 0.12em; }
+.co-confirm-details { background: #fff; border: 1.5px solid #E5E7EB; border-radius: 10px; padding: 22px 24px; text-align: left; margin-bottom: 22px; }
+.co-confirm-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #EEF0F8; font-size: 13px; }
+.co-confirm-row:last-child { border-bottom: none; }
+.co-confirm-row span:first-child { color: #6B7280; }
+.co-confirm-row span:last-child { color: var(--navy-dark); font-weight: 700; text-align: right; }
+.co-confirm-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+@media (max-width: 800px) {
+  .pay-grid { grid-template-columns: 1fr; }
+  .order-summary-card { position: static; }
+  .co-summary-inner { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .co-summary-total { text-align: left; }
+}
+</style>
+</head>
+<body class="co-page">
+
+<!-- Navbar -->
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo" style="text-decoration:none;">
+      <img src="assets/ana-tail.png" class="ana-logo-img" alt="ANA All Nippon Airways">
+      <div class="logo-divider"></div>
+      <div class="sa-badge">
+        <svg class="sa-ring" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g transform="translate(16,16)"><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(72)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(72)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(144)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(144)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(216)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(216)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(288)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(288)"/></g></svg>
+        <div class="sa-text">
+          <span class="sa-name">star alliance</span>
+          <span class="sa-member">a star alliance member</span>
+        </div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Book</a>
+      <a href="destinations.html" class="nav-link">Destinations</a>
+      <a href="fleet.html" class="nav-link">Our Fleet</a>
+      <a href="news.html" class="nav-link">News</a>
+      <a href="terminal.html" class="nav-link">Terminal Map</a>
+      <a href="experience.html" class="nav-link">Experience</a>
+      <a href="help.html" class="nav-link">Help</a>
+    </div>
+    <div class="nav-actions">
+      <div class="nav-utility">
+        <a href="my-trips.html" class="nav-utility-link">🧳 <span class="nu-label">My Trips</span></a>
+        <a href="flight-status.html" class="nav-utility-link">📡 <span class="nu-label">Status</span></a>
+        <a href="mileage-club.html" class="nav-utility-link">⭐ <span class="nu-label">Mileage Club</span></a>
+      </div>
+      <div class="currency-mount" id="currencyMount"></div>
+      <button class="lang-toggle" id="langToggle">
+        <span class="lang-option active" id="lang-en">EN</span>
+        <span class="lang-divider">|</span>
+        <span class="lang-option" id="lang-jp">日本語</span>
+      </button>
+      <a href="index.html#search-widget" class="btn-book-nav">New Search</a>
+    </div>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" id="mobileNavClose">✕</button>
+  <a href="index.html" class="mobile-nav-link">Book</a>
+  <a href="destinations.html" class="mobile-nav-link">Destinations</a>
+  <a href="fleet.html" class="mobile-nav-link">Our Fleet</a>
+  <a href="news.html" class="mobile-nav-link">News</a>
+  <a href="terminal.html" class="mobile-nav-link">Terminal Map</a>
+  <a href="experience.html" class="mobile-nav-link">Experience</a>
+  <a href="help.html" class="mobile-nav-link">Help</a>
+  <a href="my-trips.html" class="mobile-nav-link">My Trips</a>
+  <a href="flight-status.html" class="mobile-nav-link">Flight Status</a>
+  <a href="mileage-club.html" class="mobile-nav-link">Mileage Club</a>
+  <div class="mobile-nav-bottom">
+    <a href="index.html#search-widget" class="mobile-nav-book">New Search</a>
+  </div>
+</div>
+
+<!-- 5-step progress -->
+<div class="booking-steps">
+  <div class="booking-steps-inner" id="stepBar"></div>
+</div>
+
+<!-- Trip summary -->
+<div class="co-summary">
+  <div class="co-summary-inner" id="tripSummary"></div>
+</div>
+
+<!-- Body -->
+<div class="co-body" id="coBody"></div>
+
+<script src="js/airports.js?v=11"></script>
+<script src="js/currencies.js?v=11"></script>
+<script src="js/flights.js?v=11"></script>
+<script src="js/checkout.js?v=1"></script>
+<script src="js/nav.js?v=11"></script>
+</body>
+</html>

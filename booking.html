@@ -117,70 +117,6 @@
   padding: 2px 8px; background: #F3F4F6; border-radius: 4px;
 }
 .rr-city { font-size: 14px; color: #6B7280; font-weight: 500; }
-
-/* Confirm modal */
-.confirm-overlay {
-  display: none;
-  position: fixed; inset: 0; z-index: 1000;
-  background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
-  align-items: center; justify-content: center;
-}
-.confirm-overlay.open { display: flex; }
-.confirm-modal {
-  background: #fff; border-radius: 16px;
-  max-width: 560px; width: 90%; max-height: 90vh; overflow-y: auto;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.3);
-  animation: slideUp 0.25s ease;
-}
-@keyframes slideUp { from { transform: translateY(30px); opacity:0; } to { transform: translateY(0); opacity:1; } }
-.confirm-modal-head {
-  background: linear-gradient(135deg, #0B3D91, #1a5276);
-  color: #fff; padding: 24px 28px; border-radius: 16px 16px 0 0;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.confirm-modal-title { font-size: 18px; font-weight: 800; }
-.confirm-close {
-  background: none; border: none; color: rgba(255,255,255,0.7);
-  font-size: 22px; cursor: pointer; line-height: 1; padding: 0;
-}
-.confirm-body { padding: 24px 28px; }
-.confirm-leg {
-  padding: 14px 0; border-bottom: 1px solid #E5E7EB;
-  display: flex; gap: 14px; align-items: flex-start;
-}
-.confirm-leg:last-of-type { border-bottom: none; }
-.confirm-leg-icon {
-  width: 32px; height: 32px; border-radius: 8px;
-  background: var(--navy); color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; flex-shrink: 0;
-}
-.confirm-leg-route { font-size: 16px; font-weight: 800; color: var(--navy); }
-.confirm-leg-detail { font-size: 12px; color: #6B7280; margin-top: 3px; }
-.confirm-leg-detail strong { color: #374151; }
-.confirm-total {
-  background: #F0F4FF; border-radius: 10px; padding: 14px 16px;
-  display: flex; justify-content: space-between; align-items: center;
-  margin-top: 16px;
-}
-.confirm-total-label { font-size: 13px; font-weight: 600; color: #6B7280; }
-.confirm-total-price { font-size: 22px; font-weight: 900; color: var(--navy); }
-.confirm-total-note { font-size: 10px; color: #9CA3AF; margin-top: 2px; }
-.confirm-book-btn {
-  width: 100%; margin-top: 18px;
-  padding: 14px; border-radius: 10px;
-  background: linear-gradient(135deg, #0B3D91, #1565C0);
-  color: #fff; font-size: 15px; font-weight: 800;
-  border: none; cursor: pointer; letter-spacing: 0.04em;
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-.confirm-book-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(11,61,145,0.4); }
-.booked-state { display: none; text-align: center; padding: 32px 28px; }
-.booked-icon { font-size: 56px; margin-bottom: 12px; }
-.booked-title { font-size: 22px; font-weight: 900; color: var(--navy); margin-bottom: 8px; }
-.booked-ref { font-size: 14px; color: #6B7280; margin-bottom: 6px; }
-.booked-ref strong { color: var(--navy); font-size: 18px; letter-spacing: 0.1em; }
-.booked-sub { font-size: 12px; color: #9CA3AF; }
 </style>
 </head>
 <body class="results-page">
@@ -209,13 +145,18 @@
       <a href="help.html" class="nav-link">Help</a>
     </div>
     <div class="nav-actions">
+      <div class="nav-utility">
+        <a href="my-trips.html" class="nav-utility-link">🧳 <span class="nu-label">My Trips</span></a>
+        <a href="flight-status.html" class="nav-utility-link">📡 <span class="nu-label">Status</span></a>
+        <a href="mileage-club.html" class="nav-utility-link">⭐ <span class="nu-label">Mileage Club</span></a>
+      </div>
       <div class="currency-mount" id="currencyMount"></div>
       <button class="lang-toggle" id="langToggle">
         <span class="lang-option active" id="lang-en">EN</span>
         <span class="lang-divider">|</span>
         <span class="lang-option" id="lang-jp">日本語</span>
       </button>
-      <a href="index.html" class="btn-book-nav">New Search</a>
+      <a href="index.html#search-widget" class="btn-book-nav">New Search</a>
     </div>
     <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -232,6 +173,9 @@
   <a href="terminal.html" class="mobile-nav-link">Terminal Map</a>
   <a href="experience.html" class="mobile-nav-link">Experience</a>
   <a href="help.html" class="mobile-nav-link">Help</a>
+  <a href="my-trips.html" class="mobile-nav-link">My Trips</a>
+  <a href="flight-status.html" class="mobile-nav-link">Flight Status</a>
+  <a href="mileage-club.html" class="mobile-nav-link">Mileage Club</a>
   <div class="mobile-nav-bottom">
     <a href="index.html#search-widget" class="mobile-nav-book">New Search</a>
   </div>
@@ -250,7 +194,7 @@
     </div>
     <div class="bstep">
       <div class="bstep-num">3</div>
-      <span>Confirm &amp; Book</span>
+      <span>Checkout</span>
     </div>
   </div>
 </div>
@@ -319,25 +263,6 @@
         <div class="legend-dot legend-dot-city"></div>
         <span>Your cities</span>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- Confirm & Book modal -->
-<div class="confirm-overlay" id="confirmOverlay">
-  <div class="confirm-modal">
-    <div class="confirm-modal-head">
-      <span class="confirm-modal-title">Booking Summary</span>
-      <button class="confirm-close" id="confirmClose">✕</button>
-    </div>
-    <div class="confirm-body" id="confirmBody">
-      <!-- filled by JS -->
-    </div>
-    <div class="booked-state" id="bookedState">
-      <div class="booked-icon">✅</div>
-      <div class="booked-title">Booking Confirmed!</div>
-      <div class="booked-ref">Booking Reference <strong id="bookingRef">—</strong></div>
-      <div class="booked-sub">A confirmation will be sent to your registered email address.</div>
     </div>
   </div>
 </div>

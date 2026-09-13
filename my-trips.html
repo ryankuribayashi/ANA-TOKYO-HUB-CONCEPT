@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANA | My Trips</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+.mt-page { background: var(--off-white); min-height: 100vh; }
+
+.mt-hero {
+  padding: 120px 0 40px;
+  background:
+    radial-gradient(ellipse at 70% 40%, rgba(11,61,145,0.07) 0%, transparent 55%),
+    linear-gradient(160deg, #E8ECF7 0%, #DDE3F0 45%, #D8E0EE 100%);
+  border-bottom: 1px solid rgba(11,61,145,0.08);
+}
+.mt-hero-inner { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+.mt-hero-tag {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+  color: var(--navy); text-transform: uppercase; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.mt-hero-tag::before { content:''; width: 28px; height: 2px; background: var(--gold); }
+.mt-hero-title {
+  font-size: clamp(32px, 4vw, 44px); font-weight: 900;
+  color: var(--navy-dark); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 20px;
+}
+.mt-lookup-card {
+  background: #fff; border: 1.5px solid #E5E7EB; border-radius: 12px; padding: 24px;
+  display: flex; gap: 14px; align-items: end; flex-wrap: wrap; box-shadow: 0 8px 30px rgba(11,61,145,0.08);
+}
+.mt-field { flex: 1; min-width: 180px; }
+.mt-field label { display: block; font-size: 10.5px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+.mt-field input {
+  width: 100%; padding: 11px 12px; border: 1.5px solid #E5E7EB; border-radius: 6px;
+  font-size: 14px; font-family: inherit; color: var(--text); text-transform: uppercase;
+}
+.mt-field input:focus { outline: none; border-color: var(--navy); }
+.mt-lookup-btn {
+  padding: 12px 26px; border-radius: 8px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, #0B3D91, #1565C0); color: #fff;
+  font-size: 13px; font-weight: 800; letter-spacing: 0.02em; flex-shrink: 0;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.mt-lookup-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(11,61,145,0.3); }
+.mt-hint { font-size: 11.5px; color: #9CA3AF; margin-top: 10px; }
+.mt-hint button { background: none; border: none; color: var(--navy); font-weight: 700; cursor: pointer; padding: 0; font-size: 11.5px; text-decoration: underline; }
+
+.mt-body { max-width: 720px; margin: 0 auto; padding: 40px 24px 80px; }
+.mt-empty { text-align: center; padding: 40px 24px; color: #9CA3AF; }
+.mt-empty-icon { font-size: 44px; margin-bottom: 12px; }
+.mt-error { text-align: center; padding: 30px 24px; color: #B91C1C; background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; }
+
+.mt-trip-card { background: #fff; border: 1.5px solid #E5E7EB; border-radius: 12px; overflow: hidden; }
+.mt-trip-head { padding: 20px 24px; border-bottom: 1px solid #EEF0F8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.mt-trip-ref { font-size: 12px; font-weight: 700; color: #9CA3AF; letter-spacing: 0.05em; }
+.mt-trip-ref strong { color: var(--navy); font-size: 16px; letter-spacing: 0.1em; }
+.mt-trip-cabin { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold); background: rgba(201,168,76,0.1); padding: 4px 12px; border-radius: 20px; }
+
+.mt-leg { padding: 18px 24px; border-bottom: 1px solid #EEF0F8; display: flex; gap: 14px; align-items: flex-start; }
+.mt-leg-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--navy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.mt-leg-route { font-size: 16px; font-weight: 800; color: var(--navy); }
+.mt-leg-detail { font-size: 12px; color: #6B7280; margin-top: 3px; }
+.mt-leg-detail strong { color: #374151; }
+
+.mt-section { padding: 18px 24px; border-bottom: 1px solid #EEF0F8; }
+.mt-section-title { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #9CA3AF; margin-bottom: 10px; }
+.mt-pax-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; }
+.mt-pax-row span:first-child { color: var(--navy-dark); font-weight: 600; }
+.mt-pax-row span:last-child { color: #6B7280; }
+
+.mt-trip-foot { padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+.mt-total { font-size: 12px; color: #6B7280; }
+.mt-total strong { color: var(--navy); font-size: 17px; }
+.mt-cancel-btn { padding: 10px 20px; border-radius: 8px; border: 1.5px solid rgba(239,68,68,0.3); background: #fff; color: #B91C1C; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.mt-cancel-btn:hover { background: rgba(239,68,68,0.06); }
+.mt-cancel-confirm { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: #B91C1C; }
+.mt-cancel-confirm button { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; font-weight: 700; }
+.mt-cancel-yes { background: #B91C1C; color: #fff; }
+.mt-cancel-no { background: #F3F4F6; color: #6B7280; }
+.mt-cancelled-note { padding: 18px 24px; background: rgba(16,185,129,0.06); color: #059669; font-size: 13px; font-weight: 600; text-align: center; }
+</style>
+</head>
+<body class="mt-page">
+
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo" style="text-decoration:none;">
+      <img src="assets/ana-tail.png" class="ana-logo-img" alt="ANA All Nippon Airways">
+      <div class="logo-divider"></div>
+      <div class="sa-badge">
+        <svg class="sa-ring" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g transform="translate(16,16)"><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(72)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(72)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(144)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(144)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(216)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(216)"/><polygon points="0,-11 -4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.92)" transform="rotate(288)"/><polygon points="0,-11 4.5,-3.5 0,-1.5" fill="rgba(255,255,255,0.52)" transform="rotate(288)"/></g></svg>
+        <div class="sa-text">
+          <span class="sa-name">star alliance</span>
+          <span class="sa-member">a star alliance member</span>
+        </div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Book</a>
+      <a href="destinations.html" class="nav-link">Destinations</a>
+      <a href="fleet.html" class="nav-link">Our Fleet</a>
+      <a href="news.html" class="nav-link">News</a>
+      <a href="terminal.html" class="nav-link">Terminal Map</a>
+      <a href="experience.html" class="nav-link">Experience</a>
+      <a href="help.html" class="nav-link">Help</a>
+    </div>
+    <div class="nav-actions">
+      <div class="nav-utility">
+        <a href="my-trips.html" class="nav-utility-link" style="color:var(--gold);">🧳 <span class="nu-label">My Trips</span></a>
+        <a href="flight-status.html" class="nav-utility-link">📡 <span class="nu-label">Status</span></a>
+        <a href="mileage-club.html" class="nav-utility-link">⭐ <span class="nu-label">Mileage Club</span></a>
+      </div>
+      <a href="index.html#search-widget" class="btn-book-nav">Book Now</a>
+    </div>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" id="mobileNavClose">✕</button>
+  <a href="index.html" class="mobile-nav-link">Book</a>
+  <a href="destinations.html" class="mobile-nav-link">Destinations</a>
+  <a href="fleet.html" class="mobile-nav-link">Our Fleet</a>
+  <a href="news.html" class="mobile-nav-link">News</a>
+  <a href="terminal.html" class="mobile-nav-link">Terminal Map</a>
+  <a href="experience.html" class="mobile-nav-link">Experience</a>
+  <a href="help.html" class="mobile-nav-link">Help</a>
+  <a href="my-trips.html" class="mobile-nav-link" style="color:var(--gold);">My Trips</a>
+  <a href="flight-status.html" class="mobile-nav-link">Flight Status</a>
+  <a href="mileage-club.html" class="mobile-nav-link">Mileage Club</a>
+  <div class="mobile-nav-bottom">
+    <a href="index.html#search-widget" class="mobile-nav-book">Book Now</a>
+  </div>
+</div>
+
+<!-- Hero + lookup -->
+<div class="mt-hero">
+  <div class="mt-hero-inner">
+    <div class="mt-hero-tag">Manage Booking</div>
+    <h1 class="mt-hero-title">My Trips</h1>
+    <form class="mt-lookup-card" id="mtForm">
+      <div class="mt-field">
+        <label>Booking Reference</label>
+        <input id="mtRef" placeholder="e.g. NH7K2M9P" autocomplete="off">
+      </div>
+      <div class="mt-field">
+        <label>Last Name</label>
+        <input id="mtLast" placeholder="As on booking" autocomplete="off" style="text-transform:none;">
+      </div>
+      <button type="submit" class="mt-lookup-btn">Find Booking →</button>
+    </form>
+    <div class="mt-hint">Just testing this out? <button type="button" id="mtTryDemo">Try the demo booking (NH7K2M9P / Tanaka)</button></div>
+  </div>
+</div>
+
+<div class="mt-body" id="mtBody">
+  <div class="mt-empty">
+    <div class="mt-empty-icon">🧳</div>
+    <div>Enter your booking reference and last name to view your trip.</div>
+  </div>
+</div>
+
+<script src="js/airports.js?v=11"></script>
+<script src="js/currencies.js?v=11"></script>
+<script src="js/my-trips.js?v=1"></script>
+<script src="js/nav.js?v=11"></script>
+</body>
+</html>

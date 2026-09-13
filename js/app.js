@@ -146,11 +146,12 @@ document.getElementById('searchBtn')?.addEventListener('click', () => {
     const toCode   = selectedTo   || extractCode(document.getElementById('input-to')?.value);
     const date = document.getElementById('input-depart')?.value;
     const cabin = document.getElementById('input-class')?.value || 'Economy';
+    const pax = parseInt(document.getElementById('input-pax')?.value) || 1;
     if (!fromCode || !toCode) {
         alert(currentLang === 'jp' ? '出発地と目的地を入力してください（候補から選択してください）' : 'Please select an origin and destination from the dropdown suggestions');
         return;
     }
-    const url = `results.html?from=${fromCode}&to=${toCode}&date=${date}&cabin=${cabin}`;
+    const url = `results.html?from=${fromCode}&to=${toCode}&date=${date}&cabin=${cabin}&pax=${pax}`;
     const overlay = document.getElementById('loadingOverlay');
     const bar = document.getElementById('loadingBar');
     if (!overlay) { window.location.href = url; return; }
@@ -423,6 +424,7 @@ window.addEventListener('load', () => {
     const to   = first.querySelector('.mc-to')?.value;
     const date = first.querySelector('.mc-date')?.value;
     const cabin = document.getElementById('input-class')?.value || 'Economy';
+    const pax = parseInt(document.getElementById('input-pax')?.value) || 1;
     if (!mcLegs[0]?.fromCode || !mcLegs[0]?.toCode) {
       alert('Please enter origin and destination for at least the first flight');
       return;
@@ -440,6 +442,7 @@ window.addEventListener('load', () => {
       to:   allLegs[0].to,
       date: allLegs[0].date || '',
       cabin,
+      pax,
       mc: JSON.stringify(allLegs),
     });
     const overlay = document.getElementById('loadingOverlay');

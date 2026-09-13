@@ -9,6 +9,7 @@ const outDep    = params.get('outDep')    || '';
 const outArr    = params.get('outArr')    || '';
 const outDur    = params.get('outDur')    || '';
 const outOp     = params.get('outOp')     || 'ANA';
+const paxCount  = parseInt(params.get('pax')) || 1;
 
 // Multi-city: use leg 2's from/to if present, otherwise reverse leg 1
 let mcAllLegs = null;
@@ -31,7 +32,7 @@ const AIRLINE_LOGOS_BK = {
   'Singapore Airlines':'assets/singapore-airlines.webp','Lufthansa':'assets/lufthansa.png',
 };
 const AIRLINE_SHORT_BK = {
-  'ANA':'ANA','United':'UA','United Airlines':'UA','Air Canada':'AC',
+  'ANA':'ANA','JAL':'JL','United':'UA','United Airlines':'UA','Air Canada':'AC',
   'Avianca':'AV','Aeromexico':'AM','Copa Airlines':'CM','Air China':'CA',
   'Asiana':'OZ','Singapore Airlines':'SQ','EVA Air':'BR','Thai Airways':'TG',
   'Air India':'AI','Lufthansa':'LH','Turkish Airlines':'TK','Brussels Airlines':'SN',
@@ -175,79 +176,26 @@ function renderReturnFlights() {
     });
   });
 
-  // Select return → open confirm modal
+  // Select return → go to checkout with both legs identified by index
   container.querySelectorAll('.ret-select-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const idx = parseInt(btn.dataset.index);
-      openConfirmModal(returnFlights[idx]);
+      const retFlight = returnFlights[idx];
+      const p = new URLSearchParams({
+        from: fromCode, to: toCode, date: travelDate, cabin, pax: paxCount,
+        fi: params.get('fi') || '0',
+        outFlight, outDep, outArr, outDur, outOp,
+        ri: idx,
+        retFrom, retTo,
+        retFlight: retFlight.flightOut + (retFlight.direct ? '' : '+' + retFlight.flightIn),
+        retDep: retFlight.depLocal, retArr: retFlight.arrDest,
+        retDur: retFlight.totalTime, retOp: retFlight.operator,
+      });
+      if (mcAllLegs) p.set('mc', JSON.stringify(mcAllLegs));
+      window.location.href = 'checkout.html?' + p.toString();
     });
   });
 }
-
-// ── Confirm modal ─────────────────────────────────────────────────────────────
-function openConfirmModal(retFlight) {
-  const outPrice = (() => {
-    // Re-build outbound to get price — use index from URL
-    const fi = parseInt(params.get('fi') || '0');
-    const ob = buildFlights(fromCode, toCode);
-    return ob && ob[fi] ? ob[fi].prices[selectedKey] : null;
-  })();
-  const retPrice   = retFlight.prices[selectedKey];
-  const totalPrice = (outPrice && retPrice) ? outPrice + retPrice : null;
-
-  const body = document.getElementById('confirmBody');
-  body.innerHTML = `
-<div class="confirm-leg">
-  <div class="confirm-leg-icon">↗</div>
-  <div>
-    <div class="confirm-leg-route">${fromCode} → ${toCode}</div>
-    <div class="confirm-leg-detail">
-      <strong>${outFlight.replace('+',' + ')}</strong> &nbsp;·&nbsp;
-      ${outDep} → ${outArr} &nbsp;·&nbsp; ${outDur} &nbsp;·&nbsp; ${cabin}
-    </div>
-    <div class="confirm-leg-detail">Operated by <strong>${outOp}</strong></div>
-  </div>
-</div>
-<div class="confirm-leg">
-  <div class="confirm-leg-icon">↙</div>
-  <div>
-    <div class="confirm-leg-route">${retFrom} → ${retTo}</div>
-    <div class="confirm-leg-detail">
-      <strong>${retFlight.flightOut}${retFlight.direct ? '' : ' + ' + retFlight.flightIn}</strong> &nbsp;·&nbsp;
-      ${retFlight.depLocal} → ${retFlight.arrDest} &nbsp;·&nbsp; ${retFlight.totalTime} &nbsp;·&nbsp; ${cabin}
-    </div>
-    <div class="confirm-leg-detail">Operated by <strong>${retFlight.operator}</strong></div>
-  </div>
-</div>
-<div class="confirm-total">
-  <div>
-    <div class="confirm-total-label">Total per person (${cabin})</div>
-    <div class="confirm-total-note">Taxes &amp; fees included · prices indicative</div>
-  </div>
-  <div class="confirm-total-price">${totalPrice ? formatCurrency(totalPrice) : 'Contact ANA'}</div>
-</div>
-<button class="confirm-book-btn" id="bookNowBtn">Book Now →</button>`;
-
-  document.getElementById('bookNowBtn').addEventListener('click', () => {
-    const ref = 'NH' + Math.random().toString(36).substring(2,8).toUpperCase();
-    document.getElementById('bookingRef').textContent = ref;
-    body.style.display = 'none';
-    document.getElementById('bookedState').style.display = 'block';
-  });
-
-  document.getElementById('confirmOverlay').classList.add('open');
-}
-
-document.getElementById('confirmClose').addEventListener('click', () => {
-  document.getElementById('confirmOverlay').classList.remove('open');
-  document.getElementById('confirmBody').style.display = '';
-  document.getElementById('bookedState').style.display = 'none';
-});
-document.getElementById('confirmOverlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('confirmOverlay')) {
-    document.getElementById('confirmClose').click();
-  }
-});
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 renderReturnFlights();

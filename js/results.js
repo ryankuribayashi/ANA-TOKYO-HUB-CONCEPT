@@ -23,7 +23,7 @@ const AIRLINE_LOGOS = {
 
 function airlineShort(name) {
   const shorts = {
-    'ANA':'ANA','United':'UA','United Airlines':'UA','Air Canada':'AC',
+    'ANA':'ANA','JAL':'JL','United':'UA','United Airlines':'UA','Air Canada':'AC',
     'Avianca':'AV','Aeromexico':'AM','Copa Airlines':'CM',
     'Air China':'CA','Asiana':'OZ','Singapore Airlines':'SQ',
     'EVA Air':'BR','Thai Airways':'TG','Air India':'AI',
@@ -60,6 +60,7 @@ const fromCode   = params.get('from')  || '';
 const toCode     = params.get('to')    || '';
 const travelDate = params.get('date')  || '';
 const cabin      = params.get('cabin') || 'Economy';
+const paxCount   = parseInt(params.get('pax')) || 1;
 const mcParam    = params.get('mc');
 let mcLegs = null;
 try { if (mcParam) mcLegs = JSON.parse(mcParam); } catch(e) {}
@@ -322,6 +323,7 @@ function renderFlights() {
                 to:   toCode,
                 date: travelDate || '',
                 cabin,
+                pax:  paxCount,
                 fi:   i,
                 outFlight: f.flightOut + (f.direct ? '' : '+' + f.flightIn),
                 outDep:  f.depLocal,
