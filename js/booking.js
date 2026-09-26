@@ -10,6 +10,7 @@ const outArr    = params.get('outArr')    || '';
 const outDur    = params.get('outDur')    || '';
 const outOp     = params.get('outOp')     || 'ANA';
 const paxCount  = parseInt(params.get('pax')) || 1;
+const carrierFilter = params.get('carrier') || null;
 
 // Multi-city: use leg 2's from/to if present, otherwise reverse leg 1
 let mcAllLegs = null;
@@ -83,7 +84,11 @@ if (isMultiCity) {
 }
 
 // ── Build return flights ───────────────────────────────────────────────────────
-const returnFlights = buildFlights(retFrom, retTo);
+let returnFlights = buildFlights(retFrom, retTo);
+if (returnFlights && carrierFilter) {
+  const scoped = returnFlights.filter(f => f.operator === carrierFilter);
+  if (scoped.length > 0) returnFlights = scoped; // fall back to all carriers if JAL doesn't fly the return leg
+}
 
 const cabinKey = { 'Economy':'e','Premium Economy':'pe','Business':'bc','First Class':'fc' };
 const selectedKey = cabinKey[cabin] || 'e';
@@ -192,6 +197,7 @@ function renderReturnFlights() {
         retDur: retFlight.totalTime, retOp: retFlight.operator,
       });
       if (mcAllLegs) p.set('mc', JSON.stringify(mcAllLegs));
+      if (carrierFilter) p.set('carrier', carrierFilter);
       window.location.href = 'checkout.html?' + p.toString();
     });
   });

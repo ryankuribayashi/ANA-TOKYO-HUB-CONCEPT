@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JAL | Japan Airlines — Tokyo Mega Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+:root { --jal-red: #C8102E; --jal-red-dark: #8C0A20; --jal-navy: #0A1628; }
+body { background: var(--off-white, #FAF9F5); }
+
+/* ── JAL nav ── */
+.jal-navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(10,22,40,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(200,16,46,0.25); transition: background 0.2s; }
+.jal-navbar.scrolled { background: rgba(10,22,40,0.97); }
+.jal-nav-container { max-width: 1440px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.jal-nav-logo { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+.jal-mark { width: 38px; height: 38px; border-radius: 50%; background: var(--jal-red); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(255,255,255,0.15); }
+.jal-mark svg { width: 20px; height: 20px; }
+.jal-wordmark { display: flex; flex-direction: column; line-height: 1.1; }
+.jal-wordmark .jw-main { font-size: 18px; font-weight: 900; color: #fff; letter-spacing: 0.02em; }
+.jal-wordmark .jw-sub { font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.5); letter-spacing: 0.14em; text-transform: uppercase; }
+.jal-nav-divider { width: 1px; height: 30px; background: rgba(255,255,255,0.15); }
+.ow-badge { display: flex; align-items: center; gap: 8px; }
+.ow-ring { width: 26px; height: 26px; }
+.ow-text { display: flex; flex-direction: column; line-height: 1.15; }
+.ow-name { font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.85); letter-spacing: 0.02em; }
+.ow-member { font-size: 8px; color: rgba(255,255,255,0.42); letter-spacing: 0.06em; text-transform: uppercase; }
+.jal-nav-links { display: flex; align-items: center; gap: 28px; }
+.jal-nav-link { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.72); text-decoration: none; transition: color 0.15s; }
+.jal-nav-link:hover { color: #fff; }
+.jal-nav-link.active { color: var(--jal-red); font-weight: 700; }
+.jal-nav-back { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.55); text-decoration: none; display: flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1px solid rgba(255,255,255,0.18); border-radius: 4px; transition: all 0.15s; }
+.jal-nav-back:hover { color: #fff; border-color: rgba(255,255,255,0.4); }
+.jal-nav-hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 8px; }
+.jal-nav-hamburger span { width: 22px; height: 2px; background: #fff; border-radius: 2px; }
+@media (max-width: 900px) { .jal-nav-links { display: none; } .jal-nav-hamburger { display: flex; } .ow-text { display: none; } }
+
+/* ── Hero ── */
+.jal-hero { position: relative; min-height: 640px; display: flex; align-items: center; padding: 140px 24px 60px; overflow: hidden; }
+.jal-hero-bg { position: absolute; inset: 0; z-index: 0; background: linear-gradient(160deg, var(--jal-navy) 0%, #2b0810 55%, #4a0f1c 100%); }
+.jal-hero-bg::after { content:''; position: absolute; inset: 0; background: radial-gradient(ellipse at 75% 20%, rgba(200,16,46,0.28) 0%, transparent 55%); }
+.jal-hero-content { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; width: 100%; }
+.jal-hero-tag { font-size: 12px; font-weight: 700; letter-spacing: 0.2em; color: var(--jal-red); text-transform: uppercase; margin-bottom: 16px; }
+.jal-hero-title { font-size: clamp(34px, 5vw, 58px); font-weight: 900; color: #fff; letter-spacing: -0.03em; line-height: 1.08; margin-bottom: 18px; max-width: 760px; }
+.jal-hero-sub { font-size: 15px; color: rgba(255,255,255,0.62); max-width: 560px; line-height: 1.7; margin-bottom: 40px; }
+
+/* ── Search widget ── */
+.jal-search { background: #fff; border-radius: 12px; box-shadow: 0 24px 64px rgba(0,0,0,0.35); padding: 22px 22px 18px; max-width: 900px; }
+.jal-search-row { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
+.jal-search-field { flex: 1; min-width: 160px; position: relative; }
+.jal-search-field label { display: block; font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #9CA3AF; margin-bottom: 6px; }
+.jal-search-field input, .jal-search-field select {
+  width: 100%; border: 1.5px solid #E5E7EB; border-radius: 6px; padding: 11px 12px; font-family: inherit;
+  font-size: 13.5px; font-weight: 600; color: var(--jal-navy); background: #fff; outline: none; transition: border-color 0.15s;
+}
+.jal-search-field input:focus, .jal-search-field select:focus { border-color: var(--jal-red); }
+.jal-from-lock { display: flex; align-items: center; gap: 8px; padding: 11px 12px; border: 1.5px solid #F3E4E5; border-radius: 6px; background: #FBF3F3; font-size: 13.5px; font-weight: 700; color: var(--jal-red); }
+.jal-dropdown {
+  position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: #fff; border: 1px solid #E5E7EB;
+  border-radius: 8px; box-shadow: 0 12px 32px rgba(0,0,0,0.14); max-height: 240px; overflow-y: auto; z-index: 50; display: none;
+}
+.jal-dropdown.open { display: block; }
+.jal-dd-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; cursor: pointer; }
+.jal-dd-item:hover { background: #FBEEEF; }
+.jal-dd-code { font-size: 12px; font-weight: 900; color: var(--jal-red); min-width: 32px; }
+.jal-dd-info { display: flex; flex-direction: column; flex: 1; }
+.jal-dd-city { font-size: 12.5px; font-weight: 700; color: var(--jal-navy); }
+.jal-dd-name { font-size: 10.5px; color: #9CA3AF; }
+.jal-search-btn {
+  background: var(--jal-red); color: #fff; border: none; border-radius: 6px; padding: 13px 28px; font-family: inherit;
+  font-size: 13px; font-weight: 800; letter-spacing: 0.04em; cursor: pointer; display: flex; align-items: center; gap: 8px;
+  transition: background 0.15s; white-space: nowrap;
+}
+.jal-search-btn:hover { background: var(--jal-red-dark); }
+.jal-search-note { font-size: 11px; color: #9CA3AF; margin-top: 12px; }
+
+/* ── Network section ── */
+.jal-network { padding: 64px 24px; background: #fff; }
+.jal-network-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center; }
+.jal-network-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; color: var(--jal-red); text-transform: uppercase; margin-bottom: 14px; }
+.jal-network h2 { font-size: clamp(26px, 3.2vw, 38px); font-weight: 900; color: var(--jal-navy); letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 16px; }
+.jal-network p { font-size: 14.5px; color: #4B5563; line-height: 1.75; margin-bottom: 12px; }
+.jal-stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.jal-stat-card { background: #FBF3F3; border: 1px solid #F3E4E5; border-radius: 10px; padding: 20px; }
+.jal-stat-num { font-size: 30px; font-weight: 900; color: var(--jal-red); letter-spacing: -0.02em; }
+.jal-stat-label { font-size: 11.5px; color: #6B7280; font-weight: 600; margin-top: 4px; }
+
+/* ── Explore cards ── */
+.jal-explore { padding: 0 24px 72px; background: #fff; }
+.jal-explore-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.jal-explore-card {
+  position: relative; border-radius: 12px; overflow: hidden; height: 260px; text-decoration: none;
+  display: flex; align-items: flex-end; padding: 24px; transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.jal-explore-card:hover { transform: translateY(-4px); box-shadow: 0 20px 48px rgba(200,16,46,0.2); }
+.jec-dest { background: linear-gradient(160deg, #1a2a4a 0%, #263b6e 60%, #37517e 100%); }
+.jec-fleet { background: linear-gradient(160deg, #2b0d14 0%, #6e1a29 60%, #8c0a20 100%); }
+.jal-explore-card::before { content:''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 55%); }
+.jec-content { position: relative; z-index: 1; }
+.jec-tag { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 6px; display: block; }
+.jec-title { font-size: 22px; font-weight: 900; color: #fff; letter-spacing: -0.02em; }
+.jec-sub { font-size: 12.5px; color: rgba(255,255,255,0.65); margin-top: 6px; }
+.jec-arrow { position: absolute; top: 20px; right: 20px; z-index: 1; width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.14); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; }
+
+.jal-footer { background: var(--jal-navy); padding: 32px 24px; text-align: center; }
+.jal-footer p { font-size: 12px; color: rgba(255,255,255,0.4); }
+.jal-footer a { color: rgba(255,255,255,0.7); text-decoration: none; }
+.jal-footer a:hover { color: #fff; }
+
+@media (max-width: 900px) {
+  .jal-network-inner { grid-template-columns: 1fr; }
+  .jal-explore-inner { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .jal-hero { padding: 110px 16px 40px; min-height: auto; }
+  .jal-search { padding: 16px; }
+  .jal-search-row { flex-direction: column; align-items: stretch; }
+  .jal-search-btn { width: 100%; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<nav class="jal-navbar" id="jalNavbar">
+  <div class="jal-nav-container">
+    <a href="jal.html" class="jal-nav-logo">
+      <div class="jal-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M3 15 L21 9 M3 15 L9 9 M3 15 L9 21" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="jal-wordmark"><span class="jw-main">JAL</span><span class="jw-sub">Japan Airlines</span></div>
+      <div class="jal-nav-divider"></div>
+      <div class="ow-badge">
+        <svg class="ow-ring" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><circle cx="16" cy="16" r="7" fill="rgba(200,16,46,0.85)"/></svg>
+        <div class="ow-text"><span class="ow-name">oneworld</span><span class="ow-member">alliance member</span></div>
+      </div>
+    </a>
+    <div class="jal-nav-links">
+      <a href="jal.html" class="jal-nav-link active">Book</a>
+      <a href="jal-destinations.html" class="jal-nav-link">Destinations &amp; Routes</a>
+      <a href="jal-fleet.html" class="jal-nav-link">Fleet</a>
+      <a href="index.html" class="jal-nav-back">↩ ANA Site</a>
+    </div>
+    <button class="jal-nav-hamburger" aria-label="Menu" onclick="document.getElementById('jalMobileNav').classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div id="jalMobileNav" style="position:fixed;inset:0;top:72px;background:rgba(10,22,40,0.98);z-index:999;display:none;flex-direction:column;padding:24px;gap:4px;">
+  <a href="jal.html" style="color:var(--jal-red);padding:14px 4px;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.08);">Book</a>
+  <a href="jal-destinations.html" style="color:#fff;padding:14px 4px;font-weight:600;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.08);">Destinations &amp; Routes</a>
+  <a href="jal-fleet.html" style="color:#fff;padding:14px 4px;font-weight:600;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.08);">Fleet</a>
+  <a href="index.html" style="color:rgba(255,255,255,0.6);padding:14px 4px;font-weight:600;text-decoration:none;">↩ ANA Site</a>
+</div>
+<style>#jalMobileNav.open{display:flex!important;}</style>
+
+<!-- Hero + search -->
+<section class="jal-hero">
+  <div class="jal-hero-bg"></div>
+  <div class="jal-hero-content">
+    <div class="jal-hero-tag">JAPAN AIRLINES · TOKYO MEGA HUB</div>
+    <h1 class="jal-hero-title">A Leaner Network.<br>The Same Hub.</h1>
+    <p class="jal-hero-sub">JAL operates 45 direct routes from the Tokyo Mega Hub — a smaller, more selective network than ANA's, concentrated where JAL's own oneworld partners already give it an edge.</p>
+
+    <div class="jal-search" id="jalSearch">
+      <div class="jal-search-row">
+        <div class="jal-search-field">
+          <label>From</label>
+          <div class="jal-from-lock">✈ Tokyo Mega Hub (NRT)</div>
+        </div>
+        <div class="jal-search-field">
+          <label>To</label>
+          <input type="text" id="jalTo" placeholder="Search JAL destinations" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+          <div class="jal-dropdown" id="jalToDropdown"></div>
+        </div>
+        <div class="jal-search-field">
+          <label>Depart</label>
+          <input type="text" id="jalDepart" placeholder="Select date" readonly>
+        </div>
+        <div class="jal-search-field">
+          <label>Cabin</label>
+          <select id="jalCabin">
+            <option>Economy</option>
+            <option>Premium Economy</option>
+            <option>Business</option>
+            <option>First Class</option>
+          </select>
+        </div>
+        <button class="jal-search-btn" id="jalSearchBtn">
+          <span>Search JAL Flights</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </button>
+      </div>
+      <div class="jal-search-note">Results are scoped to JAL's own metal — see all carriers on any route from the JAL, Destinations &amp; Routes page.</div>
+    </div>
+  </div>
+</section>
+
+<!-- Network summary -->
+<section class="jal-network">
+  <div class="jal-network-inner">
+    <div>
+      <div class="jal-network-tag">The JAL Strategy</div>
+      <h2>Fewer Routes,<br>Sharper Focus</h2>
+      <p>Where ANA builds hub-scale reach with a five-aircraft fleet topped by the 777-9, JAL runs three aircraft types and 45 direct routes — matching ANA's frequency on the routes that matter most, and pulling ahead only where its own oneworld partners already hold ground: Hong Kong (Cathay Pacific) and Dallas/Fort Worth (American Airlines).</p>
+      <p>Everywhere else in secondary Greater China and at Manila and Taipei, JAL runs deliberately thinner than ANA — a supporting role inside the same hub, not a second hub-building push.</p>
+    </div>
+    <div class="jal-stats-grid">
+      <div class="jal-stat-card"><div class="jal-stat-num">45</div><div class="jal-stat-label">Direct Routes</div></div>
+      <div class="jal-stat-card"><div class="jal-stat-num">3</div><div class="jal-stat-label">Aircraft Types</div></div>
+      <div class="jal-stat-card"><div class="jal-stat-num">5×</div><div class="jal-stat-label">Daily to Seoul, HK &amp; Singapore</div></div>
+      <div class="jal-stat-card"><div class="jal-stat-num">oneworld</div><div class="jal-stat-label">Alliance Membership</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Explore cards -->
+<section class="jal-explore">
+  <div class="jal-explore-inner">
+    <a href="jal-destinations.html" class="jal-explore-card jec-dest">
+      <div class="jec-arrow">→</div>
+      <div class="jec-content">
+        <span class="jec-tag">Explore</span>
+        <div class="jec-title">Destinations &amp; Routes</div>
+        <div class="jec-sub">Interactive map, full schedule &amp; pricing for all 45 JAL routes</div>
+      </div>
+    </a>
+    <a href="jal-fleet.html" class="jal-explore-card jec-fleet">
+      <div class="jec-arrow">→</div>
+      <div class="jec-content">
+        <span class="jec-tag">Explore</span>
+        <div class="jec-title">Our Fleet</div>
+        <div class="jec-sub">A350-1000, 787-9 &amp; 787-8 — cabins, seat maps &amp; route assignments</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<div class="jal-footer">
+  <p>JAL — Japan Airlines · a <a href="jal-destinations.html">oneworld</a> member · part of the Tokyo Mega Hub concept · <a href="index.html">visit the ANA site →</a></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="js/airports.js?v=1"></script>
+<script src="js/flights.js?v=1"></script>
+<script>
+window.addEventListener('scroll', () => {
+  document.getElementById('jalNavbar')?.classList.toggle('scrolled', window.scrollY > 10);
+});
+
+/* ── Date picker ── */
+const jalToday = new Date();
+const jalFmt = d => d.toISOString().split('T')[0];
+flatpickr('#jalDepart', { dateFormat:'Y-m-d', minDate:'today', defaultDate: jalFmt(new Date(jalToday.getTime()+7*86400000)) });
+
+/* ── Destination autocomplete, scoped to JAL's own network only ── */
+let jalSelectedTo = null;
+const jalToInput = document.getElementById('jalTo');
+const jalToDropdown = document.getElementById('jalToDropdown');
+
+// Pre-select if arriving from a "Search JAL Flights →" link on the destinations page
+try {
+  const pre = sessionStorage.getItem('preselect-to');
+  if (pre) {
+    const { code, city } = JSON.parse(pre);
+    sessionStorage.removeItem('preselect-to');
+    if (JAL_SCHEDULE[code]) { jalToInput.value = `${city} (${code})`; jalSelectedTo = code; }
+  }
+} catch(e) {}
+
+jalToInput.addEventListener('input', () => {
+  const q = jalToInput.value.trim();
+  const results = (typeof searchAirports !== 'undefined' ? searchAirports(q) : []).filter(ap => JAL_SCHEDULE[ap.code]);
+  jalToDropdown.innerHTML = '';
+  if (!results.length || !q.length) { jalToDropdown.classList.remove('open'); return; }
+  results.forEach(ap => {
+    const item = document.createElement('div');
+    item.className = 'jal-dd-item';
+    item.innerHTML = `<span class="jal-dd-code">${ap.code}</span><div class="jal-dd-info"><span class="jal-dd-city">${ap.city}</span><span class="jal-dd-name">${ap.name}</span></div>`;
+    item.addEventListener('click', () => {
+      jalToInput.value = `${ap.city} (${ap.code})`;
+      jalSelectedTo = ap.code;
+      jalToDropdown.classList.remove('open');
+    });
+    jalToDropdown.appendChild(item);
+  });
+  jalToDropdown.classList.add('open');
+});
+document.addEventListener('click', e => {
+  if (!jalToInput.contains(e.target) && !jalToDropdown.contains(e.target)) jalToDropdown.classList.remove('open');
+});
+
+function jalExtractCode(val) { const m = (val||'').match(/\(([A-Z]{3})\)$/); return m ? m[1] : ''; }
+
+document.getElementById('jalSearchBtn').addEventListener('click', () => {
+  const toCode = jalSelectedTo || jalExtractCode(jalToInput.value);
+  if (!toCode || !JAL_SCHEDULE[toCode]) {
+    alert('Please select a JAL destination from the dropdown suggestions.');
+    return;
+  }
+  const date = document.getElementById('jalDepart').value;
+  const cabin = document.getElementById('jalCabin').value;
+  const url = `results.html?from=NRT&to=${toCode}&date=${date}&cabin=${cabin}&pax=1&carrier=JAL`;
+  window.location.href = url;
+});
+</script>
+</body>
+</html>

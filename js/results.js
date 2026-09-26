@@ -62,6 +62,10 @@ const travelDate = params.get('date')  || '';
 const cabin      = params.get('cabin') || 'Economy';
 const paxCount   = parseInt(params.get('pax')) || 1;
 const mcParam    = params.get('mc');
+// Optional carrier scoping — set by the JAL section's own search widget so a
+// visitor who searched from jal.html sees only JAL's own metal, not the full
+// merged ANA+JAL result set every other search entry point shows.
+const carrierFilter = params.get('carrier') || null;
 let mcLegs = null;
 try { if (mcParam) mcLegs = JSON.parse(mcParam); } catch(e) {}
 let currentLang  = 'en';
@@ -177,7 +181,12 @@ function routeOperatesOn(dateStr, fromC, toC) {
 const dayCheck = routeOperatesOn(travelDate, fromCode, toCode);
 
 // ── Flight data ───────────────────────────────────────────────────────────────
-const flights = dayCheck.operates ? buildFlights(fromCode, toCode) : null;
+let flights = dayCheck.operates ? buildFlights(fromCode, toCode) : null;
+const preFilterCount = flights ? flights.length : 0;
+if (flights && carrierFilter) {
+  flights = flights.filter(f => f.operator === carrierFilter);
+  if (flights.length === 0) flights = null;
+}
 
 const cabinKey = {
     'Economy':'e','Premium Economy':'pe',
@@ -231,6 +240,20 @@ function renderFlights() {
         const bothCodeshareOnly = typeof VIA_CONNECTIONS !== 'undefined'
             && VIA_CONNECTIONS[fromCode] && VIA_CONNECTIONS[toCode]
             && !SCHEDULE[fromCode] && !SCHEDULE[toCode];
+
+        // A carrier filter (JAL-only search) hid every card that otherwise
+        // existed — say so plainly rather than implying the route itself
+        // has no service at all.
+        if (carrierFilter && preFilterCount > 0) {
+          container.innerHTML = `
+          <div style="padding:40px 24px;text-align:center;color:#6B7280;">
+            <div style="font-size:48px;margin-bottom:16px;">✈</div>
+            <h3 style="color:#1A1A2E;margin-bottom:8px;">${carrierFilter} doesn't fly this route</h3>
+            <p><strong>${fromCity}</strong> → <strong>${toCity}</strong> is served via the Tokyo Mega Hub, but not by ${carrierFilter} directly.</p>
+            <a href="results.html?${new URLSearchParams({from:fromCode,to:toCode,date:travelDate,cabin,pax:paxCount}).toString()}" style="display:inline-block;margin-top:20px;padding:10px 24px;background:#0B3D91;color:#fff;border-radius:8px;text-decoration:none;">See all carriers on this route</a>
+          </div>`;
+          return;
+        }
 
         container.innerHTML = bothCodeshareOnly ? `
         <div style="padding:40px 24px;text-align:center;color:#6B7280;">
@@ -333,6 +356,7 @@ function renderFlights() {
             });
             // Pass multi-city legs so booking.html uses leg 2 as the next flight
             if (mcParam) p.set('mc', mcParam);
+            if (carrierFilter) p.set('carrier', carrierFilter);
             window.location.href = 'booking.html?' + p.toString();
         });
     });

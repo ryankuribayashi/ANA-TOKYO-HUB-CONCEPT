@@ -1384,3 +1384,14 @@ span.flatpickr-weekday { color: var(--navy) !important; font-weight: 700 !import
     .hub-stats { grid-template-columns: 1fr 1fr; }
     .stat-num { font-size: 22px; }
 }
+
+/* ── JAL cross-nav link (injected into every ANA page by js/nav.js) ─────────
+   Kept separate from JAL's own pages, which carry their own full red-branded
+   nav rather than this one small badge. */
+.nav-link-jal { display: inline-flex; align-items: center; gap: 6px; }
+.jal-pill {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #C8102E; color: #fff; font-size: 9px; font-weight: 800;
+    letter-spacing: 0.04em; padding: 2px 6px; border-radius: 3px; line-height: 1.4;
+}
+.mobile-nav-link.nav-link-jal { display: flex; align-items: center; gap: 8px; }

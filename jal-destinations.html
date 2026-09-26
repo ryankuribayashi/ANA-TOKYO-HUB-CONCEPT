@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JAL | Destinations &amp; Routes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+:root { --jal-red: #C8102E; --jal-navy: #0A1628; }
+body { background: var(--off-white, #FAF9F5); }
+
+/* ── JAL nav (same bespoke bar as jal-fleet.html) ── */
+.jal-navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(10,22,40,0.97); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(200,16,46,0.25); }
+.jal-nav-container { max-width: 1440px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.jal-nav-logo { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+.jal-mark { width: 38px; height: 38px; border-radius: 50%; background: var(--jal-red); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(255,255,255,0.15); }
+.jal-mark svg { width: 20px; height: 20px; }
+.jal-wordmark { display: flex; flex-direction: column; line-height: 1.1; }
+.jal-wordmark .jw-main { font-size: 18px; font-weight: 900; color: #fff; letter-spacing: 0.02em; }
+.jal-wordmark .jw-sub { font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.5); letter-spacing: 0.14em; text-transform: uppercase; }
+.jal-nav-divider { width: 1px; height: 30px; background: rgba(255,255,255,0.15); }
+.ow-badge { display: flex; align-items: center; gap: 8px; }
+.ow-ring { width: 26px; height: 26px; }
+.ow-text { display: flex; flex-direction: column; line-height: 1.15; }
+.ow-name { font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.85); letter-spacing: 0.02em; }
+.ow-member { font-size: 8px; color: rgba(255,255,255,0.42); letter-spacing: 0.06em; text-transform: uppercase; }
+.jal-nav-links { display: flex; align-items: center; gap: 28px; }
+.jal-nav-link { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.72); text-decoration: none; transition: color 0.15s; }
+.jal-nav-link:hover { color: #fff; }
+.jal-nav-link.active { color: var(--jal-red); font-weight: 700; }
+.jal-nav-back { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.55); text-decoration: none; display: flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1px solid rgba(255,255,255,0.18); border-radius: 4px; transition: all 0.15s; }
+.jal-nav-back:hover { color: #fff; border-color: rgba(255,255,255,0.4); }
+.jal-nav-hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 8px; }
+.jal-nav-hamburger span { width: 22px; height: 2px; background: #fff; border-radius: 2px; }
+@media (max-width: 900px) { .jal-nav-links { display: none; } .jal-nav-hamburger { display: flex; } .ow-text { display: none; } }
+
+/* ── Page layout ── */
+.jd-page-wrap { margin-top: 72px; }
+.jd-filter-bar {
+  position: sticky; top: 72px; z-index: 500; background: rgba(10,22,40,0.97); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(200,16,46,0.2); padding: 0 24px; display: flex; align-items: center; gap: 6px;
+  height: 52px; overflow-x: auto; white-space: nowrap;
+}
+.jd-filter-bar::-webkit-scrollbar { display: none; }
+.jdf-btn {
+  padding: 6px 18px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: rgba(255,255,255,0.75);
+  font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0; font-family: inherit; letter-spacing: 0.04em;
+  border-radius: 2px; transition: all 0.18s ease;
+}
+.jdf-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.jdf-btn.active { background: var(--jal-red); border-color: var(--jal-red); color: #fff; }
+
+.jd-map-section { background: #fff; padding: 24px; border-bottom: 1px solid #E5E7EB; }
+.jd-map-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+.jd-map-title { font-size: 17px; font-weight: 900; color: var(--jal-navy); letter-spacing: -0.01em; }
+.jd-map-legend { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.jdml-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #6B7280; font-weight: 500; }
+.jdml-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.jd-map-frame { position: relative; border: 1.5px solid #D1D5DB; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.09); }
+#jd-map { height: 460px; width: 100%; display: block; }
+.jd-map-vignette { position: absolute; inset: 0; pointer-events: none; z-index: 2; background: radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(0,0,0,0.14) 100%); }
+.jd-map-stats { display: flex; margin-top: 16px; border: 1px solid #E5E7EB; border-radius: 6px; overflow: hidden; }
+.jdms-item { flex: 1; padding: 13px 16px; text-align: center; border-right: 1px solid #E5E7EB; }
+.jdms-item:last-child { border-right: none; }
+.jdms-num { font-size: 22px; font-weight: 900; color: var(--jal-red); display: block; line-height: 1.2; }
+.jdms-label { font-size: 9.5px; color: #9CA3AF; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; display: block; }
+
+/* Info panel */
+.jd-panel { position: fixed; top: 124px; right: -380px; bottom: 0; width: 360px; z-index: 600; background: #fff; border-left: 1px solid #E5E7EB; box-shadow: -8px 0 40px rgba(0,0,0,0.2); transition: right 0.3s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; overflow: hidden; }
+.jd-panel.open { right: 0; }
+.jdp-header { background: linear-gradient(135deg,#0A1628 0%,#3d0812 100%); padding: 20px 20px 16px; position: relative; flex-shrink: 0; }
+.jdp-close { position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.12); border: none; color: #fff; width: 28px; height: 28px; border-radius: 2px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.jdp-close:hover { background: rgba(255,255,255,0.22); }
+.jdp-flag { font-size: 32px; margin-bottom: 8px; }
+.jdp-code { font-size: 28px; font-weight: 900; color: var(--jal-red); letter-spacing: 0.06em; }
+.jdp-city { font-size: 17px; font-weight: 800; color: #fff; margin-top: 2px; }
+.jdp-airport { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 3px; }
+.jdp-body { flex: 1; overflow-y: auto; }
+.jdp-section { padding: 14px 20px; border-bottom: 1px solid #F3F4F6; }
+.jdp-section-label { font-size: 9px; font-weight: 800; letter-spacing: 0.16em; color: #9CA3AF; text-transform: uppercase; margin-bottom: 6px; }
+.jdp-section-val { font-size: 13px; font-weight: 600; color: #1A1A2E; line-height: 1.5; }
+.jdp-section-val.red { color: var(--jal-red); font-size: 18px; font-weight: 900; }
+.jdp-banks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.jdp-bank-chip { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 2px; border: 1px solid rgba(200,16,46,0.15); background: #FBEEEF; color: var(--jal-red); }
+.jdp-cabins { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.jdp-cabin { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #374151; }
+.jdp-cabin-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.jdp-footer { padding: 16px 20px; border-top: 1px solid #E5E7EB; flex-shrink: 0; }
+.jdp-book-btn { width: 100%; padding: 13px; background: var(--jal-red); color: #fff; border: none; font-family: inherit; font-size: 13px; font-weight: 800; letter-spacing: 0.05em; cursor: pointer; border-radius: 2px; transition: background 0.2s; }
+.jdp-book-btn:hover { background: #8C0A20; }
+.jd-popup-inner { font-family:'Inter',sans-serif; font-size:12px; font-weight:600; color:#fff; text-align:center; }
+
+/* Routes section */
+.jd-routes-section { background: #F4F6FA; padding: 40px 24px 72px; }
+.jd-routes-header { max-width: 1200px; margin: 0 auto 20px; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.jd-routes-title { font-size: 22px; font-weight: 900; color: var(--jal-navy); letter-spacing: -0.02em; }
+.jd-routes-sub { font-size: 11.5px; color: #9CA3AF; font-weight: 500; margin-top: 4px; }
+.jdt-jumps { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; max-width: 1200px; margin: 0 auto 28px; }
+.jdt-jump { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; border: 1px solid #D1D5DB; color: #374151; background: #fff; text-decoration: none; transition: all 0.14s ease; white-space: nowrap; }
+.jdt-jump:hover { background: var(--jal-red); color: #fff; border-color: var(--jal-red); }
+.jdt-category { max-width: 1200px; margin: 0 auto 36px; scroll-margin-top: 132px; }
+.jdt-cat-hdr { display: flex; align-items: center; gap: 12px; padding: 10px 0 10px 14px; margin-bottom: 8px; border-left: 4px solid; }
+.jdt-cat-name { font-size: 11px; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; }
+.jdt-cat-ct { font-size: 11px; color: #9CA3AF; font-weight: 500; }
+.jd-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #E5E7EB; border-radius: 6px; overflow: hidden; }
+.jd-table th { background: #F9FAFB; padding: 9px 11px; text-align: left; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #9CA3AF; border-bottom: 1px solid #E5E7EB; white-space: nowrap; }
+.jd-row { border-bottom: 1px solid #F3F4F6; cursor: pointer; transition: background 0.1s; }
+.jd-row:last-child { border-bottom: none; }
+.jd-row:hover { background: #FBEEEF; }
+.jd-row td { padding: 9px 11px; vertical-align: middle; font-size: 12px; color: #1F2937; }
+.jd-dc { display: flex; align-items: center; gap: 8px; }
+.jd-flag-c { font-size: 17px; flex-shrink: 0; }
+.jd-di { display: flex; flex-direction: column; }
+.jd-iata { font-size: 13px; font-weight: 800; color: var(--jal-navy); letter-spacing: 0.03em; line-height: 1.2; }
+.jd-cname { font-size: 10px; color: #9CA3AF; font-weight: 500; }
+.jd-tc { display: inline-block; background: #FBEEEF; color: #8C0A20; font-size: 9.5px; font-weight: 700; padding: 2px 5px; border-radius: 3px; margin: 1px 2px 1px 0; letter-spacing: 0.02em; }
+.jd-acft-c { font-size: 11px; color: #374151; line-height: 1.5; }
+.jd-dur-c { font-size: 12px; font-weight: 700; color: var(--jal-navy); white-space: nowrap; }
+.jd-freq-c { font-size: 11px; font-weight: 600; color: #374151; white-space: nowrap; }
+.jd-price-c { font-size: 12px; font-weight: 700; color: var(--jal-navy); white-space: nowrap; }
+.jd-null { color: #D1D5DB; }
+.jd-share-badge { font-size: 9px; font-weight: 800; color: #92400E; background: #FEF3C7; padding: 2px 6px; border-radius: 2px; display: inline-block; white-space: nowrap; }
+
+.jd-footer { background: var(--jal-navy); padding: 32px 24px; text-align: center; }
+.jd-footer p { font-size: 12px; color: rgba(255,255,255,0.4); }
+.jd-footer a { color: rgba(255,255,255,0.7); text-decoration: none; }
+.jd-footer a:hover { color: #fff; }
+
+@media (max-width: 768px) {
+  #jd-map { height: 320px; }
+  .jd-map-section { padding: 12px; }
+  .jdms-item { padding: 10px 8px; }
+  .jdms-num { font-size: 18px; }
+  .jd-routes-section { padding: 24px 10px 40px; }
+  .jd-panel { top: 102px; right: -100vw; width: 100%; bottom: 0; }
+  .jd-panel.open { right: 0; }
+  th.jd-h-flight, td.jd-c-flight { display: none; }
+}
+@media (max-width: 520px) {
+  th.jd-h-deps, td.jd-c-deps { display: none; }
+  .jdt-jumps { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── JAL nav ── -->
+<nav class="jal-navbar">
+  <div class="jal-nav-container">
+    <a href="jal.html" class="jal-nav-logo">
+      <div class="jal-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M3 15 L21 9 M3 15 L9 9 M3 15 L9 21" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="jal-wordmark"><span class="jw-main">JAL</span><span class="jw-sub">Japan Airlines</span></div>
+      <div class="jal-nav-divider"></div>
+      <div class="ow-badge">
+        <svg class="ow-ring" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><circle cx="16" cy="16" r="7" fill="rgba(200,16,46,0.85)"/></svg>
+        <div class="ow-text"><span class="ow-name">oneworld</span><span class="ow-member">alliance member</span></div>
+      </div>
+    </a>
+    <div class="jal-nav-links">
+      <a href="jal.html" class="jal-nav-link">Book</a>
+      <a href="jal-destinations.html" class="jal-nav-link active">Destinations &amp; Routes</a>
+      <a href="jal-fleet.html" class="jal-nav-link">Fleet</a>
+      <a href="index.html" class="jal-nav-back">↩ ANA Site</a>
+    </div>
+    <button class="jal-nav-hamburger" aria-label="Menu" onclick="document.getElementById('jalMobileNav').classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div id="jalMobileNav" style="position:fixed;inset:0;top:72px;background:rgba(10,22,40,0.98);z-index:999;display:none;flex-direction:column;padding:24px;gap:4px;">
+  <a href="jal.html" style="color:#fff;padding:14px 4px;font-weight:600;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.08);">Book</a>
+  <a href="jal-destinations.html" style="color:var(--jal-red);padding:14px 4px;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.08);">Destinations &amp; Routes</a>
+  <a href="jal-fleet.html" style="color:#fff;padding:14px 4px;font-weight:600;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.08);">Fleet</a>
+  <a href="index.html" style="color:rgba(255,255,255,0.6);padding:14px 4px;font-weight:600;text-decoration:none;">↩ ANA Site</a>
+</div>
+<style>#jalMobileNav.open{display:flex!important;}</style>
+
+<div class="jd-page-wrap">
+
+  <div class="jd-filter-bar">
+    <button class="jdf-btn active" data-region="all">All Destinations</button>
+    <button class="jdf-btn" data-region="asia">Asia</button>
+    <button class="jdf-btn" data-region="na">North America</button>
+    <button class="jdf-btn" data-region="europe">Europe</button>
+    <button class="jdf-btn" data-region="me">Middle East</button>
+    <button class="jdf-btn" data-region="oceania">Oceania</button>
+  </div>
+
+  <section class="jd-map-section">
+    <div class="jd-map-header">
+      <div class="jd-map-title">JAL Route Network</div>
+      <div class="jd-map-legend">
+        <div class="jdml-item"><div class="jdml-dot" style="background:#C8102E;box-shadow:0 0 6px #C8102E80;"></div>Tokyo Hub (NRT)</div>
+        <div class="jdml-item"><div class="jdml-dot" style="background:#F59E0B;"></div>Asia</div>
+        <div class="jdml-item"><div class="jdml-dot" style="background:#3B82F6;"></div>Americas</div>
+        <div class="jdml-item"><div class="jdml-dot" style="background:#10B981;"></div>Europe</div>
+        <div class="jdml-item"><div class="jdml-dot" style="background:#8B5CF6;"></div>Middle East</div>
+        <div class="jdml-item"><div class="jdml-dot" style="background:#06B6D4;"></div>Oceania</div>
+      </div>
+    </div>
+    <div class="jd-map-frame">
+      <div id="jd-map"></div>
+      <div class="jd-map-vignette"></div>
+    </div>
+    <div class="jd-map-stats">
+      <div class="jdms-item"><span class="jdms-num" id="jdsbTotal">0</span><span class="jdms-label">Destinations</span></div>
+      <div class="jdms-item"><span class="jdms-num">3</span><span class="jdms-label">Aircraft Types</span></div>
+      <div class="jdms-item"><span class="jdms-num">4</span><span class="jdms-label">Continents</span></div>
+      <div class="jdms-item"><span class="jdms-num" id="jdsbCountries">0</span><span class="jdms-label">Countries</span></div>
+      <div class="jdms-item"><span class="jdms-num">1</span><span class="jdms-label">Hub (NRT only)</span></div>
+    </div>
+  </section>
+
+  <section class="jd-routes-section">
+    <div class="jd-routes-header">
+      <div>
+        <div class="jd-routes-title">Full Route Network</div>
+        <div class="jd-routes-sub">Schedules, aircraft &amp; pricing for all JAL destinations — direct NRT service only</div>
+      </div>
+    </div>
+    <div class="jdt-jumps">
+      <a class="jdt-jump" href="#jdt-asia">Asia</a>
+      <a class="jdt-jump" href="#jdt-na">North America</a>
+      <a class="jdt-jump" href="#jdt-europe">Europe</a>
+      <a class="jdt-jump" href="#jdt-me">Middle East</a>
+      <a class="jdt-jump" href="#jdt-oceania">Oceania</a>
+    </div>
+    <div id="jdRouteTableContainer"></div>
+  </section>
+
+</div>
+
+<div class="jd-panel" id="jdPanel">
+  <div class="jdp-header">
+    <button class="jdp-close" id="jdpClose">✕</button>
+    <div id="jdpFlag" class="jdp-flag"></div>
+    <div id="jdpCode" class="jdp-code"></div>
+    <div id="jdpCity" class="jdp-city"></div>
+    <div id="jdpAirport" class="jdp-airport"></div>
+  </div>
+  <div class="jdp-body" id="jdpBody"></div>
+  <div class="jdp-footer"><button class="jdp-book-btn" id="jdpBookBtn">Search JAL Flights →</button></div>
+</div>
+
+<div class="jd-footer">
+  <p>JAL — Japan Airlines · a <a href="jal.html">oneworld</a> member · part of the Tokyo Mega Hub concept · <a href="index.html">visit the ANA site →</a></p>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/airports.js?v=1"></script>
+<script src="js/flights.js?v=1"></script>
+<script>
+/* ─── JAL region buckets (JAL flies no domestic or KIX routes in this model) ── */
+const JD_REGIONS = {
+  asia:    ['ICN','HKG','SIN','BKK','CGK','KUL','GMP','PUS','PEK','PVG','HAN','SGN','MNL','TPE','DEL','CEB','HGH','CTU','CAN','MFM','BOM'],
+  na:      ['LAX','SFO','ORD','JFK','HNL','DFW','SEA','SAN','BOS','YVR','YUL','MEX','YYZ'],
+  europe:  ['LHR','CDG','FRA','HEL','MUC'],
+  me:      ['DOH'],
+  oceania: ['SYD','MEL','BNE','PER','AKL'],
+};
+const JD_REGION_COLORS = { asia:'#F59E0B', na:'#3B82F6', europe:'#10B981', me:'#8B5CF6', oceania:'#06B6D4' };
+const JD_FLAGS = {
+  'USA':'🇺🇸','Canada':'🇨🇦','Mexico':'🇲🇽','China':'🇨🇳','Hong Kong':'🇭🇰','Macau':'🇲🇴','South Korea':'🇰🇷','Taiwan':'🇹🇼',
+  'Singapore':'🇸🇬','Thailand':'🇹🇭','Philippines':'🇵🇭','Indonesia':'🇮🇩','Malaysia':'🇲🇾','Vietnam':'🇻🇳','India':'🇮🇳',
+  'UK':'🇬🇧','France':'🇫🇷','Germany':'🇩🇪','Finland':'🇫🇮','Qatar':'🇶🇦','Australia':'🇦🇺','New Zealand':'🇳🇿',
+};
+const JD_ACFT_NAME = {2:'Airbus A350-1000',3:'Boeing 787-9',5:'Boeing 787-8'};
+const JD_ACFT_SHORT = {2:'A350-1000',3:'B787-9',5:'B787-8'};
+
+function jdToHH(m) { const n=((m%1440)+1440)%1440; return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0'); }
+
+/* ─── Map ─────────────────────────────────────────────────── */
+const jdMap = L.map('jd-map', {
+  zoomControl: true, scrollWheelZoom: true, attributionControl: false,
+  maxBounds: [[-78,-30],[78,335]], maxBoundsViscosity: 1.0, minZoom: 2, zoomSnap: 0.5, worldCopyJump: false,
+}).setView([18,152],2.5);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom:18 }).addTo(jdMap);
+function jdPacificLng(lng) { return lng < -10 ? lng + 360 : lng; }
+jdMap.zoomControl.setPosition('bottomleft');
+
+const jdNrtIcon = L.divIcon({
+  className:'',
+  html:`<div style="position:relative;display:flex;align-items:center;justify-content:center;width:28px;height:28px;">
+    <div style="position:absolute;width:28px;height:28px;border-radius:50%;border:2px solid rgba(200,16,46,0.5);animation:hubRingPulse 2.2s ease-out infinite;"></div>
+    <div style="position:absolute;width:28px;height:28px;border-radius:50%;border:2px solid rgba(200,16,46,0.3);animation:hubRingPulse 2.2s ease-out 1.1s infinite;"></div>
+    <div style="width:14px;height:14px;border-radius:50%;background:#C8102E;border:2.5px solid #fff;box-shadow:0 0 14px rgba(200,16,46,0.9);position:relative;z-index:1;"></div>
+  </div>`,
+  iconSize:[28,28], iconAnchor:[14,14],
+});
+L.marker([35.7647,140.3865],{icon:jdNrtIcon,zIndexOffset:2000}).addTo(jdMap)
+  .bindTooltip('Tokyo Hub (NRT)',{permanent:false,className:'map-label map-label-hub',direction:'top',offset:[0,-10]});
+
+let jdMarkers={}, jdActiveLine=null, jdCurrentCode=null;
+let jdTotal=0; const jdCountrySet=new Set();
+for (const [region,codes] of Object.entries(JD_REGIONS)) {
+  codes.forEach(code=>{
+    const ap=AIRPORTS[code]; if(!ap) return;
+    jdTotal++;
+    if(ap.country) jdCountrySet.add(ap.country);
+    const color=JD_REGION_COLORS[region];
+    const icon=L.divIcon({className:'', html:`<div style="width:9px;height:9px;border-radius:50%;background:${color};border:1.5px solid rgba(255,255,255,0.8);box-shadow:0 0 6px ${color}80;"></div>`, iconSize:[9,9], iconAnchor:[4.5,4.5]});
+    const mk=L.marker([ap.lat,jdPacificLng(ap.lng)],{icon,zIndexOffset:100}).addTo(jdMap);
+    mk.bindTooltip(`<div class="jd-popup-inner"><strong>${code}</strong><br>${ap.city}</div>`,{permanent:false,className:'map-label',direction:'top',offset:[0,-7]});
+    mk.on('click',()=>jdShowInfo(code,color));
+    jdMarkers[code]={marker:mk,region,color};
+  });
+}
+document.getElementById('jdsbTotal').textContent = jdTotal;
+document.getElementById('jdsbCountries').textContent = jdCountrySet.size;
+
+function jdShowInfo(code, color) {
+  jdCurrentCode = code;
+  const ap = AIRPORTS[code];
+  const s = JAL_SCHEDULE[code];
+  const flag = JD_FLAGS[ap.country] || '🌍';
+  document.getElementById('jdpFlag').textContent = flag;
+  document.getElementById('jdpCode').textContent = code;
+  document.getElementById('jdpCity').textContent = ap.city;
+  document.getElementById('jdpAirport').textContent = ap.name;
+
+  let html = '';
+  if (s) {
+    const freq = s.outDeps.length >= 3 ? s.outDeps.length + '× Daily' : s.outDeps.length === 2 ? '2× Daily' : '1× Daily';
+    html += `<div class="jdp-section"><div class="jdp-section-label">Service Frequency</div><div class="jdp-section-val">${freq}</div></div>`;
+    html += `<div class="jdp-section"><div class="jdp-section-label">NRT Departures</div><div class="jdp-banks">`;
+    s.outDeps.forEach(dep => { html += `<span class="jdp-bank-chip">${jdToHH(dep)} JST</span>`; });
+    html += `</div></div>`;
+    const acSet = [...new Set(s.ac)];
+    html += `<div class="jdp-section"><div class="jdp-section-label">Aircraft</div><div class="jdp-cabins">`;
+    acSet.forEach(a => { html += `<span class="jdp-cabin"><div class="jdp-cabin-dot" style="background:#C8102E;"></div>${JD_ACFT_NAME[a]}</span>`; });
+    html += `</div></div>`;
+    const hasFC = s.ac.some(a => a === 2);
+    html += `<div class="jdp-section"><div class="jdp-section-label">Cabin Classes</div><div class="jdp-cabins">`;
+    if (hasFC) html += `<div class="jdp-cabin"><div class="jdp-cabin-dot" style="background:#C8102E;"></div>First Class</div>`;
+    html += `<div class="jdp-cabin"><div class="jdp-cabin-dot" style="background:var(--jal-navy);"></div>Business</div>`;
+    html += `<div class="jdp-cabin"><div class="jdp-cabin-dot" style="background:#E88A97;"></div>Premium Economy</div>`;
+    html += `<div class="jdp-cabin"><div class="jdp-cabin-dot" style="background:#9CA3AF;"></div>Economy</div>`;
+    html += `</div></div>`;
+    if (s.prices?.e) html += `<div class="jdp-section"><div class="jdp-section-label">Economy from</div><div class="jdp-section-val red">¥${s.prices.e.toLocaleString()}</div></div>`;
+    if (s.prices?.bc) html += `<div class="jdp-section"><div class="jdp-section-label">Business from</div><div class="jdp-section-val red" style="font-size:15px;">¥${s.prices.bc.toLocaleString()}</div></div>`;
+    html += `<div class="jdp-section"><div class="jdp-section-label">Return Arrivals at NRT</div><div class="jdp-banks">`;
+    s.inArrs.forEach(arr => { html += `<span class="jdp-bank-chip" style="background:#F9FAFB;color:#374151;border-color:#E5E7EB;">${jdToHH(arr)} JST</span>`; });
+    html += `</div></div>`;
+  } else {
+    html += `<div class="jdp-section"><div class="jdp-section-label">Service</div><div class="jdp-section-val">Not served by JAL — see the full ANA network for this destination</div></div>`;
+  }
+  document.getElementById('jdpBody').innerHTML = html;
+  document.getElementById('jdPanel').classList.add('open');
+
+  if (jdActiveLine) { try { jdMap.removeLayer(jdActiveLine); } catch(e){} jdActiveLine = null; }
+  const HUBlat=35.7647, HUBlng=140.3865;
+  let toLng = jdPacificLng(ap.lng);
+  const diff = toLng - HUBlng;
+  if (diff > 180) toLng -= 360; if (diff < -180) toLng += 360;
+  const pts=[], n=80, arcH=Math.abs(toLng-HUBlng)*0.12;
+  for (let i=0;i<=n;i++){ const t=i/n; pts.push([HUBlat+(ap.lat-HUBlat)*t+Math.sin(Math.PI*t)*arcH, HUBlng+(toLng-HUBlng)*t]); }
+  jdActiveLine = L.polyline(pts,{color,weight:2.5,opacity:0.9,dashArray:'8 5'}).addTo(jdMap);
+}
+
+document.querySelectorAll('.jdf-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.jdf-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const region = btn.dataset.region;
+    let visible = 0;
+    for (const [code,info] of Object.entries(jdMarkers)) {
+      const show = region==='all' ? true : info.region===region;
+      if (show) { info.marker.addTo(jdMap); visible++; } else { jdMap.removeLayer(info.marker); }
+    }
+    document.getElementById('jdsbTotal').textContent = visible;
+    const views = {asia:[[15,118],3], na:[[42,262],3], europe:[[52,15],3], me:[[24,50],4], oceania:[[-25,150],3], all:[[18,152],2.5]};
+    const [center,zoom] = views[region] || views.all;
+    jdMap.flyTo(center,zoom,{duration:1.2});
+    document.getElementById('jdPanel').classList.remove('open');
+    if (jdActiveLine) { try { jdMap.removeLayer(jdActiveLine); } catch(e){} jdActiveLine = null; }
+    document.querySelector('.jd-map-section').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+document.getElementById('jdpClose').addEventListener('click',()=>{
+  document.getElementById('jdPanel').classList.remove('open');
+  if (jdActiveLine) { try { jdMap.removeLayer(jdActiveLine); } catch(e){} jdActiveLine = null; }
+});
+document.getElementById('jdpBookBtn').addEventListener('click',()=>{
+  if (jdCurrentCode) sessionStorage.setItem('preselect-to',JSON.stringify({code:jdCurrentCode,city:AIRPORTS[jdCurrentCode]?.city}));
+  window.location.href='jal.html';
+});
+
+/* ─── Route table ─────────────────────────────────────────── */
+const JDT_CATEGORIES = [
+  { id:'asia',    label:'Asia',           color:'#F59E0B', codes:JD_REGIONS.asia },
+  { id:'na',      label:'North America',  color:'#3B82F6', codes:JD_REGIONS.na },
+  { id:'europe',  label:'Europe',         color:'#10B981', codes:JD_REGIONS.europe },
+  { id:'me',      label:'Middle East',    color:'#8B5CF6', codes:JD_REGIONS.me },
+  { id:'oceania', label:'Oceania',        color:'#06B6D4', codes:JD_REGIONS.oceania },
+];
+
+function jdFreqLabel(s) {
+  if (s.outDeps.length >= 3) return `${s.outDeps.length}× Daily`;
+  if (s.outDeps.length === 2) return '2× Daily';
+  return '1× Daily';
+}
+function jdDepChips(deps) {
+  return deps.map(d => `<span class="jd-tc">${jdToHH(d)}</span>`).join('');
+}
+function jdPriceCell(p) {
+  return p ? `<span class="jd-price-c">¥${(p/1000).toFixed(0)}k</span>` : `<span class="jd-null">—</span>`;
+}
+function jdBuildRow(code, catColor) {
+  const ap = AIRPORTS[code]; if (!ap) return '';
+  const s = JAL_SCHEDULE[code]; if (!s) return '';
+  const flag = JD_FLAGS[ap.country] || '🌍';
+  const acUniq = [...new Set(s.ac)];
+  const acHtml = acUniq.map(a => JD_ACFT_SHORT[a]).join('<br>');
+  const sharesTpe = code === 'TPE' ? `<span class="jd-share-badge">Split w/ 787-8</span>` : `<span class="jd-null">—</span>`;
+
+  return `<tr class="jd-row" onclick="jdShowInfo('${code}','${catColor}')">
+    <td class="jd-c-dest"><div class="jd-dc"><span class="jd-flag-c">${flag}</span><div class="jd-di"><span class="jd-iata">${code}</span><span class="jd-cname">${ap.city}</span></div></div></td>
+    <td class="jd-c-flight">${s.nos[0]||'—'}</td>
+    <td><span class="jd-acft-c">${acHtml}</span></td>
+    <td><span class="jd-dur-c">${durStr(s.dur)}</span></td>
+    <td><span class="jd-freq-c">${jdFreqLabel(s)}</span></td>
+    <td class="jd-c-deps">${jdDepChips(s.outDeps)}</td>
+    <td>${jdPriceCell(s.prices?.e)}</td>
+    <td>${jdPriceCell(s.prices?.bc)}</td>
+    <td>${sharesTpe}</td>
+  </tr>`;
+}
+function jdBuildTable() {
+  const HEADER = `<table class="jd-table"><thead><tr>
+    <th style="min-width:150px;">Destination</th>
+    <th class="jd-h-flight">Flight</th>
+    <th style="min-width:90px;">Aircraft</th>
+    <th>Duration</th>
+    <th style="min-width:90px;">Frequency</th>
+    <th class="jd-h-deps" style="min-width:140px;">Departures (JST)</th>
+    <th>Economy from</th>
+    <th>Business from</th>
+    <th>Note</th>
+  </tr></thead><tbody>`;
+  let html = '';
+  JDT_CATEGORIES.forEach(cat => {
+    const count = cat.codes.filter(c => AIRPORTS[c]).length;
+    html += `<div class="jdt-category" id="jdt-${cat.id}">
+      <div class="jdt-cat-hdr" style="border-left-color:${cat.color}">
+        <span class="jdt-cat-name" style="color:${cat.color}">${cat.label}</span>
+        <span class="jdt-cat-ct">${count} destination${count!==1?'s':''}</span>
+      </div>
+      ${HEADER}`;
+    cat.codes.forEach(code => { html += jdBuildRow(code, cat.color); });
+    html += `</tbody></table></div>`;
+  });
+  document.getElementById('jdRouteTableContainer').innerHTML = html;
+}
+jdBuildTable();
+</script>
+</body>
+</html>

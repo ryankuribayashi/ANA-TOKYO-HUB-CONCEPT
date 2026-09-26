@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JAL | Fleet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+:root {
+  --jal-red: #C8102E;
+  --jal-red-dark: #8C0A20;
+  --jal-navy: #0A1628;
+}
+body.jal-page { background: var(--off-white, #FAF9F5); }
+
+/* ── JAL nav (bespoke — distinct from ANA's navbar, not injected by nav.js) ── */
+.jal-navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(10,22,40,0.97); backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(200,16,46,0.25);
+}
+.jal-nav-container {
+  max-width: 1440px; margin: 0 auto; padding: 0 24px;
+  height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px;
+}
+.jal-nav-logo { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+.jal-mark {
+  width: 38px; height: 38px; border-radius: 50%; background: var(--jal-red);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.15);
+}
+.jal-mark svg { width: 20px; height: 20px; }
+.jal-wordmark { display: flex; flex-direction: column; line-height: 1.1; }
+.jal-wordmark .jw-main { font-size: 18px; font-weight: 900; color: #fff; letter-spacing: 0.02em; }
+.jal-wordmark .jw-sub { font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.5); letter-spacing: 0.14em; text-transform: uppercase; }
+.jal-nav-divider { width: 1px; height: 30px; background: rgba(255,255,255,0.15); }
+.ow-badge { display: flex; align-items: center; gap: 8px; }
+.ow-ring { width: 26px; height: 26px; }
+.ow-text { display: flex; flex-direction: column; line-height: 1.15; }
+.ow-name { font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.85); letter-spacing: 0.02em; }
+.ow-member { font-size: 8px; color: rgba(255,255,255,0.42); letter-spacing: 0.06em; text-transform: uppercase; }
+
+.jal-nav-links { display: flex; align-items: center; gap: 28px; }
+.jal-nav-link { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.72); text-decoration: none; transition: color 0.15s; }
+.jal-nav-link:hover { color: #fff; }
+.jal-nav-link.active { color: var(--jal-red); font-weight: 700; }
+.jal-nav-back {
+  font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.55); text-decoration: none;
+  display: flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 4px; transition: all 0.15s;
+}
+.jal-nav-back:hover { color: #fff; border-color: rgba(255,255,255,0.4); }
+.jal-nav-hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 8px; }
+.jal-nav-hamburger span { width: 22px; height: 2px; background: #fff; border-radius: 2px; }
+
+@media (max-width: 900px) {
+  .jal-nav-links { display: none; }
+  .jal-nav-hamburger { display: flex; }
+  .ow-text { display: none; }
+}
+
+/* ── Hero ── */
+.jf-hero {
+  padding: 132px 0 48px;
+  background:
+    radial-gradient(ellipse at 75% 30%, rgba(200,16,46,0.08) 0%, transparent 55%),
+    linear-gradient(160deg, #F7E9EA 0%, #F1DEE0 45%, #ECD7D9 100%);
+  border-bottom: 1px solid rgba(200,16,46,0.1);
+}
+.jf-hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.jf-hero-tag {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: var(--jal-red);
+  text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
+}
+.jf-hero-tag::before { content:''; width: 28px; height: 2px; background: var(--jal-navy); }
+.jf-hero-title { font-size: clamp(34px, 4.2vw, 54px); font-weight: 900; color: var(--jal-navy); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 14px; }
+.jf-hero-sub { font-size: 15px; color: #4B5563; max-width: 560px; line-height: 1.7; }
+
+/* ── Stats bar ── */
+.jf-stats-bar { background: var(--jal-navy); padding: 26px 0; }
+.jf-stats-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 24px; }
+.jf-stat { text-align: center; }
+.jf-stat-num { font-size: 34px; font-weight: 900; color: var(--jal-red); letter-spacing: -0.02em; }
+.jf-stat-label { font-size: 12px; color: rgba(255,255,255,0.62); font-weight: 500; margin-top: 4px; }
+
+/* ── Grid ── */
+.jf-grid { max-width: 1000px; margin: 0 auto; padding: 48px 24px 80px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.jf-widget {
+  position: relative; cursor: pointer; border-radius: 10px; overflow: hidden; height: 320px;
+  border: 1.5px solid rgba(200,16,46,0.12); transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s;
+  outline: none;
+}
+.jf-widget:hover, .jf-widget:focus-visible { transform: translateY(-5px); box-shadow: 0 20px 56px rgba(200,16,46,0.2); border-color: rgba(200,16,46,0.3); }
+.jf-widget:focus-visible { outline: 2px solid var(--jal-red); outline-offset: 3px; }
+
+.ac-a351j { background: linear-gradient(160deg, #2b0d14 0%, #6e1a29 60%, #8c0a20 100%); }
+.ac-789j  { background: linear-gradient(160deg, #0f1e3d 0%, #263b6e 60%, #37517e 100%); }
+.ac-788j  { background: linear-gradient(160deg, #1a2a4a 0%, #243d6b 60%, #2d4f88 100%); }
+
+.jfw-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; transition: transform 0.45s ease; }
+.jf-widget:hover .jfw-photo { transform: scale(1.04); }
+.jfw-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.32) 0%, transparent 40%), linear-gradient(to top, rgba(20,0,4,0.82) 0%, transparent 55%);
+}
+.jfw-type {
+  position: absolute; top: 14px; left: 15px; z-index: 2; background: rgba(0,0,0,0.45); backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.18); border-radius: 4px; padding: 4px 10px; font-size: 10px; font-weight: 800;
+  color: rgba(255,255,255,0.92); letter-spacing: 0.12em; text-transform: uppercase;
+}
+.jfw-explore {
+  position: absolute; top: 14px; right: 14px; z-index: 2; background: rgba(255,255,255,0.14); backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.28); border-radius: 20px; padding: 4px 12px; font-size: 10px; font-weight: 700;
+  color: rgba(255,255,255,0.9); letter-spacing: 0.06em; text-transform: uppercase; opacity: 0; transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.jf-widget:hover .jfw-explore, .jf-widget:focus-visible .jfw-explore { opacity: 1; transform: translateY(0); }
+.jfw-bottom { position: absolute; bottom: 0; left: 0; right: 0; z-index: 2; padding: 18px 18px 20px; }
+.jfw-name { font-size: 21px; font-weight: 900; color: #fff; letter-spacing: -0.02em; line-height: 1.15; }
+.jfw-role { font-size: 11px; color: rgba(255,255,255,0.58); font-weight: 500; margin-top: 3px; line-height: 1.4; }
+.jfw-pill {
+  display: inline-flex; align-items: center; margin-top: 9px; background: rgba(200,16,46,0.22);
+  border: 1px solid rgba(200,16,46,0.5); border-radius: 12px; padding: 3px 10px; font-size: 11px; font-weight: 700;
+  color: #FF6B7F; letter-spacing: 0.04em;
+}
+
+/* ── Modal (shared shape with ANA's, red accents) ── */
+.jf-modal { position: fixed; inset: 0; z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+.jf-modal.open { opacity: 1; pointer-events: all; }
+.jf-modal-bg { position: absolute; inset: 0; background: rgba(20,0,4,0.72); backdrop-filter: blur(6px); }
+.jf-modal-box {
+  position: relative; z-index: 1; background: #fff; border-radius: 10px; width: min(860px, 100%); max-height: 86vh;
+  overflow-y: auto; transform: translateY(30px) scale(0.97); transition: transform 0.32s cubic-bezier(0.34,1.2,0.64,1);
+  box-shadow: 0 32px 96px rgba(0,0,0,0.42); scrollbar-width: thin; scrollbar-color: rgba(200,16,46,0.2) transparent;
+}
+.jf-modal.open .jf-modal-box { transform: translateY(0) scale(1); }
+.jf-modal-close {
+  position: absolute; top: 13px; right: 13px; z-index: 20; width: 34px; height: 34px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.35); background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); cursor: pointer;
+  color: #fff; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: background 0.15s, transform 0.15s;
+}
+.jf-modal-close:hover { background: rgba(0,0,0,0.65); transform: scale(1.08); }
+.jf-modal-photo { width: 100%; height: 210px; position: relative; overflow: hidden; border-radius: 10px 10px 0 0; }
+.jf-modal-photo img { width: 100%; height: 100%; object-fit: cover; }
+.jfmp-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, transparent 35%), linear-gradient(to top, rgba(20,0,4,0.65) 0%, transparent 52%); }
+.jfmp-badge {
+  position: absolute; top: 16px; left: 20px; z-index: 2; background: rgba(0,0,0,0.45); backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 5px 12px; font-size: 11px; font-weight: 800;
+  color: rgba(255,255,255,0.92); letter-spacing: 0.1em; text-transform: uppercase;
+}
+.jfmp-bottom { position: absolute; bottom: 16px; left: 20px; right: 20px; z-index: 2; }
+.jfmp-name { font-size: 24px; font-weight: 900; color: #fff; letter-spacing: -0.02em; }
+.jfmp-role { font-size: 11px; color: rgba(255,255,255,0.65); font-weight: 500; margin-top: 3px; }
+
+.jf-modal-inner { padding: 24px 28px 32px; }
+.jfmi-seats { font-size: 14px; color: #6B7280; font-weight: 500; margin-bottom: 18px; }
+.jfmi-seats strong { color: var(--jal-red); font-weight: 800; }
+.jfmi-label { font-size: 10px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #B0B8C9; margin-bottom: 10px; }
+
+.jf-cabins { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.jf-cabin-row { display: flex; align-items: center; gap: 14px; padding: 11px 18px; border-radius: 4px; background: #FBF7F7; border: 1px solid #F3E4E5; }
+.jf-cabin-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.jf-cabin-fc { background: #C8102E; box-shadow: 0 0 8px rgba(200,16,46,0.45); }
+.jf-cabin-bc { background: var(--jal-navy); box-shadow: 0 0 6px rgba(10,22,40,0.4); }
+.jf-cabin-pe { background: #E88A97; }
+.jf-cabin-eco { background: #9CA3AF; }
+.jf-cabin-label { font-size: 12px; font-weight: 700; color: #374151; min-width: 120px; }
+.jf-cabin-config { font-size: 12px; color: #6B7280; font-weight: 500; flex: 1; }
+.jf-cabin-seats { font-size: 13px; font-weight: 800; color: var(--jal-red); min-width: 40px; text-align: right; }
+
+.jf-routes-section { padding-top: 18px; border-top: 1px solid #F3E4E5; }
+.jf-routes-title { font-size: 10px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #B0B8C9; margin-bottom: 14px; }
+.jf-regions { display: flex; flex-direction: column; gap: 14px; }
+.jf-region-head { font-size: 10px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.jf-region-head .rh-line { width: 14px; height: 2px; flex-shrink: 0; border-radius: 1px; }
+.jrh-na { color: #3B82F6; } .jrh-na .rh-line { background: #3B82F6; }
+.jrh-asia { color: #F59E0B; } .jrh-asia .rh-line { background: #F59E0B; }
+.jrh-eu { color: #10B981; } .jrh-eu .rh-line { background: #10B981; }
+.jrh-me { color: #8B5CF6; } .jrh-me .rh-line { background: #8B5CF6; }
+.jrh-oc { color: #06B6D4; } .jrh-oc .rh-line { background: #06B6D4; }
+.jf-dest-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.jf-dest-list.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.jf-dest-row { display: flex; align-items: center; gap: 7px; padding: 4px 0; border-bottom: 1px solid #FBF3F3; }
+.jf-dest-code { font-size: 12px; font-weight: 900; color: var(--jal-navy); min-width: 32px; flex-shrink: 0; letter-spacing: 0.02em; }
+.jf-dest-city { font-size: 11px; color: #4B5563; flex: 1; }
+.jf-dest-freq { font-size: 10px; font-weight: 700; color: #9CA3AF; white-space: nowrap; flex-shrink: 0; }
+.jf-specs-inline { margin-top: 16px; padding-top: 14px; border-top: 1px solid #F3E4E5; display: flex; gap: 24px; flex-wrap: wrap; }
+.jf-spec { display: flex; flex-direction: column; gap: 2px; }
+.jf-spec-val { font-size: 16px; font-weight: 900; color: var(--jal-red); }
+.jf-spec-lbl { font-size: 10px; color: #9CA3AF; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+
+.jf-footer { background: var(--jal-navy); padding: 32px 24px; text-align: center; }
+.jf-footer p { font-size: 12px; color: rgba(255,255,255,0.4); }
+.jf-footer a { color: rgba(255,255,255,0.7); text-decoration: none; }
+.jf-footer a:hover { color: #fff; }
+
+@media (max-width: 900px) { .jf-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) {
+  .jf-hero { padding: 96px 0 36px; }
+  .jf-hero-title { font-size: clamp(28px, 8vw, 40px); }
+  .jf-stats-bar { padding: 20px 0; }
+  .jf-stat-num { font-size: 24px; }
+  .jf-modal-inner { padding: 18px 18px 24px; }
+  .jf-cabin-label { min-width: 90px; font-size: 11px; }
+}
+@media (max-width: 520px) {
+  .jf-grid { grid-template-columns: 1fr; gap: 14px; padding: 28px 16px 56px; }
+  .jf-widget { height: 260px; }
+  .jf-modal { padding: 0; align-items: flex-end; }
+  .jf-modal-box { width: 100%; max-height: 90vh; border-radius: 12px 12px 0 0; }
+  .jf-modal-photo { height: 160px; }
+}
+</style>
+</head>
+<body class="jal-page">
+
+<!-- ── JAL nav ── -->
+<nav class="jal-navbar">
+  <div class="jal-nav-container">
+    <a href="jal.html" class="jal-nav-logo">
+      <div class="jal-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M3 15 L21 9 M3 15 L9 9 M3 15 L9 21" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="jal-wordmark"><span class="jw-main">JAL</span><span class="jw-sub">Japan Airlines</span></div>
+      <div class="jal-nav-divider"></div>
+      <div class="ow-badge">
+        <svg class="ow-ring" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><circle cx="16" cy="16" r="7" fill="rgba(200,16,46,0.85)"/></svg>
+        <div class="ow-text"><span class="ow-name">oneworld</span><span class="ow-member">alliance member</span></div>
+      </div>
+    </a>
+    <div class="jal-nav-links">
+      <a href="jal.html" class="jal-nav-link">Book</a>
+      <a href="jal-destinations.html" class="jal-nav-link">Destinations &amp; Routes</a>
+      <a href="jal-fleet.html" class="jal-nav-link active">Fleet</a>
+      <a href="index.html" class="jal-nav-back">↩ ANA Site</a>
+    </div>
+    <button class="jal-nav-hamburger" aria-label="Menu" onclick="document.getElementById('jalMobileNav').classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div id="jalMobileNav" style="position:fixed;inset:0;top:72px;background:rgba(10,22,40,0.98);z-index:999;display:none;flex-direction:column;padding:24px;gap:4px;">
+  <a href="jal.html" style="color:#fff;padding:14px 4px;font-weight:600;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.08);">Book</a>
+  <a href="jal-destinations.html" style="color:#fff;padding:14px 4px;font-weight:600;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.08);">Destinations &amp; Routes</a>
+  <a href="jal-fleet.html" style="color:var(--jal-red);padding:14px 4px;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.08);">Fleet</a>
+  <a href="index.html" style="color:rgba(255,255,255,0.6);padding:14px 4px;font-weight:600;text-decoration:none;">↩ ANA Site</a>
+</div>
+<style>#jalMobileNav.open{display:flex!important;}</style>
+
+<!-- Hero -->
+<div class="jf-hero">
+  <div class="jf-hero-inner">
+    <div class="jf-hero-tag">JAL FLEET</div>
+    <h1 class="jf-hero-title">Three Aircraft.<br>One Clear Strategy.</h1>
+    <p class="jf-hero-sub">JAL runs a deliberately leaner widebody fleet than ANA's hub-scale build-out — no 777-9 flagship, no fifth aircraft type. Each of the three types has exactly one job: trunk long-haul, dual-role secondary/Asia flagship, or thin regional Asia.</p>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="jf-stats-bar">
+  <div class="jf-stats-inner">
+    <div class="jf-stat"><div class="jf-stat-num">3</div><div class="jf-stat-label">Aircraft Types</div></div>
+    <div class="jf-stat"><div class="jf-stat-num">624</div><div class="jf-stat-label">Seats Across Fleet (per rotation)</div></div>
+    <div class="jf-stat"><div class="jf-stat-num">45</div><div class="jf-stat-label">Routes Served</div></div>
+    <div class="jf-stat"><div class="jf-stat-num">0</div><div class="jf-stat-label">777-9s Operated</div></div>
+  </div>
+</div>
+
+<!-- Grid -->
+<div class="jf-grid">
+
+  <div class="jf-widget ac-a351j" data-aircraft="a350" role="button" tabindex="0" aria-label="Airbus A350-1000, click to expand">
+    <img class="jfw-photo" src="assets/fleet-a351.jpg" alt="JAL Airbus A350-1000" style="object-position:center 42%;">
+    <div class="jfw-overlay"></div>
+    <div class="jfw-type">TRUNK FLAGSHIP</div>
+    <div class="jfw-explore">Explore →</div>
+    <div class="jfw-bottom">
+      <div class="jfw-name">Airbus A350-1000</div>
+      <div class="jfw-role">Flagship Long-Haul · North America, London, Paris, Frankfurt, Helsinki &amp; Sydney</div>
+      <div class="jfw-pill">267 seats</div>
+    </div>
+  </div>
+
+  <div class="jf-widget ac-789j" data-aircraft="787-9" role="button" tabindex="0" aria-label="Boeing 787-9, click to expand">
+    <img class="jfw-photo" src="assets/fleet-789.jpg" alt="JAL Boeing 787-9" style="object-position:center 52%;">
+    <div class="jfw-overlay"></div>
+    <div class="jfw-type">DUAL ROLE</div>
+    <div class="jfw-explore">Explore →</div>
+    <div class="jfw-bottom">
+      <div class="jfw-name">Boeing 787-9</div>
+      <div class="jfw-role">Secondary Long-Haul + Flagship Asia · 23 routes, more than any other JAL type</div>
+      <div class="jfw-pill">193 seats</div>
+    </div>
+  </div>
+
+  <div class="jf-widget ac-788j" data-aircraft="787-8" role="button" tabindex="0" aria-label="Boeing 787-8, click to expand">
+    <img class="jfw-photo" src="assets/fleet-788.avif" alt="JAL Boeing 787-8" style="object-position:center 40%;">
+    <div class="jfw-overlay"></div>
+    <div class="jfw-type">SECONDARY ASIA</div>
+    <div class="jfw-explore">Explore →</div>
+    <div class="jfw-bottom">
+      <div class="jfw-name">Boeing 787-8</div>
+      <div class="jfw-role">Regional China &amp; Korea · thinnest, shortest-range routes only</div>
+      <div class="jfw-pill">164 seats</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Hidden detail store -->
+<div id="jf-detail-store" style="display:none;" aria-hidden="true">
+
+  <div id="jf-detail-a350">
+    <div class="jfmi-seats">Total: <strong>267 seats</strong> · Twin-engine widebody · <em>JAL's only flagship long-haul type</em></div>
+    <p style="font-size:13px;color:#6B7280;margin:-6px 0 14px;">Unlike ANA, which splits its A350-1000 into Premium and Main Trunk builds and tops its fleet with the 777-9, JAL runs one single A350-1000 configuration as its entire flagship — smaller and leaner than either ANA build, but with a genuine First Class cabin on every one of its twelve routes.</p>
+    <div class="jfmi-label">Cabin Configuration</div>
+    <div class="jf-cabins">
+      <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-fc"></div><span class="jf-cabin-label">First Class</span><span class="jf-cabin-config">1-1-1 · Private suite · Door-to-door</span><span class="jf-cabin-seats">8</span></div>
+      <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-bc"></div><span class="jf-cabin-label">Business Class</span><span class="jf-cabin-config">1-2-1 · Full flat · Direct aisle access</span><span class="jf-cabin-seats">40</span></div>
+      <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-pe"></div><span class="jf-cabin-label">Premium Economy</span><span class="jf-cabin-config">2-3-2 · Extra legroom</span><span class="jf-cabin-seats">24</span></div>
+      <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-eco"></div><span class="jf-cabin-label">Economy</span><span class="jf-cabin-config">3-3-3 · In-seat power · 31" pitch</span><span class="jf-cabin-seats">195</span></div>
+    </div>
+    <div class="jf-routes-section">
+      <div class="jf-routes-title">Routes &amp; Destinations</div>
+      <div class="jf-regions">
+        <div>
+          <div class="jf-region-head jrh-na"><span class="rh-line"></span>North America</div>
+          <div class="jf-dest-list cols-3">
+            <div class="jf-dest-row"><span class="jf-dest-code">LAX</span><span class="jf-dest-city">Los Angeles</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">SFO</span><span class="jf-dest-city">San Francisco</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">ORD</span><span class="jf-dest-city">Chicago</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">JFK</span><span class="jf-dest-city">New York</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">HNL</span><span class="jf-dest-city">Honolulu</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">DFW</span><span class="jf-dest-city">Dallas</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">YYZ</span><span class="jf-dest-city">Toronto</span><span class="jf-dest-freq">daily</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="jf-region-head jrh-eu"><span class="rh-line"></span>Europe</div>
+          <div class="jf-dest-list">
+            <div class="jf-dest-row"><span class="jf-dest-code">LHR</span><span class="jf-dest-city">London</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">CDG</span><span class="jf-dest-city">Paris</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">FRA</span><span class="jf-dest-city">Frankfurt</span><span class="jf-dest-freq">daily</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">HEL</span><span class="jf-dest-city">Helsinki</span><span class="jf-dest-freq">daily</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="jf-region-head jrh-oc"><span class="rh-line"></span>Oceania</div>
+          <div class="jf-dest-list">
+            <div class="jf-dest-row"><span class="jf-dest-code">SYD</span><span class="jf-dest-city">Sydney</span><span class="jf-dest-freq">daily</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="jf-specs-inline">
+        <div class="jf-spec"><span class="jf-spec-val">15,600 km</span><span class="jf-spec-lbl">Max Range</span></div>
+        <div class="jf-spec"><span class="jf-spec-val">903 km/h</span><span class="jf-spec-lbl">Cruise Speed</span></div>
+        <div class="jf-spec"><span class="jf-spec-val">267</span><span class="jf-spec-lbl">Total Seats</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="jf-detail-787-9">
+    <div class="jfmi-seats">Total: <strong>193 seats</strong> · Twin-engine widebody · <em>JAL's busiest aircraft type by route count</em></div>
+    <p style="font-size:13px;color:#6B7280;margin:-6px 0 14px;">No First Class — this is where JAL's product strategy diverges hardest from ANA's: the 787-9 carries JAL's Business/Premium Economy/Economy product on both its flagship Asia routes (Seoul, Hong Kong, Singapore, 5× daily each) and its secondary long-haul network, letting the A350-1000 stay reserved for the true top tier.</p>
+    <div class="jfmi-label">Cabin Configuration</div>
+    <div class="jf-cabins">
+      <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-bc"></div><span class="jf-cabin-label">Business Class</span><span class="jf-cabin-config">1-2-1 · Full flat · Direct aisle access</span><span class="jf-cabin-seats">32</span></div>
+      <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-pe"></div><span class="jf-cabin-label">Premium Economy</span><span class="jf-cabin-config">2-3-2 · Extra legroom</span><span class="jf-cabin-seats">21</span></div>
+      <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-eco"></div><span class="jf-cabin-label">Economy</span><span class="jf-cabin-config">3-3-3 · In-seat power · 31" pitch</span><span class="jf-cabin-seats">140</span></div>
+    </div>
+    <div class="jf-routes-section">
+      <div class="jf-routes-title">Routes &amp; Destinations</div>
+      <div class="jf-regions">
+        <div>
+          <div class="jf-region-head jrh-asia"><span class="rh-line"></span>Asia — Flagship (5×/3×/2× Daily)</div>
+          <div class="jf-dest-list cols-3">
+            <div class="jf-dest-row"><span class="jf-dest-code">ICN</span><span class="jf-dest-city">Seoul</span><span class="jf-dest-freq">5×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">HKG</span><span class="jf-dest-city">Hong Kong</span><span class="jf-dest-freq">5×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">SIN</span><span class="jf-dest-city">Singapore</span><span class="jf-dest-freq">5×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">BKK</span><span class="jf-dest-city">Bangkok</span><span class="jf-dest-freq">3×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">CGK</span><span class="jf-dest-city">Jakarta</span><span class="jf-dest-freq">3×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">KUL</span><span class="jf-dest-city">Kuala Lumpur</span><span class="jf-dest-freq">3×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">HAN</span><span class="jf-dest-city">Hanoi</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">SGN</span><span class="jf-dest-city">Ho Chi Minh City</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">MNL</span><span class="jf-dest-city">Manila</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">TPE</span><span class="jf-dest-city">Taipei</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">DEL</span><span class="jf-dest-city">Delhi</span><span class="jf-dest-freq">daily</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">DOH</span><span class="jf-dest-city">Doha</span><span class="jf-dest-freq">daily</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="jf-region-head jrh-na"><span class="rh-line"></span>North America</div>
+          <div class="jf-dest-list cols-3">
+            <div class="jf-dest-row"><span class="jf-dest-code">SEA</span><span class="jf-dest-city">Seattle</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">SAN</span><span class="jf-dest-city">San Diego</span><span class="jf-dest-freq">daily</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">BOS</span><span class="jf-dest-city">Boston</span><span class="jf-dest-freq">daily</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">YVR</span><span class="jf-dest-city">Vancouver</span><span class="jf-dest-freq">daily</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">YUL</span><span class="jf-dest-city">Montreal</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">MEX</span><span class="jf-dest-city">Mexico City</span><span class="jf-dest-freq">4×wk</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="jf-region-head jrh-eu"><span class="rh-line"></span>Europe &amp; Oceania</div>
+          <div class="jf-dest-list">
+            <div class="jf-dest-row"><span class="jf-dest-code">MUC</span><span class="jf-dest-city">Munich</span><span class="jf-dest-freq">daily</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">MEL</span><span class="jf-dest-city">Melbourne</span><span class="jf-dest-freq">daily</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">BNE</span><span class="jf-dest-city">Brisbane</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">PER</span><span class="jf-dest-city">Perth</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">AKL</span><span class="jf-dest-city">Auckland</span><span class="jf-dest-freq">4×wk</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="jf-specs-inline">
+        <div class="jf-spec"><span class="jf-spec-val">14,140 km</span><span class="jf-spec-lbl">Max Range</span></div>
+        <div class="jf-spec"><span class="jf-spec-val">903 km/h</span><span class="jf-spec-lbl">Cruise Speed</span></div>
+        <div class="jf-spec"><span class="jf-spec-val">193</span><span class="jf-spec-lbl">Total Seats</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="jf-detail-787-8">
+    <div class="jfmi-seats">Total: <strong>164 seats</strong> · Twin-engine widebody · <em>Smallest, shortest-range JAL type</em></div>
+    <p style="font-size:13px;color:#6B7280;margin:-6px 0 14px;">JAL's most conservative aircraft — deployed only on the thinnest, shortest regional Asia routes it decided not to contest against ANA's own equivalent service. No route flown by this type runs at a higher frequency than ANA's own service to the same city.</p>
+    <div class="jfmi-label">Cabin Configuration</div>
+    <div class="jf-cabins">
+      <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-bc"></div><span class="jf-cabin-label">Business Class</span><span class="jf-cabin-config">2-2-2 · Lie-flat</span><span class="jf-cabin-seats">20</span></div>
+      <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-pe"></div><span class="jf-cabin-label">Premium Economy</span><span class="jf-cabin-config">2-3-2 · Extra legroom</span><span class="jf-cabin-seats">14</span></div>
+      <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-eco"></div><span class="jf-cabin-label">Economy</span><span class="jf-cabin-config">3-3-3 · In-seat power</span><span class="jf-cabin-seats">130</span></div>
+    </div>
+    <div class="jf-routes-section">
+      <div class="jf-routes-title">Routes &amp; Destinations</div>
+      <div class="jf-regions">
+        <div>
+          <div class="jf-region-head jrh-asia"><span class="rh-line"></span>Korea &amp; China (Regional)</div>
+          <div class="jf-dest-list cols-3">
+            <div class="jf-dest-row"><span class="jf-dest-code">GMP</span><span class="jf-dest-city">Seoul-Gimpo</span><span class="jf-dest-freq">3×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">PUS</span><span class="jf-dest-city">Busan</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">PEK</span><span class="jf-dest-city">Beijing</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">PVG</span><span class="jf-dest-city">Shanghai</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">TPE</span><span class="jf-dest-city">Taipei</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">HGH</span><span class="jf-dest-city">Hangzhou</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">CTU</span><span class="jf-dest-city">Chengdu</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">CAN</span><span class="jf-dest-city">Guangzhou</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">MFM</span><span class="jf-dest-city">Macau</span><span class="jf-dest-freq">4×wk</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="jf-region-head jrh-asia"><span class="rh-line"></span>South &amp; Southeast Asia</div>
+          <div class="jf-dest-list">
+            <div class="jf-dest-row"><span class="jf-dest-code">CEB</span><span class="jf-dest-city">Cebu</span><span class="jf-dest-freq">daily</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">BOM</span><span class="jf-dest-city">Mumbai</span><span class="jf-dest-freq">4×wk</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="jf-specs-inline">
+        <div class="jf-spec"><span class="jf-spec-val">13,620 km</span><span class="jf-spec-lbl">Max Range</span></div>
+        <div class="jf-spec"><span class="jf-spec-val">903 km/h</span><span class="jf-spec-lbl">Cruise Speed</span></div>
+        <div class="jf-spec"><span class="jf-spec-val">164</span><span class="jf-spec-lbl">Total Seats</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /jf-detail-store -->
+
+<!-- Modal -->
+<div class="jf-modal" id="jfModal" role="dialog" aria-modal="true">
+  <div class="jf-modal-bg" id="jfModalBg"></div>
+  <div class="jf-modal-box" id="jfModalBox">
+    <button class="jf-modal-close" id="jfModalClose" aria-label="Close">✕</button>
+    <div class="jf-modal-photo" id="jfModalPhoto">
+      <img id="jfmpImg" src="" alt="">
+      <div class="jfmp-overlay"></div>
+      <div class="jfmp-badge" id="jfmpBadge"></div>
+      <div class="jfmp-bottom">
+        <div class="jfmp-name" id="jfmpName"></div>
+        <div class="jfmp-role" id="jfmpRole"></div>
+      </div>
+    </div>
+    <div class="jf-modal-inner" id="jfModalInner"></div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="jf-footer">
+  <p>JAL — Japan Airlines · a <a href="jal.html">oneworld</a> member · part of the Tokyo Mega Hub concept · <a href="index.html">visit the ANA site →</a></p>
+</div>
+
+<script>
+const JF_DATA = {
+  'a350':  { type:'TRUNK FLAGSHIP', name:'Airbus A350-1000', role:'JAL\'s only flagship long-haul type', img:'assets/fleet-a351.jpg', imgPos:'center 42%', bg:'ac-a351j', detail:'jf-detail-a350' },
+  '787-9': { type:'DUAL ROLE',      name:'Boeing 787-9',     role:'Secondary long-haul + flagship Asia', img:'assets/fleet-789.jpg',  imgPos:'center 52%', bg:'ac-789j',  detail:'jf-detail-787-9' },
+  '787-8': { type:'SECONDARY ASIA', name:'Boeing 787-8',     role:'Regional China & Korea only',         img:'assets/fleet-788.avif',imgPos:'center 40%', bg:'ac-788j',  detail:'jf-detail-787-8' },
+};
+
+function jfOpenModal(id) {
+  var ac = JF_DATA[id];
+  if (!ac) return;
+  var photo = document.getElementById('jfModalPhoto');
+  photo.className = 'jf-modal-photo ' + ac.bg;
+  var img = document.getElementById('jfmpImg');
+  img.src = ac.img; img.alt = 'JAL ' + ac.name; img.style.objectPosition = ac.imgPos;
+  document.getElementById('jfmpBadge').textContent = ac.type;
+  document.getElementById('jfmpName').textContent = ac.name;
+  document.getElementById('jfmpRole').textContent = ac.role;
+  var detail = document.getElementById(ac.detail);
+  document.getElementById('jfModalInner').innerHTML = detail ? detail.innerHTML : '';
+  document.getElementById('jfModalBox').scrollTop = 0;
+  document.getElementById('jfModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function jfCloseModal() {
+  document.getElementById('jfModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('.jf-widget').forEach(function (w) {
+  w.addEventListener('click', function () { jfOpenModal(w.dataset.aircraft); });
+  w.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); jfOpenModal(w.dataset.aircraft); } });
+});
+document.getElementById('jfModalClose').addEventListener('click', jfCloseModal);
+document.getElementById('jfModalBg').addEventListener('click', jfCloseModal);
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') jfCloseModal(); });
+</script>
+</body>
+</html>
