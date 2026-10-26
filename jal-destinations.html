@@ -181,7 +181,7 @@ body { background: var(--off-white, #FAF9F5); }
 
   <div class="jd-filter-bar">
     <button class="jdf-btn active" data-region="all">All Destinations</button>
-    <button class="jdf-btn" data-region="asia">Asia</button>
+    <button class="jdf-btn" data-region="asia">Asia &amp; South Asia</button>
     <button class="jdf-btn" data-region="na">North America</button>
     <button class="jdf-btn" data-region="europe">Europe</button>
     <button class="jdf-btn" data-region="me">Middle East</button>
@@ -221,10 +221,10 @@ body { background: var(--off-white, #FAF9F5); }
       </div>
     </div>
     <div class="jdt-jumps">
-      <a class="jdt-jump" href="#jdt-asia">Asia</a>
+      <a class="jdt-jump" href="#jdt-asia">East &amp; Southeast Asia</a>
+      <a class="jdt-jump" href="#jdt-southasia">South Asia</a>
       <a class="jdt-jump" href="#jdt-na">North America</a>
-      <a class="jdt-jump" href="#jdt-europe">Europe</a>
-      <a class="jdt-jump" href="#jdt-me">Middle East</a>
+      <a class="jdt-jump" href="#jdt-europe">Europe &amp; Middle East</a>
       <a class="jdt-jump" href="#jdt-oceania">Oceania</a>
     </div>
     <div id="jdRouteTableContainer"></div>
@@ -253,18 +253,21 @@ body { background: var(--off-white, #FAF9F5); }
 <script src="js/flights.js?v=1"></script>
 <script>
 /* ─── JAL region buckets (JAL flies no domestic or KIX routes in this model) ── */
+// Rebuilt to match the new 53-destination JAL network (Tokyo Mega Hub
+// frequency table). South Asia folds into 'asia' here for the map filter —
+// it still gets its own category in the route table below.
 const JD_REGIONS = {
-  asia:    ['ICN','HKG','SIN','BKK','CGK','KUL','GMP','PUS','PEK','PVG','HAN','SGN','MNL','TPE','DEL','CEB','HGH','CTU','CAN','MFM','BOM'],
-  na:      ['LAX','SFO','ORD','JFK','HNL','DFW','SEA','SAN','BOS','YVR','YUL','MEX','YYZ'],
-  europe:  ['LHR','CDG','FRA','HEL','MUC'],
+  asia:    ['HKG','BKK','KUL','ICN','SIN','PEK','PUS','HAN','SGN','CGK','MNL','GMP','PVG','TPE','CEB','CTU','CAN','HGH','MFM','TSN','DEL','CMB'],
+  na:      ['ORD','DFW','HNL','LAX','JFK','SFO','BOS','SAN','SEA','YVR','CLT','MIA','PHL','PHX','LAS','MEX','LGA','YYZ'],
+  europe:  ['HEL','LHR','CDG','FRA','BCN','MAD'],
   me:      ['DOH'],
-  oceania: ['SYD','MEL','BNE','PER','AKL'],
+  oceania: ['SYD','BNE','MEL','PER','AKL','NAN'],
 };
 const JD_REGION_COLORS = { asia:'#F59E0B', na:'#3B82F6', europe:'#10B981', me:'#8B5CF6', oceania:'#06B6D4' };
 const JD_FLAGS = {
   'USA':'🇺🇸','Canada':'🇨🇦','Mexico':'🇲🇽','China':'🇨🇳','Hong Kong':'🇭🇰','Macau':'🇲🇴','South Korea':'🇰🇷','Taiwan':'🇹🇼',
-  'Singapore':'🇸🇬','Thailand':'🇹🇭','Philippines':'🇵🇭','Indonesia':'🇮🇩','Malaysia':'🇲🇾','Vietnam':'🇻🇳','India':'🇮🇳',
-  'UK':'🇬🇧','France':'🇫🇷','Germany':'🇩🇪','Finland':'🇫🇮','Qatar':'🇶🇦','Australia':'🇦🇺','New Zealand':'🇳🇿',
+  'Singapore':'🇸🇬','Thailand':'🇹🇭','Philippines':'🇵🇭','Indonesia':'🇮🇩','Malaysia':'🇲🇾','Vietnam':'🇻🇳','India':'🇮🇳','Sri Lanka':'🇱🇰',
+  'UK':'🇬🇧','France':'🇫🇷','Germany':'🇩🇪','Finland':'🇫🇮','Spain':'🇪🇸','Qatar':'🇶🇦','Australia':'🇦🇺','New Zealand':'🇳🇿','Fiji':'🇫🇯',
 };
 const JD_ACFT_NAME = {2:'Airbus A350-1000',3:'Boeing 787-9',5:'Boeing 787-8'};
 const JD_ACFT_SHORT = {2:'A350-1000',3:'B787-9',5:'B787-8'};
@@ -389,11 +392,11 @@ document.getElementById('jdpBookBtn').addEventListener('click',()=>{
 
 /* ─── Route table ─────────────────────────────────────────── */
 const JDT_CATEGORIES = [
-  { id:'asia',    label:'Asia',           color:'#F59E0B', codes:JD_REGIONS.asia },
-  { id:'na',      label:'North America',  color:'#3B82F6', codes:JD_REGIONS.na },
-  { id:'europe',  label:'Europe',         color:'#10B981', codes:JD_REGIONS.europe },
-  { id:'me',      label:'Middle East',    color:'#8B5CF6', codes:JD_REGIONS.me },
-  { id:'oceania', label:'Oceania',        color:'#06B6D4', codes:JD_REGIONS.oceania },
+  { id:'asia',      label:'East & Southeast Asia', color:'#F59E0B', codes:['HKG','BKK','KUL','ICN','SIN','PEK','PUS','HAN','SGN','CGK','MNL','GMP','PVG','TPE','CEB','CTU','CAN','HGH','MFM','TSN'] },
+  { id:'southasia', label:'South Asia',            color:'#A78BFA', codes:['DEL','CMB'] },
+  { id:'na',        label:'North America',         color:'#3B82F6', codes:JD_REGIONS.na },
+  { id:'europe',    label:'Europe & Middle East',  color:'#10B981', codes:[...JD_REGIONS.europe, ...JD_REGIONS.me] },
+  { id:'oceania',   label:'Oceania',               color:'#06B6D4', codes:JD_REGIONS.oceania },
 ];
 
 function jdFreqLabel(s) {

@@ -3,6 +3,7 @@ const AIRPORTS = {
     'KIX': { name: 'Kansai International Airport', nameJP: '関西国際空港', city: 'Osaka', country: 'Japan', lat: 34.4347, lng: 135.2440, hub: true },
     // ── North America ──────────────────────────────────────────────────────────
     'JFK': { name: 'John F. Kennedy Intl', nameJP: 'ジョン・F・ケネディ国際空港', city: 'New York', country: 'USA', lat: 40.6413, lng: -73.7781 },
+    'LGA': { name: 'LaGuardia Airport', nameJP: 'ラガーディア空港', city: 'New York', country: 'USA', lat: 40.7769, lng: -73.8740 },
     'LAX': { name: 'Los Angeles Intl', nameJP: 'ロサンゼルス国際空港', city: 'Los Angeles', country: 'USA', lat: 33.9425, lng: -118.4081 },
     'SFO': { name: 'San Francisco Intl', nameJP: 'サンフランシスコ国際空港', city: 'San Francisco', country: 'USA', lat: 37.6213, lng: -122.3790 },
     'ORD': { name: "Chicago O'Hare Intl", nameJP: 'シカゴ・オヘア国際空港', city: 'Chicago', country: 'USA', lat: 41.9742, lng: -87.9073 },

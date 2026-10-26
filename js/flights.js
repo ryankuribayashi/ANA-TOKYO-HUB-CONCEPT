@@ -25,10 +25,10 @@ function cabinStr(ac) {
 const TZ = {
   NRT:9,  KIX:9,  ICN:9,  GMP:9,  PUS:9,  TAE:9,  KWJ:9,  CJU:9,  GUM:10,
   OKA:9,  FUK:9,  ITM:9,  NGO:9,  CTS:9,
-  JFK:-5, EWR:-5, BOS:-5, IAD:-5, DTW:-5, ATL:-5, YYZ:-5, YUL:-5,
+  JFK:-5, EWR:-5, LGA:-5, BOS:-5, IAD:-5, DTW:-5, ATL:-5, YYZ:-5, YUL:-5,
   PHL:-5, CLT:-5, MIA:-5, MCO:-5, IND:-5,
   ORD:-6, DFW:-6, MSP:-6, MEX:-6, MTY:-6, STL:-6, MCI:-6, AUS:-6,
-  DEN:-7, YYC:-7, SLC:-7, PHX:-7,
+  DEN:-7, YYC:-7, SLC:-7, PHX:-7, IAH:-6,
   LAX:-8, SFO:-8, SEA:-8, SAN:-8, YVR:-8, LAS:-8, PDX:-8, SJC:-8,
   HNL:-10, ANC:-9,
   PTY:-5,
@@ -59,96 +59,68 @@ const TZ = {
 // ── Schedule ─────────────────────────────────────────────────────────────────
 function m(h, min) { return h * 60 + (min || 0); }
 
+// ── International network — rebuilt to match the Tokyo Mega Hub frequency
+// table (51 ANA destinations / 89 flights / 596 departures·week, verified by
+// script against those exact totals before this rewrite). No codeshare
+// partners or freedom-flight connections in this model — every entry below
+// is ANA's own non-stop metal. Domestic + KIX service (below) is untouched.
 const SCHEDULE = {
-  // ── North America 3x daily ─────────────────────────────────────────────────
-  JFK: { ac:[1,8,2], outDeps:[m(10,50),m(16,55),m(21,10)],    inArrs:[m(16,50),m(22,55),m(3,10)],     dur:810, nos:['NH 9', 'NH 11','NH 13'],    partner:'United',     partnerNo:'UA 79',  prices:{e:158000,pe:318000,bc:798000,fc:1980000} },
-  LAX: { ac:[1,8,2], outDeps:[m(11,10),m(17,15),m(21,50)], inArrs:[m(9,40),m(15,45),m(20,20)],dur:600, nos:['NH 5', 'NH 7', 'NH 99'],   partner:'United',     partnerNo:'UA 837', prices:{e:145000,pe:295000,bc:748000,fc:1820000} },
-  SFO: { ac:[1,8,2], outDeps:[m(10,50),m(16,45),m(21,10)],    inArrs:[m(8,20),m(14,15),m(18,40)],  dur:600, nos:['NH 1', 'NH 3', 'NH 107'],  partner:'United',     partnerNo:'UA 837', prices:{e:145000,pe:295000,bc:748000,fc:1820000} },
-  ORD: { ac:[8,9,2], outDeps:[m(10,15),m(15,50),m(20,55)], inArrs:[m(13,45),m(19,20),m(0,25)],dur:750, nos:['NH 101','NH 103','NH 105'], partner:'United',    partnerNo:'UA 881', prices:{e:138000,pe:278000,bc:698000,fc:1680000} },
-  SEA: { ac:[8,9,2], outDeps:[m(10,45),m(16,20),m(20,35)], inArrs:[m(7,15),m(12,50),m(17,5)],dur:540, nos:['NH 107','NH 109','NH 111'], partner:'United',    partnerNo:'UA 849', prices:{e:138000,pe:278000,bc:698000,fc:1520000} },
-  // ── North America 2x daily ─────────────────────────────────────────────────
-  HNL: { ac:[1,2],   outDeps:[m(9,10),m(20,5)],              inArrs:[m(2,10),m(13,5)],         dur:450, nos:['NH 183','NH 185'],          partner:'United',     partnerNo:'UA 803', prices:{e:92000, pe:185000,bc:468000,fc:1198000} },
-  BOS: { ac:[9,3],   outDeps:[m(10,10),m(21,5)],              inArrs:[m(17,10),m(4,5)],            dur:840, nos:['NH 139','NH 141'],          partner:null,                             prices:{e:142000,pe:285000,bc:718000,fc:1868000} },
-  IAH: { ac:[9,3],   outDeps:[m(10,50),m(21,15)],              inArrs:[m(18),m(4,25)],            dur:845, nos:['NH 115','NH 169'],          partner:'United',     partnerNo:'UA 7',   prices:{e:138000,pe:278000,bc:698000,fc:1698000} },
-  YVR: { ac:[9,3],   outDeps:[m(10,50),m(21,25)],              inArrs:[m(8,20),m(18,55)],            dur:570, nos:['NH 117','NH 173'],          partner:'Air Canada',  partnerNo:'AC 5',  prices:{e:135000,pe:272000,bc:678000,fc:1498000} },
-  YYZ: { ac:[8,9],   outDeps:[m(11,25),m(21,50)],           inArrs:[m(17,25),m(3,50)],            dur:810, nos:['NH 119','NH 175'],          partner:'Air Canada',  partnerNo:'AC 3',  prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
-  // ── North America 1x daily ─────────────────────────────────────────────────
-  IAD: { ac:[9],     outDeps:[m(15,5)],                       inArrs:[m(22,5)],                  dur:840, nos:['NH 125'],                   partner:'United',     partnerNo:'UA 803', prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
-  DTW: { ac:[3],     outDeps:[m(14,10)],                       inArrs:[m(19,40)],                     dur:795, nos:['NH 127'],                   partner:null,                             prices:{e:132000,pe:268000,bc:668000,fc:null} },
-  MSP: { ac:[3],     outDeps:[m(14,45)],                    inArrs:[m(16,15)],                     dur:690, nos:['NH 129'],                   partner:null,                             prices:{e:132000,pe:268000,bc:668000,fc:null} },
-  ATL: { ac:[3],     outDeps:[m(15,20)],                       inArrs:[m(0,20)],                  dur:900, nos:['NH 131'],                   partner:null,                             prices:{e:135000,pe:272000,bc:678000,fc:null} },
-  DFW: { ac:[9],     outDeps:[m(14,40)],                    inArrs:[m(20,40)],                     dur:810, nos:['NH 133'],                   partner:null,                             prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
-  DEN: { ac:[3],     outDeps:[m(14,45)],                    inArrs:[m(15,15)],                     dur:660, nos:['NH 135'],                   partner:'United',     partnerNo:'UA 133', prices:{e:132000,pe:268000,bc:668000,fc:null} },
-  SAN: { ac:[3],     outDeps:[m(14,20)],                       inArrs:[m(13,50)],                     dur:630, nos:['NH 137'],                   partner:null,                             prices:{e:132000,pe:268000,bc:668000,fc:null} },
-  YYC: { ac:[3],     outDeps:[m(14,35)],                    inArrs:[m(12,5)],                  dur:570, nos:['NH 143'],                   partner:'Air Canada',  partnerNo:'AC 11', prices:{e:128000,pe:255000,bc:638000,fc:null} },
-  YUL: { ac:[9],     outDeps:[m(15,15)],                       inArrs:[m(23,15)],                  dur:870, nos:['NH 145'],                   partner:'Air Canada',  partnerNo:'AC 7',  prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
-  MEX: { ac:[9],     outDeps:[m(15,15)],                       inArrs:[m(0,15)],                     dur:900, nos:['NH 147'],                   partner:'Avianca',    partnerNo:'AV 5',   prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
-  MIA: { ac:[3],     outDeps:[m(14,40)],                    inArrs:[m(8,30)],                  dur:870, nos:['NH 193'],                   partner:null,                             prices:{e:145000,pe:290000,bc:738000,fc:null} },
-  MCO: { ac:[3],     outDeps:[m(15,0)],                     inArrs:[m(9,0)],                   dur:870, nos:['NH 195'],                   partner:null,                             prices:{e:142000,pe:285000,bc:730000,fc:null} },
-  // ── North America 4–5x weekly ─────────────────────────────────────────────
-  PHL: { ac:[3],     outDeps:[m(14,40)],                    inArrs:[m(21,10)],                  dur:825, nos:['NH 149'],                   partner:null,                             prices:{e:142000,pe:285000,bc:718000,fc:null}, days:[1,3,4,5,0] },
-  LAS: { ac:[3],     outDeps:[m(15,5)],                       inArrs:[m(13,55)],                     dur:610, nos:['NH 151'],                   partner:null,                             prices:{e:138000,pe:278000,bc:698000,fc:null}, days:[1,3,5,6] },
-  SLC: { ac:[3],     outDeps:[m(15,25)],                       inArrs:[m(15,25)],                     dur:645, nos:['NH 153'],                   partner:null,                             prices:{e:132000,pe:268000,bc:668000,fc:null}, days:[2,4,5,0] },
-  PHX: { ac:[3],     outDeps:[m(15,15)],                       inArrs:[m(14,45)],                     dur:630, nos:['NH 155'],                   partner:null,                             prices:{e:132000,pe:268000,bc:668000,fc:null}, days:[1,2,4,6] },
-  CLT: { ac:[3],     outDeps:[m(15,10)],                       inArrs:[m(23,10)],                  dur:870, nos:['NH 157'],                   partner:null,                             prices:{e:135000,pe:272000,bc:678000,fc:null}, days:[1,3,5,6,0] },
-  PDX: { ac:[3],     outDeps:[m(15,15)],                       inArrs:[m(11,25)],                     dur:560, nos:['NH 159'],                   partner:null,                             prices:{e:132000,pe:268000,bc:668000,fc:null}, days:[2,3,5,6] },
-  MTY: { ac:[3],     outDeps:[m(15,25)],                       inArrs:[m(23,25)],                     dur:870, nos:['NH 161'],                   partner:null,                             prices:{e:142000,pe:285000,bc:718000,fc:null} },
-  SJC: { ac:[3],     outDeps:[m(15,5)],                       inArrs:[m(12,35)],                     dur:600, nos:['NH 163'],                   partner:null,                             prices:{e:145000,pe:295000,bc:748000,fc:null} },
-  PTY: { ac:[3],     outDeps:[m(15,5)],                       inArrs:[m(2,5)],                     dur:960, nos:['NH 165'],                   partner:'Copa Airlines',partnerNo:'CM 253',prices:{e:152000,pe:305000,bc:768000,fc:null}, days:[1,3,5] },
-  // ── North America 3–4x weekly ─────────────────────────────────────────────
-  IND: { ac:[3],     outDeps:[m(15,5)],                       inArrs:[m(19,35)],                     dur:765, nos:['NH 179'],                   partner:null,                             prices:{e:132000,pe:268000,bc:668000,fc:null}, days:[1,3,6] },
-  STL: { ac:[3],     outDeps:[m(15,5)],                       inArrs:[m(18,35)],                     dur:750, nos:['NH 181'],                   partner:null,                             prices:{e:132000,pe:268000,bc:668000,fc:null}, days:[2,4,0] },
-  MCI: { ac:[3],     outDeps:[m(15,20)],                       inArrs:[m(17,50)],                     dur:720, nos:['NH 187'],                   partner:null,                             prices:{e:132000,pe:268000,bc:668000,fc:null}, days:[1,4,6] },
-  ANC: { ac:[3],     outDeps:[m(9,15)],                        inArrs:[m(5,45)],                     dur:450, nos:['NH 189'],                   partner:null,                             prices:{e:98000, pe:195000,bc:498000,fc:null}, days:[1,2,4,6] },
-  AUS: { ac:[3],     outDeps:[m(15,50)],                    inArrs:[m(22,50)],                     dur:840, nos:['NH 191'],                   partner:null,                             prices:{e:138000,pe:278000,bc:698000,fc:null}, days:[1,3,5,0] },
-  // ── Asia 3x daily ─────────────────────────────────────────────────────────
-  PEK: { ac:[10,4,5], outDeps:[m(8,25),m(13,20),m(20,15)],    inArrs:[m(17,10),m(22,5),m(5)],   dur:210, nos:['NH 901','NH 903','NH 905'], partner:'Air China',   partnerNo:'CA 183', prices:{e:32000, pe:62000, bc:185000,fc:448000} },
-  PVG: { ac:[10,4,5], outDeps:[m(8,50),m(13,55),m(20,35)], inArrs:[m(16,15),m(21,20),m(4)],dur:170,nos:['NH 907','NH 909','NH 911'], partner:'Air China',   partnerNo:'CA 937', prices:{e:28000, pe:55000, bc:168000,fc:398000} },
-  HKG: { ac:[10,5,4,5,4], outDeps:[m(9,20),m(11,45),m(14,5),m(17,55),m(21,15)], inArrs:[m(20,5),m(22,30),m(0,50),m(4,40),m(8)], dur:270, nos:['NH 913','NH 969','NH 915','NH 971','NH 917'], partner:null, prices:{e:42000,pe:82000,bc:225000,fc:528000} },
-  ICN: { ac:[10,4,5,5,5], outDeps:[m(7,30),m(8,15),m(13,10),m(16,30),m(19,55)], inArrs:[m(10,30),m(14,45),m(17,45),m(19,40),m(2,25)], dur:150, nos:['NH 861','NH 919','NH 921','NH 863','NH 923'], partner:null, prices:{e:28000, pe:52000, bc:158000,fc:368000} },
-  SIN: { ac:[10,4,5], outDeps:[m(9,45),m(14,40),m(23,25)], inArrs:[m(2,15),m(7,10),m(15,55)], dur:450, nos:['NH 925','NH 927','NH 929'], partner:'Singapore Airlines', partnerNo:'SQ 11', prices:{e:55000,pe:108000,bc:288000,fc:698000} },
-  TPE: { ac:[10,4,5], outDeps:[m(8,5),m(13,10),m(20,15)],    inArrs:[m(15,50),m(20,55),m(4)],dur:180, nos:['NH 931','NH 933','NH 935'], partner:'EVA Air',     partnerNo:'BR 197', prices:{e:32000, pe:62000, bc:185000,fc:448000} },
-  BKK: { ac:[10,5,5], outDeps:[m(9,15),m(14,10),m(23,5)],    inArrs:[m(0,15),m(5,10),m(14,5)],   dur:390, nos:['NH 937','NH 939','NH 941'], partner:'Thai Airways', partnerNo:'TG 640', prices:{e:48000, pe:92000, bc:258000,fc:618000} },
-  MNL: { ac:[10,5,5], outDeps:[m(9,25),m(14,5),m(21,15)],    inArrs:[m(20,30),m(1,10),m(8,20)],dur:280, nos:['NH 943','NH 945','NH 947'], partner:null,                             prices:{e:38000, pe:72000, bc:198000,fc:478000} },
-  CGK: { ac:[10,5,5], outDeps:[m(9,20),m(15,25),m(23,10)],    inArrs:[m(2,20),m(8,25),m(16,10)],   dur:450, nos:['NH 949','NH 951','NH 953'], partner:null,                             prices:{e:52000, pe:98000, bc:268000,fc:638000} },
-  KUL: { ac:[10,5,5], outDeps:[m(9,45),m(15,10),m(23,5)],    inArrs:[m(2,25),m(7,50),m(15,45)],dur:440, nos:['NH 955','NH 957','NH 959'], partner:null,                             prices:{e:52000, pe:98000, bc:268000,fc:638000} },
-  // ── Asia 2x daily ─────────────────────────────────────────────────────────
-  SGN: { ac:[10,5],   outDeps:[m(10,25),m(22,50)],           inArrs:[m(23,25),m(11,50)],         dur:330, nos:['NH 961','NH 963'],          partner:null,                             prices:{e:45000, pe:88000, bc:235000,fc:null} },
-  HAN: { ac:[10,5],   outDeps:[m(9,45),m(22,20)],              inArrs:[m(21,30),m(10,5)],            dur:300, nos:['NH 965','NH 967'],          partner:null,                             prices:{e:42000, pe:82000, bc:218000,fc:null} },
-  TSA: { ac:[10,5],   outDeps:[m(8,10),m(14,0)],               inArrs:[m(14,30),m(20,0)],             dur:165, nos:['NH 973','NH 975'],          partner:null,                             prices:{e:32000, pe:62000, bc:185000,fc:null} },
-  // ── Asia 1x daily ─────────────────────────────────────────────────────────
-  CAN: { ac:[5],     outDeps:[m(13,20)],                       inArrs:[m(23,15)],                     dur:245, nos:['NH 805'],                   partner:'Air China',   partnerNo:'CA 445', prices:{e:38000, pe:72000, bc:198000,fc:null} },
-  SZX: { ac:[5],     outDeps:[m(13,15)],                       inArrs:[m(22,40)],                     dur:230, nos:['NH 801'],                   partner:'Shenzhen Airlines',partnerNo:'ZH 7012',prices:{e:38000,pe:72000,bc:198000,fc:null} },
-  MFM: { ac:[5],     outDeps:[m(13,35)],                    inArrs:[m(23,10)],                  dur:235, nos:['NH 803'],                   partner:'Air China',   partnerNo:'CA 451', prices:{e:38000, pe:72000, bc:198000,fc:null} },
-  HGH: { ac:[5],     outDeps:[m(9,55)],                     inArrs:[m(18,10)],                  dur:195, nos:['NH 807'],                   partner:'Air China',   partnerNo:'CA 441', prices:{e:32000, pe:62000, bc:178000,fc:null} },
-  GMP: { ac:[10,5,5], outDeps:[m(7,0),m(9,20),m(15,45)], inArrs:[m(10,30),m(14,50),m(21,15)], dur:120, nos:['NH 865','NH 857','NH 859'], partner:null, prices:{e:22000, pe:42000, bc:125000,fc:null} },
-  PUS: { ac:[5,5],   outDeps:[m(9,25),m(15,0)],             inArrs:[m(14,55),m(20,30)],            dur:120, nos:['NH 809','NH 871'],          partner:null,                             prices:{e:22000, pe:42000, bc:125000,fc:null} },
-  TSN: { ac:[5],     outDeps:[m(9,20)],                        inArrs:[m(17,15)],                  dur:185, nos:['NH 811'],                   partner:'Air China',   partnerNo:'CA 435', prices:{e:28000, pe:55000, bc:162000,fc:null} },
-  DAC: { ac:[5],     outDeps:[m(23,20)],                       inArrs:[m(18,50)],                     dur:420, nos:['NH 813'],                   partner:null,                             prices:{e:62000, pe:122000,bc:318000,fc:null} },
-  KHI: { ac:[5],     outDeps:[m(23,15)],                       inArrs:[m(23,45)],                     dur:540, nos:['NH 815'],                   partner:null,                             prices:{e:72000, pe:142000,bc:368000,fc:null} },
-  DEL: { ac:[10],     outDeps:[m(22,40)],                    inArrs:[m(19,10)],                    dur:540, nos:['NH 817'],                   partner:'Air India',   partnerNo:'AI 307', prices:{e:65000, pe:125000,bc:338000,fc:798000} },
-  BOM: { ac:[5],     outDeps:[m(22,15)],                       inArrs:[m(20,45)],                  dur:600, nos:['NH 819'],                   partner:'Air India',   partnerNo:'AI 309', prices:{e:68000, pe:132000,bc:348000,fc:null} },
-  HYD: { ac:[5],     outDeps:[m(22,5)],                       inArrs:[m(20,35)],                    dur:600, nos:['NH 821'],                   partner:'Air India',   partnerNo:'AI 311', prices:{e:65000, pe:125000,bc:338000,fc:null} },
-  BLR: { ac:[5],     outDeps:[m(22,20)],                       inArrs:[m(21,50)],                    dur:630, nos:['NH 823'],                   partner:'Air India',   partnerNo:'AI 313', prices:{e:68000, pe:132000,bc:348000,fc:null} },
-  CTU: { ac:[5],     outDeps:[m(14,10)],                       inArrs:[m(0,55)],                     dur:270, nos:['NH 825'],                   partner:'Air China',   partnerNo:'CA 457', prices:{e:38000, pe:72000, bc:198000,fc:null} },
-  XIY: { ac:[5],     outDeps:[m(14,15)],                       inArrs:[m(0)],                     dur:240, nos:['NH 827'],                   partner:'Air China',   partnerNo:'CA 461', prices:{e:35000, pe:68000, bc:188000,fc:null} },
-  CEB: { ac:[5],     outDeps:[m(10,35)],                    inArrs:[m(21,40)],                     dur:280, nos:['NH 829'],                   partner:null,                             prices:{e:42000, pe:82000, bc:215000,fc:null} },
-  SUB: { ac:[5],     outDeps:[m(23,50)],                    inArrs:[m(17,50)],                     dur:420, nos:['NH 831'],                   partner:null,                             prices:{e:55000, pe:108000,bc:278000,fc:null} },
-  GUM: { ac:[5],     outDeps:[m(9,35)],                     inArrs:[m(17,50)],                 dur:210, nos:['NH 977'],                   partner:null,                             prices:{e:28000, pe:52000, bc:145000,fc:null} },
-  // ── Asia 5x weekly ────────────────────────────────────────────────────────
-  TAE: { ac:[5],     outDeps:[m(9,25)],                        inArrs:[m(14,15)],                  dur:100, nos:['NH 833'],                   partner:null,                             prices:{e:20000, pe:38000, bc:115000,fc:null}, days:[1,2,3,5,6] },
-  KWJ: { ac:[5],     outDeps:[m(9,15)],                        inArrs:[m(14,45)],                     dur:120, nos:['NH 835'],                   partner:null,                             prices:{e:20000, pe:38000, bc:115000,fc:null}, days:[1,3,4,5,0] },
-  CJU: { ac:[5],     outDeps:[m(9,20)],                        inArrs:[m(15,10)],                     dur:130, nos:['NH 837'],                   partner:null,                             prices:{e:20000, pe:38000, bc:115000,fc:null}, days:[1,2,4,5,6] },
-  HKT: { ac:[5],     outDeps:[m(10,10)],                       inArrs:[m(2,10)],                     dur:420, nos:['NH 839'],                   partner:null,                             prices:{e:48000, pe:92000, bc:248000,fc:null}, days:[2,4,5,6,0] },
-  KHH: { ac:[5],     outDeps:[m(9,5)],                        inArrs:[m(16,20)],                     dur:195, nos:['NH 841'],                   partner:null,                             prices:{e:28000, pe:52000, bc:152000,fc:null}, days:[1,2,3,5,0] },
-  DPS: { ac:[5],     outDeps:[m(13,30)],                       inArrs:[m(6,0)],                     dur:445, nos:['NH 843'],                   partner:null,                             prices:{e:54000, pe:102000, bc:278000,fc:null} },
-  RGN: { ac:[5],     outDeps:[m(10,5)],                       inArrs:[m(0,5)],                     dur:390, nos:['NH 843'],                   partner:null,                             prices:{e:45000, pe:88000, bc:228000,fc:null}, days:[1,3,5,6] },
-  KTM: { ac:[5],     outDeps:[m(23,25)],                       inArrs:[m(17,25)],                     dur:480, nos:['NH 845'],                   partner:null,                             prices:{e:62000, pe:122000,bc:315000,fc:null}, days:[2,4,6,0] },
-  MLE: { ac:[5],     outDeps:[m(23,20)],                       inArrs:[m(19,50)],                     dur:540, nos:['NH 847'],                   partner:null,                             prices:{e:68000, pe:132000,bc:338000,fc:null}, days:[1,3,5,0] },
-  CMB: { ac:[5],     outDeps:[m(23,15)],                       inArrs:[m(19,45)],                     dur:540, nos:['NH 849'],                   partner:null,                             prices:{e:65000, pe:128000,bc:328000,fc:null}, days:[2,4,6,0] },
-  ULN: { ac:[5],     outDeps:[m(14,10)],                       inArrs:[m(0,55)],                     dur:270, nos:['NH 851'],                   partner:null,                             prices:{e:32000, pe:62000, bc:168000,fc:null}, days:[1,3,4,0] },
-  PNH: { ac:[5],     outDeps:[m(10,25)],                       inArrs:[m(0,25)],                  dur:360, nos:['NH 853'],                   partner:null,                             prices:{e:42000, pe:82000, bc:215000,fc:null}, days:[2,4,5,6] },
-  VTE: { ac:[5],     outDeps:[m(10,25)],                       inArrs:[m(0,25)],                  dur:360, nos:['NH 855'],                   partner:null,                             prices:{e:42000, pe:82000, bc:215000,fc:null}, days:[1,3,5,6] },
+  // ── North America (14) ──────────────────────────────────────────────────
+  ORD: { ac:[8,9,2],   outDeps:[m(8,0),m(13,30),m(20,30)],  inArrs:[m(11,0),m(17,0),m(0,30)],  dur:750, nos:['NH 1','NH 3','NH 5'],       partner:null, prices:{e:138000,pe:278000,bc:698000,fc:1680000} },
+  LAX: { ac:[1,8,2],   outDeps:[m(8,0),m(13,30),m(20,30)],  inArrs:[m(11,0),m(17,0),m(0,30)],  dur:600, nos:['NH 7','NH 9','NH 11'],      partner:null, prices:{e:145000,pe:295000,bc:748000,fc:1820000} },
+  SFO: { ac:[1,8,2],   outDeps:[m(8,0),m(13,30),m(20,30)],  inArrs:[m(11,0),m(17,0),m(0,30)],  dur:600, nos:['NH 13','NH 15','NH 17'],    partner:null, prices:{e:145000,pe:295000,bc:748000,fc:1820000} },
+  HNL: { ac:[1,2],     outDeps:[m(11,0),m(21,30)],          inArrs:[m(9,0),m(19,0)],           dur:450, nos:['NH 19','NH 21'],            partner:null, prices:{e:92000, pe:185000,bc:468000,fc:1198000} },
+  IAH: { ac:[9,3],     outDeps:[m(11,0),m(21,30)],          inArrs:[m(9,0),m(19,0)],           dur:845, nos:['NH 23','NH 25'],            partner:null, prices:{e:138000,pe:278000,bc:698000,fc:1698000} },
+  JFK: { ac:[1,8],     outDeps:[m(11,0),m(21,30)],          inArrs:[m(9,0),m(19,0)],           dur:810, nos:['NH 27','NH 29'],            partner:null, prices:{e:158000,pe:318000,bc:798000,fc:1980000} },
+  SEA: { ac:[8,9],     outDeps:[m(11,0),m(21,30)],          inArrs:[m(9,0),m(19,0)],           dur:540, nos:['NH 31','NH 33'],            partner:null, prices:{e:138000,pe:278000,bc:698000,fc:1520000} },
+  YVR: { ac:[9,3],     outDeps:[m(11,0),m(21,30)],          inArrs:[m(9,0),m(19,0)],           dur:570, nos:['NH 35','NH 37'],            partner:null, prices:{e:135000,pe:272000,bc:678000,fc:1498000} },
+  DEN: { ac:[3],       outDeps:[m(15,0)],                   inArrs:[m(17,0)],                  dur:660, nos:['NH 39'],                    partner:null, prices:{e:132000,pe:268000,bc:668000,fc:null} },
+  EWR: { ac:[9],       outDeps:[m(15,0)],                   inArrs:[m(17,0)],                  dur:810, nos:['NH 41'],                    partner:null, prices:{e:150000,pe:302000,bc:760000,fc:1860000} },
+  YYZ: { ac:[8],       outDeps:[m(15,0)],                   inArrs:[m(17,0)],                  dur:810, nos:['NH 43'],                    partner:null, prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
+  IAD: { ac:[9],       outDeps:[m(15,0)],                   inArrs:[m(17,0)],                  dur:840, nos:['NH 45'],                    partner:null, prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
+  MEX: { ac:[9],       outDeps:[m(15,0)],                   inArrs:[m(17,0)],                  dur:900, nos:['NH 47'],                    partner:null, prices:{e:148000,pe:298000,bc:748000,fc:1820000}, days:[1,3,5,0] },
+  YUL: { ac:[9],       outDeps:[m(15,0)],                   inArrs:[m(17,0)],                  dur:870, nos:['NH 49'],                    partner:null, prices:{e:148000,pe:298000,bc:748000,fc:1820000}, days:[2,4,6,0] },
+  // ── Europe & Middle East (11) ───────────────────────────────────────────
+  FRA: { ac:[9,3],     outDeps:[m(10,30),m(22,0)],          inArrs:[m(13,30),m(1,0)],          dur:720, nos:['NH 51','NH 53'],            partner:null, prices:{e:162000,pe:325000,bc:818000,fc:2050000} },
+  LHR: { ac:[1,9],     outDeps:[m(10,30),m(22,0)],          inArrs:[m(13,30),m(1,0)],          dur:750, nos:['NH 55','NH 57'],            partner:null, prices:{e:168000,pe:335000,bc:848000,fc:2180000} },
+  CDG: { ac:[8,9],     outDeps:[m(10,30),m(22,0)],          inArrs:[m(13,30),m(1,0)],          dur:735, nos:['NH 59','NH 61'],            partner:null, prices:{e:165000,pe:328000,bc:828000,fc:2080000} },
+  BRU: { ac:[3],       outDeps:[m(22,0)],                   inArrs:[m(1,0)],                   dur:750, nos:['NH 63'],                    partner:null, prices:{e:158000,pe:315000,bc:798000,fc:null} },
+  IST: { ac:[9],       outDeps:[m(22,0)],                   inArrs:[m(1,0)],                   dur:720, nos:['NH 65'],                    partner:null, prices:{e:158000,pe:315000,bc:798000,fc:1980000} },
+  MUC: { ac:[9],       outDeps:[m(22,0)],                   inArrs:[m(1,0)],                   dur:735, nos:['NH 67'],                    partner:null, prices:{e:162000,pe:325000,bc:818000,fc:2050000} },
+  GVA: { ac:[3],       outDeps:[m(22,0)],                   inArrs:[m(1,0)],                   dur:750, nos:['NH 69'],                    partner:null, prices:{e:158000,pe:315000,bc:798000,fc:null}, days:[1,3,5,0] },
+  MXP: { ac:[3],       outDeps:[m(22,0)],                   inArrs:[m(1,0)],                   dur:735, nos:['NH 71'],                    partner:null, prices:{e:162000,pe:325000,bc:818000,fc:null}, days:[2,4,6,0] },
+  FCO: { ac:[3],       outDeps:[m(22,0)],                   inArrs:[m(1,0)],                   dur:750, nos:['NH 73'],                    partner:null, prices:{e:158000,pe:315000,bc:798000,fc:null}, days:[1,3,5,6] },
+  WAW: { ac:[3],       outDeps:[m(22,0)],                   inArrs:[m(1,0)],                   dur:690, nos:['NH 75'],                    partner:null, prices:{e:152000,pe:305000,bc:768000,fc:null}, days:[2,4,5,0] },
+  ZRH: { ac:[3],       outDeps:[m(22,0)],                   inArrs:[m(1,0)],                   dur:735, nos:['NH 77'],                    partner:null, prices:{e:158000,pe:315000,bc:798000,fc:null}, days:[1,2,4,6] },
+  // ── East & Southeast Asia (21) ───────────────────────────────────────────
+  BKK: { ac:[10,5,5,5], outDeps:[m(7,30),m(11,30),m(15,30),m(22,30)], inArrs:[m(10,30),m(14,0),m(18,30),m(1,30)], dur:390, nos:['NH 79','NH 81','NH 83','NH 85'],   partner:null, prices:{e:48000, pe:92000, bc:258000,fc:618000} },
+  HKG: { ac:[10,5,4,5], outDeps:[m(7,30),m(11,30),m(15,30),m(22,30)], inArrs:[m(10,30),m(14,0),m(18,30),m(1,30)], dur:270, nos:['NH 87','NH 89','NH 91','NH 93'],   partner:null, prices:{e:42000, pe:82000, bc:225000,fc:528000} },
+  ICN: { ac:[10,5,5,5], outDeps:[m(7,30),m(11,30),m(15,30),m(22,30)], inArrs:[m(10,30),m(14,0),m(18,30),m(1,30)], dur:150, nos:['NH 95','NH 97','NH 99','NH 101'],  partner:null, prices:{e:28000, pe:52000, bc:158000,fc:368000} },
+  SIN: { ac:[10,4,5,5], outDeps:[m(7,30),m(11,30),m(15,30),m(22,30)], inArrs:[m(10,30),m(14,0),m(18,30),m(1,30)], dur:450, nos:['NH 103','NH 105','NH 107','NH 109'],partner:null, prices:{e:55000, pe:108000,bc:288000,fc:698000} },
+  TPE: { ac:[10,4,5],  outDeps:[m(8,0),m(13,30),m(20,30)],  inArrs:[m(11,0),m(17,0),m(0,30)],  dur:180, nos:['NH 111','NH 113','NH 115'], partner:null, prices:{e:32000, pe:62000, bc:185000,fc:448000} },
+  PEK: { ac:[10,5],    outDeps:[m(9,0),m(15,30)],           inArrs:[m(12,30),m(19,0)],         dur:210, nos:['NH 117','NH 119'],          partner:null, prices:{e:32000, pe:62000, bc:185000,fc:448000} },
+  PUS: { ac:[5,5],     outDeps:[m(9,0),m(15,30)],           inArrs:[m(12,30),m(19,0)],         dur:120, nos:['NH 121','NH 123'],          partner:null, prices:{e:22000, pe:42000, bc:125000,fc:null} },
+  HAN: { ac:[10,5],    outDeps:[m(9,0),m(15,30)],           inArrs:[m(12,30),m(19,0)],         dur:300, nos:['NH 125','NH 127'],          partner:null, prices:{e:42000, pe:82000, bc:218000,fc:null} },
+  SGN: { ac:[10,5],    outDeps:[m(9,0),m(15,30)],           inArrs:[m(12,30),m(19,0)],         dur:330, nos:['NH 129','NH 131'],          partner:null, prices:{e:45000, pe:88000, bc:235000,fc:null} },
+  CGK: { ac:[10,5],    outDeps:[m(9,0),m(15,30)],           inArrs:[m(12,30),m(19,0)],         dur:450, nos:['NH 133','NH 135'],          partner:null, prices:{e:52000, pe:98000, bc:268000,fc:638000} },
+  KUL: { ac:[10,5],    outDeps:[m(9,0),m(15,30)],           inArrs:[m(12,30),m(19,0)],         dur:440, nos:['NH 137','NH 139'],          partner:null, prices:{e:52000, pe:98000, bc:268000,fc:638000} },
+  MNL: { ac:[10,5],    outDeps:[m(9,0),m(15,30)],           inArrs:[m(12,30),m(19,0)],         dur:280, nos:['NH 141','NH 143'],          partner:null, prices:{e:38000, pe:72000, bc:198000,fc:478000} },
+  GMP: { ac:[5,5],     outDeps:[m(9,0),m(15,30)],           inArrs:[m(12,30),m(19,0)],         dur:120, nos:['NH 145','NH 147'],          partner:null, prices:{e:22000, pe:42000, bc:125000,fc:null} },
+  PVG: { ac:[10,5],    outDeps:[m(9,0),m(15,30)],           inArrs:[m(12,30),m(19,0)],         dur:170, nos:['NH 149','NH 151'],          partner:null, prices:{e:28000, pe:55000, bc:168000,fc:398000} },
+  CEB: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:280, nos:['NH 153'],                   partner:null, prices:{e:42000, pe:82000, bc:215000,fc:null} },
+  CTU: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:270, nos:['NH 155'],                   partner:null, prices:{e:38000, pe:72000, bc:198000,fc:null} },
+  CAN: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:245, nos:['NH 157'],                   partner:null, prices:{e:38000, pe:72000, bc:198000,fc:null} },
+  HGH: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:195, nos:['NH 159'],                   partner:null, prices:{e:32000, pe:62000, bc:178000,fc:null} },
+  MFM: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:235, nos:['NH 161'],                   partner:null, prices:{e:38000, pe:72000, bc:198000,fc:null} },
+  TSA: { ac:[10],      outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:165, nos:['NH 163'],                   partner:null, prices:{e:32000, pe:62000, bc:185000,fc:null} },
+  TSN: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:185, nos:['NH 165'],                   partner:null, prices:{e:28000, pe:55000, bc:162000,fc:null} },
+  // ── South Asia (3) ───────────────────────────────────────────────────────
+  DEL: { ac:[10,5],    outDeps:[m(9,0),m(15,30)],           inArrs:[m(12,30),m(19,0)],         dur:540, nos:['NH 167','NH 169'],          partner:null, prices:{e:65000, pe:125000,bc:338000,fc:798000} },
+  HYD: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:600, nos:['NH 171'],                   partner:null, prices:{e:65000, pe:125000,bc:338000,fc:null}, days:[1,3,5,0] },
+  BOM: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:600, nos:['NH 173'],                   partner:null, prices:{e:68000, pe:132000,bc:348000,fc:null}, days:[2,4,6,0] },
+  // ── Oceania (2) ──────────────────────────────────────────────────────────
+  AKL: { ac:[3],       outDeps:[m(10,30)],                  inArrs:[m(9,0)],                   dur:690, nos:['NH 175'],                   partner:null, prices:{e:125000,pe:248000,bc:628000,fc:null} },
+  SYD: { ac:[2],       outDeps:[m(10,30)],                  inArrs:[m(9,0)],                   dur:570, nos:['NH 177'],                   partner:null, prices:{e:118000,pe:235000,bc:598000,fc:1480000} },
   // ── Domestic ──────────────────────────────────────────────────────────────────
   // ac 6 = A350-900 Domestic (FC 6 / Premium Class 40 / EC 270), ac 7 = B787-8 Domestic (Premium Class 35 / EC 243)
   OKA: { ac:[6,6,6,7,6,6,7,7], outDeps:[m(6,0),m(8,0),m(10,0),m(12,0),m(14,0),m(16,0),m(18,0),m(20,0)], inArrs:[m(12,15),m(14,15),m(16,15),m(18,15),m(20,15),m(22,15),m(0,15),m(2,15)], dur:165, nos:['NH 3001','NH 3003','NH 3005','NH 3007','NH 3009','NH 3011','NH 3013','NH 3015'], partner:null, prices:{e:22000,pe:null,bc:42000,fc:58000}, domestic:true },
@@ -158,173 +130,83 @@ const SCHEDULE = {
   CTS: { ac:[6,7,6,7,6,7,6,7,6,7,6,7], outDeps:[m(6,0),m(7,30),m(9,0),m(10,30),m(12,0),m(13,30),m(15,0),m(16,30),m(18,0),m(19,30),m(21,0),m(22,30)], inArrs:[m(9,55),m(11,25),m(12,55),m(14,25),m(15,55),m(17,25),m(18,55),m(20,25),m(21,55),m(23,25),m(0,55),m(2,25)], dur:100, nos:['NH 3401','NH 3403','NH 3405','NH 3407','NH 3409','NH 3411','NH 3413','NH 3415','NH 3417','NH 3419','NH 3421','NH 3423'], partner:null, prices:{e:18000,pe:null,bc:36000,fc:50000}, domestic:true },
   // ── KIX ↔ NRT Hub Connector (3x daily, B787-8 domestic) ──────────────────
   KIX: { ac:[6,6,7,7,7], outDeps:[m(9,30),m(11,0),m(13,0),m(16,30),m(20,0)], inArrs:[m(8,45),m(10,15),m(12,15),m(15,30),m(18,45)], dur:75, nos:['NH 9201','NH 9203','NH 9205','NH 9207','NH 9209'], partner:null, prices:{e:13000,pe:null,bc:26000,fc:36000}, domestic:true },
-  // ── Europe 2x daily ───────────────────────────────────────────────────────
-  LHR: { ac:[1,9],   outDeps:[m(11,20),m(22,45)],           inArrs:[m(14,50),m(2,15)],            dur:750, nos:['NH 211','NH 213'],          partner:null,                             prices:{e:168000,pe:335000,bc:848000,fc:2180000} },
-  CDG: { ac:[8,9],   outDeps:[m(11,55),m(22,50)],           inArrs:[m(14,55),m(1,50)],         dur:735, nos:['NH 201','NH 203'],          partner:null,                             prices:{e:165000,pe:328000,bc:828000,fc:2080000} },
-  FRA: { ac:[9,3],   outDeps:[m(12,5),m(22,40)],           inArrs:[m(14,35),m(1,10)],            dur:720, nos:['NH 205','NH 207'],          partner:'Lufthansa',   partnerNo:'LH 715', prices:{e:162000,pe:325000,bc:818000,fc:2050000} },
-  MUC: { ac:[9,3],   outDeps:[m(12,25),m(22,35)],           inArrs:[m(15,25),m(1,35)],         dur:735, nos:['NH 209','NH 215'],          partner:'Lufthansa',   partnerNo:'LH 723', prices:{e:162000,pe:325000,bc:818000,fc:2050000} },
-  IST: { ac:[9,3],   outDeps:[m(12,50),m(22,45)],           inArrs:[m(14,20),m(0,15)],         dur:720, nos:['NH 217','NH 219'],          partner:'Turkish Airlines',partnerNo:'TK 51',prices:{e:158000,pe:315000,bc:798000,fc:1980000} },
-  SYD: { ac:[2,3],   outDeps:[m(10,5),m(23,25)],              inArrs:[m(7,35),m(20,55)],         dur:570, nos:['NH 891','NH 893'],          partner:'Air New Zealand',partnerNo:'NZ 91',prices:{e:118000,pe:235000,bc:598000,fc:1480000} },
-  // ── Europe 1x daily ───────────────────────────────────────────────────────
-  // HEL served via WAW — see VIA_CONNECTIONS
-  BRU: { ac:[3],     outDeps:[m(12,5)],                       inArrs:[m(15,35)],                  dur:750, nos:['NH 241'],                   partner:'Brussels Airlines',partnerNo:'SN 291',prices:{e:158000,pe:315000,bc:798000,fc:null} },
-  ARN: { ac:[3],     outDeps:[m(11,50)],                    inArrs:[m(13,20)],                     dur:690, nos:['NH 233'],                   partner:null,                             prices:{e:158000,pe:315000,bc:798000,fc:null} },
-  MXP: { ac:[3],     outDeps:[m(12,50)],                    inArrs:[m(15,50)],                     dur:735, nos:['NH 257'],                   partner:'ITA Airways',  partnerNo:'AZ 789', prices:{e:162000,pe:325000,bc:818000,fc:null} },
-  // ── Europe 4–5x weekly (direct ANA) ──────────────────────────────────────
-  WAW: { ac:[3],     outDeps:[m(22,35)],                    inArrs:[m(0,5)],                     dur:690, nos:['NH 245'],                   partner:'LOT Polish',   partnerNo:'LO 77',  prices:{e:152000,pe:305000,bc:768000,fc:null} },
-  VIE: { ac:[3],     outDeps:[m(22,50)],                    inArrs:[m(1,20)],                     dur:720, nos:['NH 247'],                   partner:'Austrian',     partnerNo:'OS 51',  prices:{e:155000,pe:308000,bc:778000,fc:null} },
-  ZRH: { ac:[3],     outDeps:[m(22,50)],                    inArrs:[m(1,50)],                     dur:735, nos:['NH 249'],                   partner:'Swiss',        partnerNo:'LX 161', prices:{e:158000,pe:315000,bc:798000,fc:null} },
-  GVA: { ac:[3],     outDeps:[m(22,45)],                    inArrs:[m(2,15)],                     dur:750, nos:['NH 251'],                   partner:'Swiss',        partnerNo:'LX 165', prices:{e:158000,pe:315000,bc:798000,fc:null} },
-  FCO: { ac:[3],     outDeps:[m(22,15)],                       inArrs:[m(1,45)],                     dur:750, nos:['NH 253'],                   partner:'ITA Airways',  partnerNo:'AZ 791', prices:{e:158000,pe:315000,bc:798000,fc:null} },
-  // ── Middle East ───────────────────────────────────────────────────────────
-  DOH: { ac:[3],     outDeps:[m(23,25)],                       inArrs:[m(23,55)],                     dur:660, nos:['NH 271'],                   partner:null,                             prices:{e:88000, pe:175000,bc:448000,fc:null} },
-  AUH: { ac:[3],     outDeps:[m(23,10)],                       inArrs:[m(1,40)],                     dur:720, nos:['NH 273'],                   partner:null,                             prices:{e:92000, pe:185000,bc:468000,fc:null} },
-  DXB: { ac:[2],     outDeps:[m(23,15)],                       inArrs:[m(23,0)],                     dur:660, nos:['NH 275'],                   partner:null,                             prices:{e:92000, pe:185000,bc:468000,fc:1180000} },
-  // ── Africa ────────────────────────────────────────────────────────────────
-  CAI: { ac:[3],     outDeps:[m(23,15)],                       inArrs:[m(6,15)],                     dur:840, nos:['NH 291'],                   partner:'EgyptAir',     partnerNo:'MS 927', prices:{e:138000,pe:278000,bc:698000,fc:null} },
-  ADD: { ac:[3],     outDeps:[m(23,15)],                       inArrs:[m(7,15)],                     dur:870, nos:['NH 293'],                   partner:'Ethiopian',    partnerNo:'ET 665', prices:{e:145000,pe:292000,bc:738000,fc:null} },
-  // JNB served via ADD — see VIA_CONNECTIONS
-  // ── Oceania ───────────────────────────────────────────────────────────────
-  MEL: { ac:[3],     outDeps:[m(10,25)],                       inArrs:[m(8,55)],                  dur:600, nos:['NH 895'],                   partner:null,                             prices:{e:108000,pe:215000,bc:548000,fc:null} },
-  BNE: { ac:[3],     outDeps:[m(10,55)],                    inArrs:[m(7,25)],                     dur:570, nos:['NH 897'],                   partner:null,                             prices:{e:102000,pe:202000,bc:518000,fc:null} },
-  PER: { ac:[3],     outDeps:[m(11,5)],                       inArrs:[m(10,35)],                  dur:630, nos:['NH 899'],                   partner:null,                             prices:{e:98000, pe:195000,bc:498000,fc:null} },
-  AKL: { ac:[3],     outDeps:[m(22,25)],                       inArrs:[m(23,55)],                    dur:690, nos:['NH 889'],                   partner:'Air New Zealand',partnerNo:'NZ 97',prices:{e:125000,pe:248000,bc:628000,fc:null} },
-  CNS: { ac:[3],     outDeps:[m(10,5)],                       inArrs:[m(3,5)],                     dur:450, nos:['NH 887'],                   partner:null,                             prices:{e:82000, pe:162000,bc:418000,fc:null}, days:[1,2,4,5,6] },
 };
 
-// ── Via-connections ───────────────────────────────────────────────────────────
-const VIA_CONNECTIONS = {
-  DUB: { viaCode:'BRU', freedom:true, partner:'ANA', partnerNo:'NH 501', dur:105, note:'ANA freedom flight via Brussels'   },
-  CPH: { viaCode:'MUC', freedom:true, partner:'ANA', partnerNo:'NH 503', dur:150, note:'ANA freedom flight via Munich'    },
-  HEL: { viaCode:'WAW', freedom:true, partner:'ANA', partnerNo:'NH 505', dur:145, note:'ANA freedom flight via Warsaw'     },
-  OSL: { viaCode:'ARN', freedom:true, partner:'ANA', partnerNo:'NH 507', dur:90,  note:'ANA freedom flight via Stockholm'  },
-  BER: { viaCode:'FRA', freedom:true, partner:'ANA', partnerNo:'NH 509', dur:70,  note:'ANA freedom flight via Frankfurt'  },
-  PRG: { viaCode:'MUC', freedom:true, partner:'ANA', partnerNo:'NH 511', dur:95,  note:'ANA freedom flight via Munich'     },
-  LIS: { viaCode:'ZRH', freedom:true, partner:'ANA', partnerNo:'NH 513', dur:200, note:'ANA freedom flight via Zurich'     },
-  MAD: { viaCode:'GVA', freedom:true, partner:'ANA', partnerNo:'NH 515', dur:125, note:'ANA freedom flight via Geneva'     },
-  BCN: { viaCode:'FCO', freedom:true, partner:'ANA', partnerNo:'NH 517', dur:135, note:'ANA freedom flight via Rome'       },
-  ATH: { viaCode:'IST', freedom:true, partner:'ANA', partnerNo:'NH 519', dur:135, note:'ANA freedom flight via Istanbul'   },
-  BUD: { viaCode:'IST', freedom:true, partner:'ANA', partnerNo:'NH 521', dur:215, note:'ANA freedom flight via Istanbul'   },
-  ZAG: { viaCode:'VIE', freedom:true, partner:'ANA', partnerNo:'NH 523', dur:70,  note:'ANA freedom flight via Vienna'     },
-  AMS: { viaCode:'FRA', freedom:true, partner:'ANA', partnerNo:'NH 525', dur:60,  note:'ANA freedom flight via Frankfurt'  },
-  JNB: { viaCode:'ADD', freedom:true, partner:'ANA', partnerNo:'NH 527', dur:240, note:'ANA freedom flight via Addis Ababa'},
-
-  // ── Codeshare-only connections ─────────────────────────────────────────────
-  // NOT ANA destinations/freedom flights — these are interline itineraries:
-  // ANA operates the NRT↔hub leg, the partner airline operates its own
-  // flight (own number, own metal) on to the final city. Shown in search
-  // results as "ANA / <Partner>", not counted in ANA route/destination stats.
-  CMN: { viaCode:'IST', partner:'Turkish Airlines',  partnerNo:'TK 559', dur:285, note:'Codeshare connection on Turkish Airlines', acName:'Airbus A321neo' },
-  LOS: { viaCode:'ADD', partner:'Ethiopian Airlines', partnerNo:'ET 901', dur:325, note:'Codeshare connection on Ethiopian Airlines', acName:'Boeing 787-9' },
-  NBO: { viaCode:'FRA', partner:'Lufthansa',          partnerNo:'LH 590', dur:490, note:'Codeshare connection on Lufthansa', acName:'Boeing 787-9' },
-  GRU: { viaCode:'FRA', partner:'Lufthansa',          partnerNo:'LH 506', dur:755, note:'Codeshare connection on Lufthansa', acName:'Boeing 777-300ER' },
-  SCL: { viaCode:'PTY', partner:'Copa Airlines',      partnerNo:'CM 195', dur:395, note:'Codeshare connection on Copa Airlines', acName:'Boeing 737 MAX 9' },
-  EZE: { viaCode:'PTY', partner:'Copa Airlines',      partnerNo:'CM 213', dur:432, note:'Codeshare connection on Copa Airlines', acName:'Boeing 737 MAX 9' },
-  GIG: { viaCode:'PTY', partner:'Copa Airlines',      partnerNo:'CM 231', dur:434, note:'Codeshare connection on Copa Airlines', acName:'Boeing 737-800' },
-  BOG: { viaCode:'IAH', partner:'United Airlines',    partnerNo:'UA 205', dur:295, note:'Codeshare connection on United Airlines', acName:'Boeing 737-900' },
-  LIM: { viaCode:'IAH', partner:'United Airlines',    partnerNo:'UA 843', dur:395, note:'Codeshare connection on United Airlines', acName:'Boeing 787-8' },
-  NAN: { viaCode:'AKL', partner:'Air New Zealand',    partnerNo:'NZ 851', dur:185, note:'Codeshare connection on Air New Zealand', acName:'Airbus A321neo' },
-  PPT: { viaCode:'AKL', partner:'Air New Zealand',    partnerNo:'NZ 71',  dur:300, note:'Codeshare connection on Air New Zealand', acName:'Boeing 787-9' },
-};
-
-// ── Partner own-flight operations ─────────────────────────────────────────────
-const PARTNER_OPS = {
-  PEK: { name:'Air China',          nos:['CA 181','CA 183'],   outDeps:[m(10),   m(16,30)], inArrs:[m(11,30),m(18)],    dur:null,  acName:'Airbus A330-200' },
-  PVG: { name:'Air China',          nos:['CA 935','CA 937'],   outDeps:[m(9,30), m(16)],    inArrs:[m(10,30),m(17)],    dur:null,  acName:'Boeing 737 MAX' },
-  CAN: { name:'Air China',          nos:['CA 443'],            outDeps:[m(14)],             inArrs:[m(13)],             dur:245,   acName:'Airbus A330-200' },
-  SZX: { name:'Shenzhen Airlines', nos:['ZH 7010'],           outDeps:[m(9,30)],           inArrs:[m(8,30)],           dur:230,   acName:'Airbus A320neo' },
-  SIN: { name:'Singapore Airlines', nos:['SQ 11', 'SQ 639'],  outDeps:[m(11),   m(23,30)], inArrs:[m(9),    m(22)],    dur:null,  acName:'Airbus A350-900' },
-  TPE: { name:'EVA Air',            nos:['BR 197','BR 195'],   outDeps:[m(9,30), m(17)],    inArrs:[m(11),   m(18,30)], dur:null,  acName:'Boeing 787-9' },
-  BKK: { name:'Thai Airways',       nos:['TG 640','TG 642'],   outDeps:[m(11),   m(22,30)], inArrs:[m(10),   m(21,30)], dur:null,  acName:'Boeing 777-300ER' },
-  DEL: { name:'Air India',          nos:['AI 307'],            outDeps:[m(23)],             inArrs:[m(11)],             dur:null,  acName:'Airbus A350-900' },
-  FRA: { name:'Lufthansa',          nos:['LH 715'],            outDeps:[m(14)],             inArrs:[m(7,30)],           dur:720,   acName:'Airbus A340-300' },
-  MUC: { name:'Lufthansa',          nos:['LH 723'],            outDeps:[m(14)],             inArrs:[m(7,30)],           dur:735,   acName:'Airbus A340-300' },
-  IST: { name:'Turkish Airlines',   nos:['TK 51'],             outDeps:[m(14,30)],          inArrs:[m(8,30)],           dur:720,   acName:'Boeing 777-300ER' },
-  WAW: { name:'LOT Polish Airlines',nos:['LO 77'],             outDeps:[m(22,30)],          inArrs:[m(7)],              dur:690,   acName:'Boeing 787-9' },
-  ZRH: { name:'Swiss',              nos:['LX 161'],            outDeps:[m(22,30)],          inArrs:[m(7)],              dur:735,   acName:'Airbus A340-300' },
-  FCO: { name:'ITA Airways',        nos:['AZ 791'],            outDeps:[m(22)],             inArrs:[m(7)],              dur:750,   acName:'Airbus A320neo' },
-  VIE: { name:'Austrian Airlines',  nos:['OS 51'],             outDeps:[m(22,30)],          inArrs:[m(7)],              dur:720,   acName:'Boeing 767-300ER' },
-  SYD: { name:'Air New Zealand',    nos:['NZ 91'],             outDeps:[m(23,30)],          inArrs:[m(22)],             dur:570,   acName:'Boeing 787-9' },
-  AKL: { name:'Air New Zealand',    nos:['NZ 97'],             outDeps:[m(23,30)],          inArrs:[m(22)],             dur:690,   acName:'Boeing 787-9' },
-  EWR: { name:'United Airlines',    nos:['UA 79'],             outDeps:[m(14)],             inArrs:[m(10)],             dur:810,   acName:'Boeing 787-9', prices:{e:145000,pe:null,bc:738000,fc:null} },
-  ORD: { name:'United Airlines',    nos:['UA 881','UA 883'],   outDeps:[m(15),   m(22)],    inArrs:[m(12),   m(18)],    dur:750,   acName:'Boeing 787-9' },
-  IAH: { name:'United Airlines',    nos:['UA 7',  'UA 837'],   outDeps:[m(14,30),m(22)],    inArrs:[m(8),    m(17)],    dur:845,   acName:'Boeing 777-200' },
-  SEA: { name:'United Airlines',    nos:['UA 849'],            outDeps:[m(15)],             inArrs:[m(12)],             dur:540,   acName:'Boeing 787-9' },
-  SFO: { name:'United Airlines',    nos:['UA 837'],            outDeps:[m(15)],             inArrs:[m(13)],             dur:570,   acName:'Boeing 777-200' },
-  LAX: { name:'United Airlines',    nos:['UA 801'],            outDeps:[m(15)],             inArrs:[m(13,30)],          dur:600,   acName:'Boeing 777-200' },
-  DEN: { name:'United Airlines',    nos:['UA 133'],            outDeps:[m(22)],             inArrs:[m(10)],             dur:660,   acName:'Boeing 787-9' },
-  IAD: { name:'United Airlines',    nos:['UA 803'],            outDeps:[m(22)],             inArrs:[m(9)],              dur:840,   acName:'Boeing 787-9' },
-  HNL: { name:'United Airlines',    nos:['UA 803'],            outDeps:[m(14)],             inArrs:[m(12)],             dur:450,   acName:'Boeing 777-200' },
-  YVR: { name:'Air Canada',         nos:['AC 5'],              outDeps:[m(14)],             inArrs:[m(12,30)],          dur:570,   acName:'Boeing 787-9' },
-  YYZ: { name:'Air Canada',         nos:['AC 3'],              outDeps:[m(14,30)],          inArrs:[m(12,30)],          dur:810,   acName:'Airbus A330-300' },
-  YUL: { name:'Air Canada',         nos:['AC 7'],              outDeps:[m(22,30)],          inArrs:[m(8)],              dur:870,   acName:'Boeing 787-9' },
-};
+// ── Via-connections / partner own-flight operations ───────────────────────────
+// Dropped for this network rebuild — no codeshares or freedom-flight
+// connections in the current Tokyo Mega Hub frequency model (both carriers
+// fly pure non-stop networks from NRT). Left as empty objects rather than
+// removed so the rest of the engine (which checks `VIA_CONNECTIONS[code]` /
+// `PARTNER_OPS[code]` and degrades gracefully when absent) needs no changes.
+const VIA_CONNECTIONS = {};
+const PARTNER_OPS = {};
 
 // ── JAL Schedule (direct NRT↔dest only — JAL is modeled as a leaner, more
 // selective second carrier: 3 widebody types (A350-1000/787-9/787-8, reusing
 // ACFT codes 2/3/5), no connecting-hub or codeshare network of its own in this
-// model. Frequencies below are the daily-departure count nearest each route's
-// real weekly total (e.g. a 10/week route shows as 2x/day, a 4/week route as
-// 1x/day) — the demo has no weekly-calendar view, so day-of-week gating is not
-// modeled for these routes; they show every day they're searched. ─────────────
+// model. Rebuilt to match the Tokyo Mega Hub frequency table (53 destinations
+// / 83 flights / 532 departures·week, verified by script before this
+// rewrite) — "N weekly" routes get a real `days` restriction this time rather
+// than the daily-equivalent rounding the first build used. ───────────────────
 const JAL_SCHEDULE = {
-  // ── Asia 5x daily (787-9) ────────────────────────────────────────────────
-  ICN: { ac:[3,3,3,3,3], outDeps:[m(7,20),m(9,50),m(13,15),m(16,40),m(20,20)], inArrs:[m(10,15),m(12,45),m(17,30),m(21,10),m(0,45)], dur:150, nos:['JL 701','JL 703','JL 705','JL 707','JL 709'], prices:{e:28000,pe:52000,bc:158000,fc:null} },
-  HKG: { ac:[3,3,3,3,3], outDeps:[m(7,20),m(9,50),m(13,15),m(16,40),m(20,20)], inArrs:[m(10,15),m(12,45),m(17,30),m(21,10),m(0,45)], dur:270, nos:['JL 711','JL 713','JL 715','JL 717','JL 719'], prices:{e:42000,pe:82000,bc:225000,fc:null} },
-  SIN: { ac:[3,3,3,3,3], outDeps:[m(7,20),m(9,50),m(13,15),m(16,40),m(20,20)], inArrs:[m(10,15),m(12,45),m(17,30),m(21,10),m(0,45)], dur:450, nos:['JL 721','JL 723','JL 725','JL 727','JL 729'], prices:{e:55000,pe:108000,bc:288000,fc:null} },
-  // ── Asia 3x daily ────────────────────────────────────────────────────────
-  BKK: { ac:[3,3,3],   outDeps:[m(8,45),m(14,20),m(22,5)], inArrs:[m(11,30),m(17,50),m(1,20)], dur:390, nos:['JL 731','JL 733','JL 735'], prices:{e:48000,pe:92000,bc:258000,fc:null} },
-  CGK: { ac:[3,3,3],   outDeps:[m(8,45),m(14,20),m(22,5)], inArrs:[m(11,30),m(17,50),m(1,20)], dur:450, nos:['JL 741','JL 743','JL 745'], prices:{e:52000,pe:98000,bc:268000,fc:null} },
-  KUL: { ac:[3,3,3],   outDeps:[m(8,45),m(14,20),m(22,5)], inArrs:[m(11,30),m(17,50),m(1,20)], dur:440, nos:['JL 751','JL 753','JL 755'], prices:{e:52000,pe:98000,bc:268000,fc:null} },
-  GMP: { ac:[5,5,5],   outDeps:[m(8,45),m(14,20),m(22,5)], inArrs:[m(11,30),m(17,50),m(1,20)], dur:120, nos:['JL 761','JL 763','JL 765'], prices:{e:22000,pe:42000,bc:125000,fc:null} },
-  // ── Asia 2x daily ────────────────────────────────────────────────────────
-  PUS: { ac:[5,5],     outDeps:[m(8,55),m(15,20)],         inArrs:[m(12,10),m(19,35)],         dur:120, nos:['JL 801','JL 803'], prices:{e:22000,pe:42000,bc:125000,fc:null} },
-  PEK: { ac:[5,5],     outDeps:[m(8,55),m(15,20)],         inArrs:[m(12,10),m(19,35)],         dur:210, nos:['JL 811','JL 813'], prices:{e:32000,pe:62000,bc:185000,fc:null} },
-  PVG: { ac:[5,5],     outDeps:[m(8,55),m(15,20)],         inArrs:[m(12,10),m(19,35)],         dur:170, nos:['JL 821','JL 823'], prices:{e:28000,pe:55000,bc:168000,fc:null} },
-  HAN: { ac:[3,3],     outDeps:[m(8,55),m(15,20)],         inArrs:[m(12,10),m(19,35)],         dur:300, nos:['JL 831','JL 833'], prices:{e:42000,pe:82000,bc:218000,fc:null} },
-  SGN: { ac:[3,3],     outDeps:[m(8,55),m(15,20)],         inArrs:[m(12,10),m(19,35)],         dur:330, nos:['JL 841','JL 843'], prices:{e:45000,pe:88000,bc:235000,fc:null} },
-  MNL: { ac:[3,3],     outDeps:[m(8,55),m(15,20)],         inArrs:[m(12,10),m(19,35)],         dur:280, nos:['JL 851','JL 853'], prices:{e:38000,pe:72000,bc:198000,fc:null} },
-  TPE: { ac:[3,5],     outDeps:[m(8,55),m(15,20)],         inArrs:[m(12,10),m(19,35)],         dur:180, nos:['JL 861','JL 863'], prices:{e:32000,pe:62000,bc:185000,fc:null} },
-  // ── Asia 1x daily, day bank (787-8) ──────────────────────────────────────
-  HGH: { ac:[5],       outDeps:[m(9,40)],                  inArrs:[m(18,20)],                  dur:195, nos:['JL 901'], prices:{e:32000,pe:62000,bc:178000,fc:null} },
-  CTU: { ac:[5],       outDeps:[m(9,40)],                  inArrs:[m(18,20)],                  dur:270, nos:['JL 911'], prices:{e:38000,pe:72000,bc:198000,fc:null} },
-  CAN: { ac:[5],       outDeps:[m(9,40)],                  inArrs:[m(18,20)],                  dur:245, nos:['JL 921'], prices:{e:38000,pe:72000,bc:198000,fc:null} },
-  MFM: { ac:[5],       outDeps:[m(9,40)],                  inArrs:[m(18,20)],                  dur:235, nos:['JL 931'], prices:{e:38000,pe:72000,bc:198000,fc:null} },
-  CEB: { ac:[5],       outDeps:[m(9,40)],                  inArrs:[m(18,20)],                  dur:280, nos:['JL 881'], prices:{e:42000,pe:82000,bc:215000,fc:null} },
-  // ── Asia 1x daily, night bank (long thin routes) ─────────────────────────
-  DEL: { ac:[3],       outDeps:[m(22,45)],                 inArrs:[m(13,30)],                  dur:540, nos:['JL 871'], prices:{e:65000,pe:125000,bc:338000,fc:null} },
-  DOH: { ac:[3],       outDeps:[m(22,45)],                 inArrs:[m(13,30)],                  dur:660, nos:['JL 891'], prices:{e:88000,pe:175000,bc:448000,fc:null} },
-  BOM: { ac:[5],       outDeps:[m(22,45)],                 inArrs:[m(13,30)],                  dur:600, nos:['JL 941'], prices:{e:68000,pe:132000,bc:348000,fc:null} },
-  // ── North America 2x daily (A350-1000) ───────────────────────────────────
-  LAX: { ac:[2,2],     outDeps:[m(11,40),m(20,15)],        inArrs:[m(9,15),m(18,50)],          dur:600, nos:['JL 001','JL 003'], prices:{e:145000,pe:295000,bc:748000,fc:1820000} },
-  SFO: { ac:[2,2],     outDeps:[m(11,40),m(20,15)],        inArrs:[m(9,15),m(18,50)],          dur:600, nos:['JL 011','JL 013'], prices:{e:145000,pe:295000,bc:748000,fc:1820000} },
-  ORD: { ac:[2,2],     outDeps:[m(11,40),m(20,15)],        inArrs:[m(9,15),m(18,50)],          dur:750, nos:['JL 021','JL 023'], prices:{e:138000,pe:278000,bc:698000,fc:1680000} },
-  JFK: { ac:[2,2],     outDeps:[m(11,40),m(20,15)],        inArrs:[m(9,15),m(18,50)],          dur:810, nos:['JL 031','JL 033'], prices:{e:158000,pe:318000,bc:798000,fc:1980000} },
-  HNL: { ac:[2,2],     outDeps:[m(11,40),m(20,15)],        inArrs:[m(9,15),m(18,50)],          dur:450, nos:['JL 041','JL 043'], prices:{e:92000, pe:185000,bc:468000,fc:1198000} },
-  DFW: { ac:[2,2],     outDeps:[m(11,40),m(20,15)],        inArrs:[m(9,15),m(18,50)],          dur:810, nos:['JL 051','JL 053'], prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
-  // ── North America 2x daily (787-9, thinner) ──────────────────────────────
-  SEA: { ac:[3,3],     outDeps:[m(11,40),m(20,15)],        inArrs:[m(9,15),m(18,50)],          dur:540, nos:['JL 061','JL 063'], prices:{e:138000,pe:278000,bc:698000,fc:null} },
-  // ── North America 1x daily (787-9) ───────────────────────────────────────
-  SAN: { ac:[3],       outDeps:[m(14,50)],                 inArrs:[m(16,35)],                  dur:630, nos:['JL 071'], prices:{e:132000,pe:268000,bc:668000,fc:null} },
-  BOS: { ac:[3],       outDeps:[m(14,50)],                 inArrs:[m(16,35)],                  dur:840, nos:['JL 081'], prices:{e:142000,pe:285000,bc:718000,fc:null} },
-  YVR: { ac:[3],       outDeps:[m(14,50)],                 inArrs:[m(16,35)],                  dur:570, nos:['JL 091'], prices:{e:135000,pe:272000,bc:678000,fc:null} },
-  MUC: { ac:[3],       outDeps:[m(22,30)],                 inArrs:[m(0,40)],                   dur:735, nos:['JL 431'], prices:{e:162000,pe:325000,bc:818000,fc:null} },
-  YUL: { ac:[3],       outDeps:[m(14,50)],                 inArrs:[m(16,35)],                  dur:870, nos:['JL 111'], prices:{e:148000,pe:298000,bc:748000,fc:null} },
-  MEX: { ac:[3],       outDeps:[m(14,50)],                 inArrs:[m(16,35)],                  dur:900, nos:['JL 121'], prices:{e:148000,pe:298000,bc:748000,fc:null} },
-  // ── North America 1x daily (A350-1000) ───────────────────────────────────
-  YYZ: { ac:[2],       outDeps:[m(14,50)],                 inArrs:[m(16,35)],                  dur:810, nos:['JL 101'], prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
-  // ── Europe 2x daily (A350-1000) ───────────────────────────────────────────
-  LHR: { ac:[2,2],     outDeps:[m(10,5),m(22,0)],          inArrs:[m(13,20),m(1,45)],          dur:750, nos:['JL 401','JL 403'], prices:{e:168000,pe:335000,bc:848000,fc:2180000} },
-  CDG: { ac:[2,2],     outDeps:[m(10,5),m(22,0)],          inArrs:[m(13,20),m(1,45)],          dur:735, nos:['JL 411','JL 413'], prices:{e:165000,pe:328000,bc:828000,fc:2080000} },
-  // ── Europe 1x daily, night bank (A350-1000) ──────────────────────────────
-  FRA: { ac:[2],       outDeps:[m(22,30)],                 inArrs:[m(0,40)],                   dur:720, nos:['JL 421'], prices:{e:162000,pe:325000,bc:818000,fc:2050000} },
-  HEL: { ac:[2],       outDeps:[m(22,30)],                 inArrs:[m(0,40)],                   dur:585, nos:['JL 441'], prices:{e:155000,pe:310000,bc:780000,fc:1900000} },
-  // ── Oceania 1x daily (A350-1000 / 787-9) ─────────────────────────────────
-  SYD: { ac:[2],       outDeps:[m(10,45)],                 inArrs:[m(9,5)],                    dur:570, nos:['JL 771'], prices:{e:118000,pe:235000,bc:598000,fc:1480000} },
-  MEL: { ac:[3],       outDeps:[m(10,45)],                 inArrs:[m(9,5)],                    dur:600, nos:['JL 775'], prices:{e:108000,pe:215000,bc:548000,fc:null} },
-  BNE: { ac:[3],       outDeps:[m(10,45)],                 inArrs:[m(9,5)],                    dur:570, nos:['JL 779'], prices:{e:102000,pe:202000,bc:518000,fc:null} },
-  PER: { ac:[3],       outDeps:[m(10,45)],                 inArrs:[m(9,5)],                    dur:630, nos:['JL 783'], prices:{e:98000, pe:195000,bc:498000,fc:null} },
-  AKL: { ac:[3],       outDeps:[m(10,45)],                 inArrs:[m(9,5)],                    dur:690, nos:['JL 787'], prices:{e:125000,pe:248000,bc:628000,fc:null} },
+  // ── North America (18) ──────────────────────────────────────────────────
+  ORD: { ac:[2,2],   outDeps:[m(11,35),m(20,10)], inArrs:[m(9,10),m(18,45)], dur:750, nos:['JL 1','JL 3'],   prices:{e:138000,pe:278000,bc:698000,fc:1680000} },
+  DFW: { ac:[2,2],   outDeps:[m(11,35),m(20,10)], inArrs:[m(9,10),m(18,45)], dur:810, nos:['JL 5','JL 7'],   prices:{e:148000,pe:298000,bc:748000,fc:1820000} },
+  HNL: { ac:[2,2],   outDeps:[m(11,35),m(20,10)], inArrs:[m(9,10),m(18,45)], dur:450, nos:['JL 9','JL 11'],  prices:{e:92000, pe:185000,bc:468000,fc:1198000} },
+  LAX: { ac:[2,2],   outDeps:[m(11,35),m(20,10)], inArrs:[m(9,10),m(18,45)], dur:600, nos:['JL 13','JL 15'], prices:{e:145000,pe:295000,bc:748000,fc:1820000} },
+  JFK: { ac:[2,2],   outDeps:[m(11,35),m(20,10)], inArrs:[m(9,10),m(18,45)], dur:810, nos:['JL 17','JL 19'], prices:{e:158000,pe:318000,bc:798000,fc:1980000} },
+  SFO: { ac:[2,2],   outDeps:[m(11,35),m(20,10)], inArrs:[m(9,10),m(18,45)], dur:600, nos:['JL 21','JL 23'], prices:{e:145000,pe:295000,bc:748000,fc:1820000} },
+  BOS: { ac:[3],     outDeps:[m(14,45)],          inArrs:[m(16,30)],        dur:840, nos:['JL 25'],         prices:{e:142000,pe:285000,bc:718000,fc:null} },
+  SAN: { ac:[3],     outDeps:[m(14,45)],          inArrs:[m(16,30)],        dur:630, nos:['JL 27'],         prices:{e:132000,pe:268000,bc:668000,fc:null} },
+  SEA: { ac:[3],     outDeps:[m(14,45)],          inArrs:[m(16,30)],        dur:540, nos:['JL 29'],         prices:{e:138000,pe:278000,bc:698000,fc:null} },
+  YVR: { ac:[3],     outDeps:[m(14,45)],          inArrs:[m(16,30)],        dur:570, nos:['JL 31'],         prices:{e:135000,pe:272000,bc:678000,fc:null} },
+  CLT: { ac:[3],     outDeps:[m(14,45)],          inArrs:[m(16,30)],        dur:870, nos:['JL 33'],         prices:{e:135000,pe:272000,bc:678000,fc:null}, days:[1,2,3,5,6] },
+  MIA: { ac:[3],     outDeps:[m(14,45)],          inArrs:[m(16,30)],        dur:870, nos:['JL 35'],         prices:{e:145000,pe:290000,bc:738000,fc:null}, days:[1,2,4,5,0] },
+  PHL: { ac:[3],     outDeps:[m(14,45)],          inArrs:[m(16,30)],        dur:825, nos:['JL 37'],         prices:{e:142000,pe:285000,bc:718000,fc:null}, days:[1,3,4,5,6] },
+  PHX: { ac:[3],     outDeps:[m(14,45)],          inArrs:[m(16,30)],        dur:630, nos:['JL 39'],         prices:{e:132000,pe:268000,bc:668000,fc:null}, days:[2,3,4,6,0] },
+  LAS: { ac:[3],     outDeps:[m(14,45)],          inArrs:[m(16,30)],        dur:610, nos:['JL 41'],         prices:{e:138000,pe:278000,bc:698000,fc:null}, days:[1,3,5,6] },
+  MEX: { ac:[3],     outDeps:[m(14,45)],          inArrs:[m(16,30)],        dur:900, nos:['JL 43'],         prices:{e:148000,pe:298000,bc:748000,fc:null}, days:[2,4,5,0] },
+  LGA: { ac:[3],     outDeps:[m(14,45)],          inArrs:[m(16,30)],        dur:810, nos:['JL 45'],         prices:{e:150000,pe:302000,bc:760000,fc:null}, days:[1,2,5,6] },
+  YYZ: { ac:[2],     outDeps:[m(14,45)],          inArrs:[m(16,30)],        dur:810, nos:['JL 47'],         prices:{e:148000,pe:298000,bc:748000,fc:1820000}, days:[3,4,6,0] },
+  // ── Europe & Middle East (7) ─────────────────────────────────────────────
+  HEL: { ac:[2,2],   outDeps:[m(10,5),m(22,0)],   inArrs:[m(12,55),m(0,45)], dur:585, nos:['JL 49','JL 51'], prices:{e:155000,pe:310000,bc:780000,fc:1900000} },
+  LHR: { ac:[2,2],   outDeps:[m(10,5),m(22,0)],   inArrs:[m(12,55),m(0,45)], dur:750, nos:['JL 53','JL 55'], prices:{e:168000,pe:335000,bc:848000,fc:2180000} },
+  CDG: { ac:[2,2],   outDeps:[m(10,5),m(22,0)],   inArrs:[m(12,55),m(0,45)], dur:735, nos:['JL 57','JL 59'], prices:{e:165000,pe:328000,bc:828000,fc:2080000} },
+  DOH: { ac:[3],     outDeps:[m(22,25)],          inArrs:[m(0,35)],          dur:660, nos:['JL 61'],         prices:{e:88000, pe:175000,bc:448000,fc:null} },
+  FRA: { ac:[2],     outDeps:[m(22,25)],          inArrs:[m(0,35)],          dur:720, nos:['JL 63'],         prices:{e:162000,pe:325000,bc:818000,fc:2050000} },
+  BCN: { ac:[2],     outDeps:[m(22,25)],          inArrs:[m(0,35)],          dur:855, nos:['JL 65'],         prices:{e:160000,pe:320000,bc:810000,fc:1950000}, days:[2,4,6] },
+  MAD: { ac:[2],     outDeps:[m(22,25)],          inArrs:[m(0,35)],          dur:870, nos:['JL 67'],         prices:{e:162000,pe:325000,bc:820000,fc:1970000}, days:[1,3,5] },
+  // ── East & Southeast Asia (20) ───────────────────────────────────────────
+  HKG: { ac:[3,3,3,3,3], outDeps:[m(7,15),m(9,45),m(13,10),m(16,35),m(20,15)], inArrs:[m(10,10),m(12,40),m(17,25),m(21,5),m(0,40)], dur:270, nos:['JL 69','JL 71','JL 73','JL 75','JL 77'], prices:{e:42000,pe:82000,bc:225000,fc:null} },
+  BKK: { ac:[3,3,3],     outDeps:[m(8,40),m(14,15),m(22,0)],                   inArrs:[m(11,25),m(17,45),m(1,15)],                   dur:390, nos:['JL 79','JL 81','JL 83'],               prices:{e:48000,pe:92000,bc:258000,fc:null} },
+  KUL: { ac:[3,3,3],     outDeps:[m(8,40),m(14,15),m(22,0)],                   inArrs:[m(11,25),m(17,45),m(1,15)],                   dur:440, nos:['JL 85','JL 87','JL 89'],               prices:{e:52000,pe:98000,bc:268000,fc:null} },
+  ICN: { ac:[3,3,3],     outDeps:[m(8,40),m(14,15),m(22,0)],                   inArrs:[m(11,25),m(17,45),m(1,15)],                   dur:150, nos:['JL 91','JL 93','JL 95'],               prices:{e:28000,pe:52000,bc:158000,fc:null} },
+  SIN: { ac:[3,3,3],     outDeps:[m(8,40),m(14,15),m(22,0)],                   inArrs:[m(11,25),m(17,45),m(1,15)],                   dur:450, nos:['JL 97','JL 99','JL 101'],              prices:{e:55000,pe:108000,bc:288000,fc:null} },
+  PEK: { ac:[5,5],       outDeps:[m(8,50),m(15,15)],                           inArrs:[m(12,5),m(19,30)],                            dur:210, nos:['JL 103','JL 105'],                     prices:{e:32000,pe:62000,bc:185000,fc:null} },
+  PUS: { ac:[5,5],       outDeps:[m(8,50),m(15,15)],                           inArrs:[m(12,5),m(19,30)],                            dur:120, nos:['JL 107','JL 109'],                     prices:{e:22000,pe:42000,bc:125000,fc:null} },
+  HAN: { ac:[3,3],       outDeps:[m(8,50),m(15,15)],                           inArrs:[m(12,5),m(19,30)],                            dur:300, nos:['JL 111','JL 113'],                     prices:{e:42000,pe:82000,bc:218000,fc:null} },
+  SGN: { ac:[3,3],       outDeps:[m(8,50),m(15,15)],                           inArrs:[m(12,5),m(19,30)],                            dur:330, nos:['JL 115','JL 117'],                     prices:{e:45000,pe:88000,bc:235000,fc:null} },
+  CGK: { ac:[3,3],       outDeps:[m(8,50),m(15,15)],                           inArrs:[m(12,5),m(19,30)],                            dur:450, nos:['JL 119','JL 121'],                     prices:{e:52000,pe:98000,bc:268000,fc:null} },
+  MNL: { ac:[3,3],       outDeps:[m(8,50),m(15,15)],                           inArrs:[m(12,5),m(19,30)],                            dur:280, nos:['JL 123','JL 125'],                     prices:{e:38000,pe:72000,bc:198000,fc:null} },
+  GMP: { ac:[5,5],       outDeps:[m(8,50),m(15,15)],                           inArrs:[m(12,5),m(19,30)],                            dur:120, nos:['JL 127','JL 129'],                     prices:{e:22000,pe:42000,bc:125000,fc:null} },
+  PVG: { ac:[5,5],       outDeps:[m(8,50),m(15,15)],                           inArrs:[m(12,5),m(19,30)],                            dur:170, nos:['JL 131','JL 133'],                     prices:{e:28000,pe:55000,bc:168000,fc:null} },
+  TPE: { ac:[3,5],       outDeps:[m(8,50),m(15,15)],                           inArrs:[m(12,5),m(19,30)],                            dur:180, nos:['JL 135','JL 137'],                     prices:{e:32000,pe:62000,bc:185000,fc:null} },
+  CEB: { ac:[5],         outDeps:[m(9,35)],                                    inArrs:[m(18,15)],                                    dur:280, nos:['JL 139'],                              prices:{e:42000,pe:82000,bc:215000,fc:null} },
+  CTU: { ac:[5],         outDeps:[m(9,35)],                                    inArrs:[m(18,15)],                                    dur:270, nos:['JL 141'],                              prices:{e:38000,pe:72000,bc:198000,fc:null} },
+  CAN: { ac:[5],         outDeps:[m(9,35)],                                    inArrs:[m(18,15)],                                    dur:245, nos:['JL 143'],                              prices:{e:38000,pe:72000,bc:198000,fc:null} },
+  HGH: { ac:[5],         outDeps:[m(9,35)],                                    inArrs:[m(18,15)],                                    dur:195, nos:['JL 145'],                              prices:{e:32000,pe:62000,bc:178000,fc:null} },
+  MFM: { ac:[5],         outDeps:[m(9,35)],                                    inArrs:[m(18,15)],                                    dur:235, nos:['JL 147'],                              prices:{e:38000,pe:72000,bc:198000,fc:null} },
+  TSN: { ac:[5],         outDeps:[m(9,35)],                                    inArrs:[m(18,15)],                                    dur:185, nos:['JL 149'],                              prices:{e:28000,pe:55000,bc:162000,fc:null} },
+  // ── South Asia (2) ───────────────────────────────────────────────────────
+  DEL: { ac:[3],     outDeps:[m(22,50)],          inArrs:[m(13,25)],         dur:540, nos:['JL 151'],        prices:{e:65000,pe:125000,bc:338000,fc:null} },
+  CMB: { ac:[5],     outDeps:[m(22,50)],          inArrs:[m(13,25)],         dur:540, nos:['JL 153'],        prices:{e:65000,pe:128000,bc:328000,fc:null}, days:[2,4,6] },
+  // ── Oceania (6) ──────────────────────────────────────────────────────────
+  SYD: { ac:[2],     outDeps:[m(10,40)],          inArrs:[m(9,0)],           dur:570, nos:['JL 155'],        prices:{e:118000,pe:235000,bc:598000,fc:1480000} },
+  BNE: { ac:[3],     outDeps:[m(10,40)],          inArrs:[m(9,0)],           dur:570, nos:['JL 157'],        prices:{e:102000,pe:202000,bc:518000,fc:null}, days:[1,3,5,0] },
+  MEL: { ac:[3],     outDeps:[m(10,40)],          inArrs:[m(9,0)],           dur:600, nos:['JL 159'],        prices:{e:108000,pe:215000,bc:548000,fc:null}, days:[2,4,6,0] },
+  PER: { ac:[3],     outDeps:[m(10,40)],          inArrs:[m(9,0)],           dur:630, nos:['JL 161'],        prices:{e:98000, pe:195000,bc:498000,fc:null}, days:[1,2,4,6] },
+  AKL: { ac:[3],     outDeps:[m(10,40)],          inArrs:[m(9,0)],           dur:690, nos:['JL 163'],        prices:{e:125000,pe:248000,bc:628000,fc:null}, days:[2,4,6] },
+  NAN: { ac:[3],     outDeps:[m(10,40)],          inArrs:[m(9,0)],           dur:580, nos:['JL 165'],        prices:{e:95000, pe:190000,bc:480000,fc:null}, days:[1,3,5] },
 };
 
 // ── JAL direct NRT↔dest builder — mirrors buildDirect's structure/timing
