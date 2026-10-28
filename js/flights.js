@@ -114,6 +114,20 @@ const SCHEDULE = {
   MFM: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:235, nos:['NH 161'],                   partner:null, prices:{e:38000, pe:72000, bc:198000,fc:null} },
   TSA: { ac:[10],      outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:165, nos:['NH 163'],                   partner:null, prices:{e:32000, pe:62000, bc:185000,fc:null} },
   TSN: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:185, nos:['NH 165'],                   partner:null, prices:{e:28000, pe:55000, bc:162000,fc:null} },
+  // ── East & Southeast Asia — Secondary/Leisure, 4× Weekly (787-8) ─────────
+  // Added to broaden Asian connectivity beyond the daily-frequency tier —
+  // thin, leisure-leaning markets ANA reaches on a conservative weekly
+  // schedule rather than claiming daily service it wouldn't fill.
+  KHH: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:195, nos:['NH 179'], partner:null, prices:{e:28000, pe:52000, bc:152000,fc:null}, days:[1,3,5,0] },
+  TAE: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:100, nos:['NH 181'], partner:null, prices:{e:20000, pe:38000, bc:115000,fc:null}, days:[2,4,6,0] },
+  KWJ: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:120, nos:['NH 183'], partner:null, prices:{e:20000, pe:38000, bc:115000,fc:null}, days:[1,2,4,6] },
+  SUB: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:420, nos:['NH 185'], partner:null, prices:{e:55000, pe:108000,bc:278000,fc:null}, days:[2,3,5,6] },
+  DPS: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:445, nos:['NH 187'], partner:null, prices:{e:54000, pe:102000,bc:278000,fc:null}, days:[1,4,5,0] },
+  KHI: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:540, nos:['NH 189'], partner:null, prices:{e:72000, pe:142000,bc:368000,fc:null}, days:[2,3,6,0] },
+  VTE: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:360, nos:['NH 191'], partner:null, prices:{e:42000, pe:82000, bc:215000,fc:null}, days:[1,3,4,6] },
+  RGN: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:390, nos:['NH 193'], partner:null, prices:{e:45000, pe:88000, bc:228000,fc:null}, days:[2,4,5,0] },
+  HKT: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:420, nos:['NH 195'], partner:null, prices:{e:48000, pe:92000, bc:248000,fc:null}, days:[1,2,5,6] },
+  ULN: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:270, nos:['NH 197'], partner:null, prices:{e:32000, pe:62000, bc:168000,fc:null}, days:[3,4,6,0] },
   // ── South Asia (3) ───────────────────────────────────────────────────────
   DEL: { ac:[10,5],    outDeps:[m(9,0),m(15,30)],           inArrs:[m(12,30),m(19,0)],         dur:540, nos:['NH 167','NH 169'],          partner:null, prices:{e:65000, pe:125000,bc:338000,fc:798000} },
   HYD: { ac:[5],       outDeps:[m(9,30)],                   inArrs:[m(18,0)],                  dur:600, nos:['NH 171'],                   partner:null, prices:{e:65000, pe:125000,bc:338000,fc:null}, days:[1,3,5,0] },

@@ -391,7 +391,8 @@
 // (it still gets its own category in the route table below).
 const DEST_REGIONS = {
   asia:    ['BKK','HKG','ICN','SIN','TPE','PEK','PUS','HAN','SGN','CGK','KUL','MNL','GMP','PVG',
-            'CEB','CTU','CAN','HGH','MFM','TSA','TSN','DEL','HYD','BOM'],
+            'CEB','CTU','CAN','HGH','MFM','TSA','TSN','DEL','HYD','BOM',
+            'KHH','TAE','KWJ','SUB','DPS','KHI','VTE','RGN','HKT','ULN'],
   domestic:['OKA','FUK','ITM','NGO','CTS'],
   na:      ['ORD','LAX','SFO','HNL','IAH','JFK','SEA','YVR','DEN','EWR','YYZ','IAD','MEX','YUL'],
   europe:  ['FRA','LHR','CDG','BRU','IST','MUC','GVA','MXP','FCO','WAW','ZRH'],
@@ -633,8 +634,8 @@ const WEEKLY_4_5_SET = new Set(['PHL','LAS','SLC','PHX','CLT','PDX','MTY','SJC',
 // the Middle East or Africa directly, so those categories are gone.
 const RT_CATEGORIES = [
   { id:'domestic',  label:'Domestic Routes',          color:'#EC4899', codes:['OKA','FUK','ITM','NGO','CTS'] },
-  { id:'eastasia',  label:'East & Southeast Asia',    color:'#F59E0B', codes:['HKG','BKK','KUL','ICN','SIN','PEK','PUS','HAN','SGN','CGK','MNL','GMP','PVG','TPE','CEB','CTU','CAN','HGH','MFM','TSA','TSN'] },
-  { id:'southasia', label:'South Asia',               color:'#A78BFA', codes:['DEL','HYD','BOM'] },
+  { id:'eastasia',  label:'East & Southeast Asia',    color:'#F59E0B', codes:['HKG','BKK','KUL','ICN','SIN','PEK','PUS','HAN','SGN','CGK','MNL','GMP','PVG','TPE','CEB','CTU','CAN','HGH','MFM','TSA','TSN','KHH','TAE','KWJ','SUB','DPS','VTE','RGN','HKT','ULN'] },
+  { id:'southasia', label:'South Asia',               color:'#A78BFA', codes:['DEL','HYD','BOM','KHI'] },
   { id:'na',        label:'North America',            color:'#3B82F6', codes:['ORD','LAX','SFO','HNL','IAH','JFK','SEA','YVR','DEN','EWR','YYZ','IAD','MEX','YUL'] },
   { id:'europe',    label:'Europe & Middle East',      color:'#10B981', codes:['FRA','LHR','CDG','BRU','IST','MUC','GVA','MXP','FCO','WAW','ZRH'] },
   { id:'oceania',   label:'Oceania',                  color:'#06B6D4', codes:['AKL','SYD'] },
