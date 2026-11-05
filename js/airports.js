@@ -3,6 +3,16 @@ const AIRPORTS = {
     'KIX': { name: 'Kansai International Airport', nameJP: '関西国際空港', city: 'Osaka', country: 'Japan', lat: 34.4347, lng: 135.2440, hub: true },
     // ── North America ──────────────────────────────────────────────────────────
     'JFK': { name: 'John F. Kennedy Intl', nameJP: 'ジョン・F・ケネディ国際空港', city: 'New York', country: 'USA', lat: 40.6413, lng: -73.7781 },
+    // ── JAL A321XLR narrowbody tier additions ──────────────────────────────
+    'DAD': { name: 'Da Nang Intl', nameJP: 'ダナン国際空港', city: 'Da Nang', country: 'Vietnam', lat: 16.0439, lng: 108.1992 },
+    'ISB': { name: 'Islamabad Intl', nameJP: 'イスラマバード国際空港', city: 'Islamabad', country: 'Pakistan', lat: 33.5491, lng: 72.8260 },
+    'DVO': { name: 'Francisco Bangoy Intl', nameJP: 'フランシスコ・バンゴイ国際空港', city: 'Davao City', country: 'Philippines', lat: 7.1255, lng: 125.6456 },
+    'DRW': { name: 'Darwin Intl', nameJP: 'ダーウィン国際空港', city: 'Darwin', country: 'Australia', lat: -12.4147, lng: 130.8773 },
+    'DLC': { name: 'Dalian Zhoushuizi Intl', nameJP: '大連周水子国際空港', city: 'Dalian', country: 'China', lat: 38.9657, lng: 121.5386 },
+    'FOC': { name: 'Fuzhou Changle Intl', nameJP: '福州長楽国際空港', city: 'Fuzhou', country: 'China', lat: 25.9351, lng: 119.6633 },
+    'CKG': { name: 'Chongqing Jiangbei Intl', nameJP: '重慶江北国際空港', city: 'Chongqing', country: 'China', lat: 29.7192, lng: 106.6417 },
+    'WUH': { name: 'Wuhan Tianhe Intl', nameJP: '武漢天河国際空港', city: 'Wuhan', country: 'China', lat: 30.7838, lng: 114.2081 },
+    'CGO': { name: 'Zhengzhou Xinzheng Intl', nameJP: '鄭州新鄭国際空港', city: 'Zhengzhou', country: 'China', lat: 34.5197, lng: 113.8408 },
     'LGA': { name: 'LaGuardia Airport', nameJP: 'ラガーディア空港', city: 'New York', country: 'USA', lat: 40.7769, lng: -73.8740 },
     'LAX': { name: 'Los Angeles Intl', nameJP: 'ロサンゼルス国際空港', city: 'Los Angeles', country: 'USA', lat: 33.9425, lng: -118.4081 },
     'SFO': { name: 'San Francisco Intl', nameJP: 'サンフランシスコ国際空港', city: 'San Francisco', country: 'USA', lat: 37.6213, lng: -122.3790 },

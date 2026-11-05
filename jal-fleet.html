@@ -98,6 +98,8 @@ body.jal-page { background: var(--off-white, #FAF9F5); }
 
 .ac-a351j { background: linear-gradient(160deg, #2b0d14 0%, #6e1a29 60%, #8c0a20 100%); }
 .ac-789j  { background: linear-gradient(160deg, #0f1e3d 0%, #263b6e 60%, #37517e 100%); }
+.ac-a359j { background: linear-gradient(160deg, #3d1210 0%, #7a2a1e 60%, #9c3a1f 100%); }
+.ac-a321j { background: linear-gradient(160deg, #1f2937 0%, #374151 60%, #4b5563 100%); }
 .ac-788j  { background: linear-gradient(160deg, #1a2a4a 0%, #243d6b 60%, #2d4f88 100%); }
 
 .jfw-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; transition: transform 0.45s ease; }
@@ -251,17 +253,17 @@ body.jal-page { background: var(--off-white, #FAF9F5); }
   <div class="jf-hero-inner">
     <div class="jf-hero-tag">JAL FLEET</div>
     <h1 class="jf-hero-title">Three Aircraft.<br>One Clear Strategy.</h1>
-    <p class="jf-hero-sub">JAL runs a deliberately leaner widebody fleet than ANA's hub-scale build-out — no 777-9 flagship, no fifth aircraft type. Each of the three types has exactly one job: trunk long-haul, dual-role secondary/Asia flagship, or thin regional Asia.</p>
+    <p class="jf-hero-sub">JAL runs a breadth-first fleet across five aircraft types — no 777-9 flagship, but a narrowbody tier ANA's all-widebody doctrine has no answer for. Each type has its own job: trunk long-haul, secondary/Asia 2nd bank, flagship Asia, thin regional Asia, or thin long-range breadth.</p>
   </div>
 </div>
 
 <!-- Stats -->
 <div class="jf-stats-bar">
   <div class="jf-stats-inner">
-    <div class="jf-stat"><div class="jf-stat-num">3</div><div class="jf-stat-label">Aircraft Types</div></div>
-    <div class="jf-stat"><div class="jf-stat-num">624</div><div class="jf-stat-label">Seats Across Fleet (per rotation)</div></div>
-    <div class="jf-stat"><div class="jf-stat-num">53</div><div class="jf-stat-label">Routes Served</div></div>
-    <div class="jf-stat"><div class="jf-stat-num">0</div><div class="jf-stat-label">777-9s Operated</div></div>
+    <div class="jf-stat"><div class="jf-stat-num">5</div><div class="jf-stat-label">Aircraft Types</div></div>
+    <div class="jf-stat"><div class="jf-stat-num">1,040</div><div class="jf-stat-label">Seats Across Fleet (per rotation)</div></div>
+    <div class="jf-stat"><div class="jf-stat-num">69</div><div class="jf-stat-label">Routes Served</div></div>
+    <div class="jf-stat"><div class="jf-stat-num">19</div><div class="jf-stat-label">Narrowbody-Only Cities</div></div>
   </div>
 </div>
 
@@ -275,7 +277,7 @@ body.jal-page { background: var(--off-white, #FAF9F5); }
     <div class="jfw-explore">Explore →</div>
     <div class="jfw-bottom">
       <div class="jfw-name">Airbus A350-1000</div>
-      <div class="jfw-role">Flagship Long-Haul · North America, Europe &amp; Sydney · 14 routes</div>
+      <div class="jfw-role">Flagship Long-Haul · North America, Europe &amp; Sydney · 11 routes</div>
       <div class="jfw-pill">267 seats</div>
     </div>
   </div>
@@ -283,12 +285,24 @@ body.jal-page { background: var(--off-white, #FAF9F5); }
   <div class="jf-widget ac-789j" data-aircraft="787-9" role="button" tabindex="0" aria-label="Boeing 787-9, click to expand">
     <img class="jfw-photo" src="assets/fleet-789.jpg" alt="JAL Boeing 787-9" style="object-position:center 52%;">
     <div class="jfw-overlay"></div>
-    <div class="jfw-type">DUAL ROLE</div>
+    <div class="jfw-type">WORKHORSE</div>
     <div class="jfw-explore">Explore →</div>
     <div class="jfw-bottom">
       <div class="jfw-name">Boeing 787-9</div>
-      <div class="jfw-role">Secondary Long-Haul + Flagship Asia · 28 routes, more than any other JAL type</div>
+      <div class="jfw-role">Secondary Long-Haul · North America, Europe &amp; Oceania · 20 routes</div>
       <div class="jfw-pill">193 seats</div>
+    </div>
+  </div>
+
+  <div class="jf-widget ac-a359j" data-aircraft="a359" role="button" tabindex="0" aria-label="Airbus A350-900, click to expand">
+    <img class="jfw-photo" src="assets/fleet-a359.jpg" alt="JAL Airbus A350-900" style="object-position:center 40%;">
+    <div class="jfw-overlay"></div>
+    <div class="jfw-type">FLAGSHIP ASIA</div>
+    <div class="jfw-explore">Explore →</div>
+    <div class="jfw-bottom">
+      <div class="jfw-name">Airbus A350-900</div>
+      <div class="jfw-role">First Daily Bank, Flagship Asia · Hong Kong, Bangkok, Singapore &amp; Seoul</div>
+      <div class="jfw-pill">250 seats</div>
     </div>
   </div>
 
@@ -299,8 +313,20 @@ body.jal-page { background: var(--off-white, #FAF9F5); }
     <div class="jfw-explore">Explore →</div>
     <div class="jfw-bottom">
       <div class="jfw-name">Boeing 787-8</div>
-      <div class="jfw-role">Regional China, Korea &amp; Colombo · thinnest, shortest-range routes only</div>
+      <div class="jfw-role">Second Daily Bank, Thin Asia · 17 routes behind the A350-900's first bank</div>
       <div class="jfw-pill">164 seats</div>
+    </div>
+  </div>
+
+  <div class="jf-widget ac-a321j" data-aircraft="a321" role="button" tabindex="0" aria-label="Airbus A321XLR, click to expand">
+    <img class="jfw-photo" src="assets/fleet-788.avif" alt="JAL Airbus A321XLR" style="object-position:center 40%;">
+    <div class="jfw-overlay"></div>
+    <div class="jfw-type">NARROWBODY BREADTH</div>
+    <div class="jfw-explore">Explore →</div>
+    <div class="jfw-bottom">
+      <div class="jfw-name">Airbus A321XLR</div>
+      <div class="jfw-role">19 secondary cities, 4&times; weekly, zero overlap with ANA's network</div>
+      <div class="jfw-pill">166 seats</div>
     </div>
   </div>
 
@@ -311,7 +337,7 @@ body.jal-page { background: var(--off-white, #FAF9F5); }
 
   <div id="jf-detail-a350">
     <div class="jfmi-seats">Total: <strong>267 seats</strong> · Twin-engine widebody · <em>JAL's only flagship long-haul type</em></div>
-    <p style="font-size:13px;color:#6B7280;margin:-6px 0 14px;">Unlike ANA, which splits its A350-1000 into Premium and Main Trunk builds and tops its fleet with the 777-9, JAL runs one single A350-1000 configuration as its entire flagship — smaller and leaner than either ANA build, but with a genuine First Class cabin on every one of its fourteen routes.</p>
+    <p style="font-size:13px;color:#6B7280;margin:-6px 0 14px;">Unlike ANA, which splits its A350-1000 into Premium and Main Trunk builds and tops its fleet with the 777-9, JAL runs one single A350-1000 configuration as its entire flagship — smaller and leaner than either ANA build, but with a genuine First Class cabin on every one of its eleven routes, reserved for the true top tier of the network.</p>
     <div class="jfmi-label">Cabin Configuration</div>
     <div class="jf-cabins">
       <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-fc"></div><span class="jf-cabin-label">First Class</span><span class="jf-cabin-config">1-1-1 · Private suite · Door-to-door</span><span class="jf-cabin-seats">8</span></div>
@@ -331,18 +357,20 @@ body.jal-page { background: var(--off-white, #FAF9F5); }
             <div class="jf-dest-row"><span class="jf-dest-code">LAX</span><span class="jf-dest-city">Los Angeles</span><span class="jf-dest-freq">2×d</span></div>
             <div class="jf-dest-row"><span class="jf-dest-code">JFK</span><span class="jf-dest-city">New York</span><span class="jf-dest-freq">2×d</span></div>
             <div class="jf-dest-row"><span class="jf-dest-code">SFO</span><span class="jf-dest-city">San Francisco</span><span class="jf-dest-freq">2×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">YYZ</span><span class="jf-dest-city">Toronto</span><span class="jf-dest-freq">4×wk</span></div>
           </div>
         </div>
         <div>
           <div class="jf-region-head jrh-eu"><span class="rh-line"></span>Europe</div>
           <div class="jf-dest-list">
-            <div class="jf-dest-row"><span class="jf-dest-code">HEL</span><span class="jf-dest-city">Helsinki</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">HEL</span><span class="jf-dest-city">Helsinki</span><span class="jf-dest-freq">1×d</span></div>
             <div class="jf-dest-row"><span class="jf-dest-code">LHR</span><span class="jf-dest-city">London</span><span class="jf-dest-freq">2×d</span></div>
             <div class="jf-dest-row"><span class="jf-dest-code">CDG</span><span class="jf-dest-city">Paris</span><span class="jf-dest-freq">2×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">FRA</span><span class="jf-dest-city">Frankfurt</span><span class="jf-dest-freq">1×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">BCN</span><span class="jf-dest-city">Barcelona</span><span class="jf-dest-freq">3×wk</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">MAD</span><span class="jf-dest-city">Madrid</span><span class="jf-dest-freq">3×wk</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="jf-region-head jrh-me"><span class="rh-line"></span>Middle East</div>
+          <div class="jf-dest-list">
+            <div class="jf-dest-row"><span class="jf-dest-code">DOH</span><span class="jf-dest-city">Doha</span><span class="jf-dest-freq">1×d</span></div>
           </div>
         </div>
         <div>
@@ -361,8 +389,8 @@ body.jal-page { background: var(--off-white, #FAF9F5); }
   </div>
 
   <div id="jf-detail-787-9">
-    <div class="jfmi-seats">Total: <strong>193 seats</strong> · Twin-engine widebody · <em>JAL's busiest aircraft type by route count</em></div>
-    <p style="font-size:13px;color:#6B7280;margin:-6px 0 14px;">No First Class — this is where JAL's product strategy diverges hardest from ANA's: the 787-9 carries JAL's Business/Premium Economy/Economy product on both its flagship Asia routes (Hong Kong 5× daily, Seoul/Singapore/Bangkok/KL 3× daily) and the bulk of its secondary long-haul network, letting the A350-1000 stay reserved for the true top tier. The widest route count of any JAL type.</p>
+    <div class="jfmi-seats">Total: <strong>193 seats</strong> · Twin-engine widebody · <em>JAL's secondary long-haul type</em></div>
+    <p style="font-size:13px;color:#6B7280;margin:-6px 0 14px;">No First Class — the 787-9 carries JAL's Business/Premium Economy/Economy product across the bulk of secondary long-haul North America and Europe, plus every thinner Oceania route and the one-daily Doha service, leaving the thin Asia second-bank network to the 787-8 instead.</p>
     <div class="jfmi-label">Cabin Configuration</div>
     <div class="jf-cabins">
       <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-bc"></div><span class="jf-cabin-label">Business Class</span><span class="jf-cabin-config">1-2-1 · Full flat · Direct aisle access</span><span class="jf-cabin-seats">32</span></div>
@@ -373,46 +401,43 @@ body.jal-page { background: var(--off-white, #FAF9F5); }
       <div class="jf-routes-title">Routes &amp; Destinations</div>
       <div class="jf-regions">
         <div>
-          <div class="jf-region-head jrh-asia"><span class="rh-line"></span>Asia — Flagship (5×/3×/2× Daily)</div>
+          <div class="jf-region-head jrh-na"><span class="rh-line"></span>North America</div>
           <div class="jf-dest-list cols-3">
-            <div class="jf-dest-row"><span class="jf-dest-code">HKG</span><span class="jf-dest-city">Hong Kong</span><span class="jf-dest-freq">5×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">BKK</span><span class="jf-dest-city">Bangkok</span><span class="jf-dest-freq">3×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">KUL</span><span class="jf-dest-city">Kuala Lumpur</span><span class="jf-dest-freq">3×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">ICN</span><span class="jf-dest-city">Seoul</span><span class="jf-dest-freq">3×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">SIN</span><span class="jf-dest-city">Singapore</span><span class="jf-dest-freq">3×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">HAN</span><span class="jf-dest-city">Hanoi</span><span class="jf-dest-freq">2×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">SGN</span><span class="jf-dest-city">Ho Chi Minh City</span><span class="jf-dest-freq">2×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">CGK</span><span class="jf-dest-city">Jakarta</span><span class="jf-dest-freq">2×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">MNL</span><span class="jf-dest-city">Manila</span><span class="jf-dest-freq">2×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">TPE</span><span class="jf-dest-city">Taipei</span><span class="jf-dest-freq">2×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">DEL</span><span class="jf-dest-city">Delhi</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">SEA</span><span class="jf-dest-city">Seattle</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">YVR</span><span class="jf-dest-city">Vancouver</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">BOS</span><span class="jf-dest-city">Boston</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">SAN</span><span class="jf-dest-city">San Diego</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">CLT</span><span class="jf-dest-city">Charlotte</span><span class="jf-dest-freq">5×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">PHL</span><span class="jf-dest-city">Philadelphia</span><span class="jf-dest-freq">5×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">MIA</span><span class="jf-dest-city">Miami</span><span class="jf-dest-freq">5×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">YYZ</span><span class="jf-dest-city">Toronto</span><span class="jf-dest-freq">5×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">LAS</span><span class="jf-dest-city">Las Vegas</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">MEX</span><span class="jf-dest-city">Mexico City</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">PHX</span><span class="jf-dest-city">Phoenix</span><span class="jf-dest-freq">4×wk</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="jf-region-head jrh-eu"><span class="rh-line"></span>Europe</div>
+          <div class="jf-dest-list">
+            <div class="jf-dest-row"><span class="jf-dest-code">HEL</span><span class="jf-dest-city">Helsinki</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">FRA</span><span class="jf-dest-city">Frankfurt</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">MAD</span><span class="jf-dest-city">Madrid</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">BCN</span><span class="jf-dest-city">Barcelona</span><span class="jf-dest-freq">4×wk</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="jf-region-head jrh-me"><span class="rh-line"></span>Middle East</div>
+          <div class="jf-dest-list">
             <div class="jf-dest-row"><span class="jf-dest-code">DOH</span><span class="jf-dest-city">Doha</span><span class="jf-dest-freq">1×d</span></div>
           </div>
         </div>
         <div>
-          <div class="jf-region-head jrh-na"><span class="rh-line"></span>North America</div>
-          <div class="jf-dest-list cols-3">
-            <div class="jf-dest-row"><span class="jf-dest-code">BOS</span><span class="jf-dest-city">Boston</span><span class="jf-dest-freq">1×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">SAN</span><span class="jf-dest-city">San Diego</span><span class="jf-dest-freq">1×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">SEA</span><span class="jf-dest-city">Seattle</span><span class="jf-dest-freq">1×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">YVR</span><span class="jf-dest-city">Vancouver</span><span class="jf-dest-freq">1×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">CLT</span><span class="jf-dest-city">Charlotte</span><span class="jf-dest-freq">5×wk</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">MIA</span><span class="jf-dest-city">Miami</span><span class="jf-dest-freq">5×wk</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">PHL</span><span class="jf-dest-city">Philadelphia</span><span class="jf-dest-freq">5×wk</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">PHX</span><span class="jf-dest-city">Phoenix</span><span class="jf-dest-freq">5×wk</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">LAS</span><span class="jf-dest-city">Las Vegas</span><span class="jf-dest-freq">4×wk</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">MEX</span><span class="jf-dest-city">Mexico City</span><span class="jf-dest-freq">4×wk</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">LGA</span><span class="jf-dest-city">New York-LaGuardia</span><span class="jf-dest-freq">4×wk</span></div>
-          </div>
-        </div>
-        <div>
           <div class="jf-region-head jrh-oc"><span class="rh-line"></span>Oceania</div>
-          <div class="jf-dest-list cols-3">
+          <div class="jf-dest-list">
+            <div class="jf-dest-row"><span class="jf-dest-code">MEL</span><span class="jf-dest-city">Melbourne</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">AKL</span><span class="jf-dest-city">Auckland</span><span class="jf-dest-freq">4×wk</span></div>
             <div class="jf-dest-row"><span class="jf-dest-code">BNE</span><span class="jf-dest-city">Brisbane</span><span class="jf-dest-freq">4×wk</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">MEL</span><span class="jf-dest-city">Melbourne</span><span class="jf-dest-freq">4×wk</span></div>
             <div class="jf-dest-row"><span class="jf-dest-code">PER</span><span class="jf-dest-city">Perth</span><span class="jf-dest-freq">4×wk</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">AKL</span><span class="jf-dest-city">Auckland</span><span class="jf-dest-freq">3×wk</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">NAN</span><span class="jf-dest-city">Nadi (Fiji)</span><span class="jf-dest-freq">3×wk</span></div>
           </div>
         </div>
       </div>
@@ -425,8 +450,8 @@ body.jal-page { background: var(--off-white, #FAF9F5); }
   </div>
 
   <div id="jf-detail-787-8">
-    <div class="jfmi-seats">Total: <strong>164 seats</strong> · Twin-engine widebody · <em>Smallest, shortest-range JAL type</em></div>
-    <p style="font-size:13px;color:#6B7280;margin:-6px 0 14px;">JAL's most conservative aircraft — deployed only on the thinnest, shortest regional Asia routes it decided not to contest against ANA's own equivalent service, plus JAL's one South Asia route ANA doesn't fly at all: Colombo.</p>
+    <div class="jfmi-seats">Total: <strong>164 seats</strong> · Twin-engine widebody · <em>Second daily bank into Asia</em></div>
+    <p style="font-size:13px;color:#6B7280;margin:-6px 0 14px;">The thin end of JAL's widebody Asia network — no First Class, deployed on the second daily bank behind the A350-900's flagship service, plus the standalone Seoul-Gimpo, Guangzhou, Macau, Tianjin, Hangzhou and Chengdu routes the A350-900 doesn't reach at all.</p>
     <div class="jfmi-label">Cabin Configuration</div>
     <div class="jf-cabins">
       <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-bc"></div><span class="jf-cabin-label">Business Class</span><span class="jf-cabin-config">2-2-2 · Lie-flat</span><span class="jf-cabin-seats">20</span></div>
@@ -437,25 +462,25 @@ body.jal-page { background: var(--off-white, #FAF9F5); }
       <div class="jf-routes-title">Routes &amp; Destinations</div>
       <div class="jf-regions">
         <div>
-          <div class="jf-region-head jrh-asia"><span class="rh-line"></span>Korea &amp; China (Regional)</div>
+          <div class="jf-region-head jrh-asia"><span class="rh-line"></span>Asia — Second Daily Bank</div>
           <div class="jf-dest-list cols-3">
+            <div class="jf-dest-row"><span class="jf-dest-code">BKK</span><span class="jf-dest-city">Bangkok</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">SIN</span><span class="jf-dest-city">Singapore</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">KUL</span><span class="jf-dest-city">Kuala Lumpur</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">PEK</span><span class="jf-dest-city">Beijing</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">PVG</span><span class="jf-dest-city">Shanghai</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">PUS</span><span class="jf-dest-city">Busan</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">HAN</span><span class="jf-dest-city">Hanoi</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">SGN</span><span class="jf-dest-city">Ho Chi Minh City</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">CGK</span><span class="jf-dest-city">Jakarta</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">MNL</span><span class="jf-dest-city">Manila</span><span class="jf-dest-freq">1×d</span></div>
             <div class="jf-dest-row"><span class="jf-dest-code">GMP</span><span class="jf-dest-city">Seoul-Gimpo</span><span class="jf-dest-freq">2×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">PUS</span><span class="jf-dest-city">Busan</span><span class="jf-dest-freq">2×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">PEK</span><span class="jf-dest-city">Beijing</span><span class="jf-dest-freq">2×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">PVG</span><span class="jf-dest-city">Shanghai</span><span class="jf-dest-freq">2×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">TPE</span><span class="jf-dest-city">Taipei</span><span class="jf-dest-freq">2×d</span></div>
             <div class="jf-dest-row"><span class="jf-dest-code">CEB</span><span class="jf-dest-city">Cebu</span><span class="jf-dest-freq">1×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">CTU</span><span class="jf-dest-city">Chengdu</span><span class="jf-dest-freq">1×d</span></div>
             <div class="jf-dest-row"><span class="jf-dest-code">CAN</span><span class="jf-dest-city">Guangzhou</span><span class="jf-dest-freq">1×d</span></div>
-            <div class="jf-dest-row"><span class="jf-dest-code">HGH</span><span class="jf-dest-city">Hangzhou</span><span class="jf-dest-freq">1×d</span></div>
             <div class="jf-dest-row"><span class="jf-dest-code">MFM</span><span class="jf-dest-city">Macau</span><span class="jf-dest-freq">1×d</span></div>
             <div class="jf-dest-row"><span class="jf-dest-code">TSN</span><span class="jf-dest-city">Tianjin</span><span class="jf-dest-freq">1×d</span></div>
-          </div>
-        </div>
-        <div>
-          <div class="jf-region-head jrh-asia"><span class="rh-line"></span>South Asia</div>
-          <div class="jf-dest-list">
-            <div class="jf-dest-row"><span class="jf-dest-code">CMB</span><span class="jf-dest-city">Colombo</span><span class="jf-dest-freq">3×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">HGH</span><span class="jf-dest-city">Hangzhou</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">CTU</span><span class="jf-dest-city">Chengdu</span><span class="jf-dest-freq">1×d</span></div>
           </div>
         </div>
       </div>
@@ -463,6 +488,110 @@ body.jal-page { background: var(--off-white, #FAF9F5); }
         <div class="jf-spec"><span class="jf-spec-val">13,620 km</span><span class="jf-spec-lbl">Max Range</span></div>
         <div class="jf-spec"><span class="jf-spec-val">903 km/h</span><span class="jf-spec-lbl">Cruise Speed</span></div>
         <div class="jf-spec"><span class="jf-spec-val">164</span><span class="jf-spec-lbl">Total Seats</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="jf-detail-a359">
+    <div class="jfmi-seats">Total: <strong>250 seats</strong> · Twin-engine widebody · <em>Flagship Asia configuration</em></div>
+    <p style="font-size:13px;color:#6B7280;margin:-6px 0 14px;">JAL's dedicated Asia flagship — no First Class, but the first daily bank on every major Asia route the airline touches, from Hong Kong's 4×-daily service down to Delhi's single daily flight. 14 routes, all within the widebody's own regional lane.</p>
+    <div class="jfmi-label">Cabin Configuration</div>
+    <div class="jf-cabins">
+      <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-bc"></div><span class="jf-cabin-label">Business Class</span><span class="jf-cabin-config">1-2-1 · Full flat · Direct aisle access</span><span class="jf-cabin-seats">40</span></div>
+      <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-pe"></div><span class="jf-cabin-label">Premium Economy</span><span class="jf-cabin-config">2-3-2 · Extra legroom</span><span class="jf-cabin-seats">24</span></div>
+      <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-eco"></div><span class="jf-cabin-label">Economy</span><span class="jf-cabin-config">3-3-3 · In-seat power · 31" pitch</span><span class="jf-cabin-seats">186</span></div>
+    </div>
+    <div class="jf-routes-section">
+      <div class="jf-routes-title">Routes &amp; Destinations</div>
+      <div class="jf-regions">
+        <div>
+          <div class="jf-region-head jrh-asia"><span class="rh-line"></span>Asia — First Daily Bank</div>
+          <div class="jf-dest-list cols-3">
+            <div class="jf-dest-row"><span class="jf-dest-code">HKG</span><span class="jf-dest-city">Hong Kong</span><span class="jf-dest-freq">4×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">ICN</span><span class="jf-dest-city">Seoul-Incheon</span><span class="jf-dest-freq">4×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">BKK</span><span class="jf-dest-city">Bangkok</span><span class="jf-dest-freq">3×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">SIN</span><span class="jf-dest-city">Singapore</span><span class="jf-dest-freq">3×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">TPE</span><span class="jf-dest-city">Taipei</span><span class="jf-dest-freq">2×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">KUL</span><span class="jf-dest-city">Kuala Lumpur</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">PEK</span><span class="jf-dest-city">Beijing</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">PVG</span><span class="jf-dest-city">Shanghai</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">PUS</span><span class="jf-dest-city">Busan</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">HAN</span><span class="jf-dest-city">Hanoi</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">SGN</span><span class="jf-dest-city">Ho Chi Minh City</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">CGK</span><span class="jf-dest-city">Jakarta</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">MNL</span><span class="jf-dest-city">Manila</span><span class="jf-dest-freq">1×d</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">DEL</span><span class="jf-dest-city">Delhi</span><span class="jf-dest-freq">1×d</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="jf-specs-inline">
+        <div class="jf-spec"><span class="jf-spec-val">15,000 km</span><span class="jf-spec-lbl">Max Range</span></div>
+        <div class="jf-spec"><span class="jf-spec-val">903 km/h</span><span class="jf-spec-lbl">Cruise Speed</span></div>
+        <div class="jf-spec"><span class="jf-spec-val">250</span><span class="jf-spec-lbl">Total Seats</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="jf-detail-a321">
+    <div class="jfmi-seats">Total: <strong>166 seats</strong> · Single-aisle, long-range narrowbody · <em>Turkish Airlines-style breadth tier</em></div>
+    <p style="font-size:13px;color:#6B7280;margin:-6px 0 14px;">This is the strategic centerpiece of JAL's redesign — an aircraft ANA's all-widebody fleet has no equivalent of. The A321XLR's extended range lets JAL reach 19 secondary cities across Korea, Greater China, Southeast Asia, South Asia and the Pacific that neither airline's widebodies could justify flying thin, each at 4× weekly with zero route overlap against ANA's own network.</p>
+    <div class="jfmi-label">Cabin Configuration</div>
+    <div class="jf-cabins">
+      <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-bc"></div><span class="jf-cabin-label">Business Class</span><span class="jf-cabin-config">2-2 · Recliner, extra recline</span><span class="jf-cabin-seats">16</span></div>
+      <div class="jf-cabin-row"><div class="jf-cabin-dot jf-cabin-eco"></div><span class="jf-cabin-label">Economy</span><span class="jf-cabin-config">3-3 · In-seat power · 30" pitch</span><span class="jf-cabin-seats">150</span></div>
+    </div>
+    <div class="jf-routes-section">
+      <div class="jf-routes-title">Routes &amp; Destinations</div>
+      <div class="jf-regions">
+        <div>
+          <div class="jf-region-head jrh-asia"><span class="rh-line"></span>Korea</div>
+          <div class="jf-dest-list">
+            <div class="jf-dest-row"><span class="jf-dest-code">TAE</span><span class="jf-dest-city">Daegu</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">KWJ</span><span class="jf-dest-city">Gwangju</span><span class="jf-dest-freq">4×wk</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="jf-region-head jrh-asia"><span class="rh-line"></span>Greater China</div>
+          <div class="jf-dest-list cols-3">
+            <div class="jf-dest-row"><span class="jf-dest-code">KHH</span><span class="jf-dest-city">Kaohsiung</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">DLC</span><span class="jf-dest-city">Dalian</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">XIY</span><span class="jf-dest-city">Xi'an</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">FOC</span><span class="jf-dest-city">Fuzhou</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">CKG</span><span class="jf-dest-city">Chongqing</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">WUH</span><span class="jf-dest-city">Wuhan</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">CGO</span><span class="jf-dest-city">Zhengzhou</span><span class="jf-dest-freq">4×wk</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="jf-region-head jrh-asia"><span class="rh-line"></span>Southeast Asia</div>
+          <div class="jf-dest-list">
+            <div class="jf-dest-row"><span class="jf-dest-code">SUB</span><span class="jf-dest-city">Surabaya</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">DAD</span><span class="jf-dest-city">Da Nang</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">PNH</span><span class="jf-dest-city">Phnom Penh</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">RGN</span><span class="jf-dest-city">Yangon</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">DVO</span><span class="jf-dest-city">Davao City</span><span class="jf-dest-freq">4×wk</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="jf-region-head jrh-asia"><span class="rh-line"></span>South Asia</div>
+          <div class="jf-dest-list">
+            <div class="jf-dest-row"><span class="jf-dest-code">ISB</span><span class="jf-dest-city">Islamabad</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">KHI</span><span class="jf-dest-city">Karachi</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">CMB</span><span class="jf-dest-city">Colombo</span><span class="jf-dest-freq">4×wk</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="jf-region-head jrh-oc"><span class="rh-line"></span>Oceania &amp; Pacific</div>
+          <div class="jf-dest-list">
+            <div class="jf-dest-row"><span class="jf-dest-code">DRW</span><span class="jf-dest-city">Darwin</span><span class="jf-dest-freq">4×wk</span></div>
+            <div class="jf-dest-row"><span class="jf-dest-code">NAN</span><span class="jf-dest-city">Nadi (Fiji)</span><span class="jf-dest-freq">4×wk</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="jf-specs-inline">
+        <div class="jf-spec"><span class="jf-spec-val">8,700 km</span><span class="jf-spec-lbl">Max Range</span></div>
+        <div class="jf-spec"><span class="jf-spec-val">870 km/h</span><span class="jf-spec-lbl">Cruise Speed</span></div>
+        <div class="jf-spec"><span class="jf-spec-val">166</span><span class="jf-spec-lbl">Total Seats</span></div>
       </div>
     </div>
   </div>
@@ -494,9 +623,11 @@ body.jal-page { background: var(--off-white, #FAF9F5); }
 
 <script>
 const JF_DATA = {
-  'a350':  { type:'TRUNK FLAGSHIP', name:'Airbus A350-1000', role:'JAL\'s only flagship long-haul type', img:'assets/fleet-a351.jpg', imgPos:'center 42%', bg:'ac-a351j', detail:'jf-detail-a350' },
-  '787-9': { type:'DUAL ROLE',      name:'Boeing 787-9',     role:'Secondary long-haul + flagship Asia', img:'assets/fleet-789.jpg',  imgPos:'center 52%', bg:'ac-789j',  detail:'jf-detail-787-9' },
-  '787-8': { type:'SECONDARY ASIA', name:'Boeing 787-8',     role:'Regional China, Korea & Colombo',     img:'assets/fleet-788.avif',imgPos:'center 40%', bg:'ac-788j',  detail:'jf-detail-787-8' },
+  'a350':  { type:'TRUNK FLAGSHIP',     name:'Airbus A350-1000', role:'Flagship Long-Haul · North America, Europe & Sydney · 11 routes', img:'assets/fleet-a351.jpg', imgPos:'center 42%', bg:'ac-a351j', detail:'jf-detail-a350' },
+  '787-9': { type:'WORKHORSE',          name:'Boeing 787-9',     role:'Secondary Long-Haul · North America, Europe & Oceania · 20 routes', img:'assets/fleet-789.jpg',  imgPos:'center 52%', bg:'ac-789j',  detail:'jf-detail-787-9' },
+  '787-8': { type:'SECONDARY ASIA',     name:'Boeing 787-8',     role:'Second Daily Bank, Thin Asia · 17 routes behind the A350-900\'s first bank', img:'assets/fleet-788.avif', imgPos:'center 40%', bg:'ac-788j', detail:'jf-detail-787-8' },
+  'a359':  { type:'FLAGSHIP ASIA',      name:'Airbus A350-900',  role:'First Daily Bank, Flagship Asia · Hong Kong, Bangkok, Singapore & Seoul', img:'assets/fleet-a359.jpg', imgPos:'center 40%', bg:'ac-a359j', detail:'jf-detail-a359' },
+  'a321':  { type:'NARROWBODY BREADTH', name:'Airbus A321XLR',   role:'19 secondary cities, 4× weekly, zero overlap with ANA\'s network', img:'assets/fleet-788.avif', imgPos:'center 40%', bg:'ac-a321j', detail:'jf-detail-a321' },
 };
 
 function jfOpenModal(id) {

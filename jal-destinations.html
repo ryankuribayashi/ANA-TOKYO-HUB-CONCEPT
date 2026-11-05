@@ -221,8 +221,7 @@ body { background: var(--off-white, #FAF9F5); }
       </div>
     </div>
     <div class="jdt-jumps">
-      <a class="jdt-jump" href="#jdt-asia">East &amp; Southeast Asia</a>
-      <a class="jdt-jump" href="#jdt-southasia">South Asia</a>
+      <a class="jdt-jump" href="#jdt-asia">East, Southeast &amp; South Asia</a>
       <a class="jdt-jump" href="#jdt-na">North America</a>
       <a class="jdt-jump" href="#jdt-europe">Europe &amp; Middle East</a>
       <a class="jdt-jump" href="#jdt-oceania">Oceania</a>
@@ -256,21 +255,25 @@ body { background: var(--off-white, #FAF9F5); }
 // Rebuilt to match the new 53-destination JAL network (Tokyo Mega Hub
 // frequency table). South Asia folds into 'asia' here for the map filter —
 // it still gets its own category in the route table below.
+// Turkish Airlines-style rebuild, interim state: widebody tier only (50
+// destinations, full network: 50 widebody + 19 A321XLR narrowbody).
 const JD_REGIONS = {
-  asia:    ['HKG','BKK','KUL','ICN','SIN','PEK','PUS','HAN','SGN','CGK','MNL','GMP','PVG','TPE','CEB','CTU','CAN','HGH','MFM','TSN','DEL','CMB'],
-  na:      ['ORD','DFW','HNL','LAX','JFK','SFO','BOS','SAN','SEA','YVR','CLT','MIA','PHL','PHX','LAS','MEX','LGA','YYZ'],
-  europe:  ['HEL','LHR','CDG','FRA','BCN','MAD'],
+  asia:    ['HKG','BKK','SIN','ICN','KUL','PEK','PVG','PUS','HAN','SGN','CGK','MNL','GMP','TPE','DEL','CEB','CAN','MFM','TSN','HGH','CTU',
+            'TAE','KWJ','SUB','DAD','PNH','RGN','ISB','KHI','DVO','CMB','KHH','DLC','XIY','FOC','CKG','WUH','CGO'],
+  na:      ['ORD','LAX','SFO','HNL','JFK','DFW','SEA','YVR','BOS','SAN','CLT','PHL','MIA','YYZ','LAS','MEX','PHX'],
+  europe:  ['LHR','CDG','HEL','MAD','BCN','FRA'],
   me:      ['DOH'],
-  oceania: ['SYD','BNE','MEL','PER','AKL','NAN'],
+  oceania: ['SYD','MEL','AKL','BNE','PER','NAN','DRW'],
 };
 const JD_REGION_COLORS = { asia:'#F59E0B', na:'#3B82F6', europe:'#10B981', me:'#8B5CF6', oceania:'#06B6D4' };
 const JD_FLAGS = {
   'USA':'🇺🇸','Canada':'🇨🇦','Mexico':'🇲🇽','China':'🇨🇳','Hong Kong':'🇭🇰','Macau':'🇲🇴','South Korea':'🇰🇷','Taiwan':'🇹🇼',
   'Singapore':'🇸🇬','Thailand':'🇹🇭','Philippines':'🇵🇭','Indonesia':'🇮🇩','Malaysia':'🇲🇾','Vietnam':'🇻🇳','India':'🇮🇳','Sri Lanka':'🇱🇰',
   'UK':'🇬🇧','France':'🇫🇷','Germany':'🇩🇪','Finland':'🇫🇮','Spain':'🇪🇸','Qatar':'🇶🇦','Australia':'🇦🇺','New Zealand':'🇳🇿','Fiji':'🇫🇯',
+  'Cambodia':'🇰🇭','Myanmar':'🇲🇲','Pakistan':'🇵🇰',
 };
-const JD_ACFT_NAME = {2:'Airbus A350-1000',3:'Boeing 787-9',5:'Boeing 787-8'};
-const JD_ACFT_SHORT = {2:'A350-1000',3:'B787-9',5:'B787-8'};
+const JD_ACFT_NAME = {2:'Airbus A350-1000',3:'Boeing 787-9',4:'Airbus A350-900',5:'Boeing 787-8',11:'Airbus A321XLR'};
+const JD_ACFT_SHORT = {2:'A350-1000',3:'B787-9',4:'A350-900',5:'B787-8',11:'A321XLR'};
 
 function jdToHH(m) { const n=((m%1440)+1440)%1440; return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0'); }
 
@@ -392,8 +395,7 @@ document.getElementById('jdpBookBtn').addEventListener('click',()=>{
 
 /* ─── Route table ─────────────────────────────────────────── */
 const JDT_CATEGORIES = [
-  { id:'asia',      label:'East & Southeast Asia', color:'#F59E0B', codes:['HKG','BKK','KUL','ICN','SIN','PEK','PUS','HAN','SGN','CGK','MNL','GMP','PVG','TPE','CEB','CTU','CAN','HGH','MFM','TSN'] },
-  { id:'southasia', label:'South Asia',            color:'#A78BFA', codes:['DEL','CMB'] },
+  { id:'asia',      label:'East, Southeast & South Asia', color:'#F59E0B', codes:JD_REGIONS.asia },
   { id:'na',        label:'North America',         color:'#3B82F6', codes:JD_REGIONS.na },
   { id:'europe',    label:'Europe & Middle East',  color:'#10B981', codes:[...JD_REGIONS.europe, ...JD_REGIONS.me] },
   { id:'oceania',   label:'Oceania',               color:'#06B6D4', codes:JD_REGIONS.oceania },
@@ -416,7 +418,7 @@ function jdBuildRow(code, catColor) {
   const flag = JD_FLAGS[ap.country] || '🌍';
   const acUniq = [...new Set(s.ac)];
   const acHtml = acUniq.map(a => JD_ACFT_SHORT[a]).join('<br>');
-  const sharesTpe = code === 'TPE' ? `<span class="jd-share-badge">Split w/ 787-8</span>` : `<span class="jd-null">—</span>`;
+  const sharesTpe = acUniq.length > 1 ? `<span class="jd-share-badge">Split: ${acUniq.map(a => JD_ACFT_SHORT[a]).join('/')}</span>` : `<span class="jd-null">—</span>`;
 
   return `<tr class="jd-row" onclick="jdShowInfo('${code}','${catColor}')">
     <td class="jd-c-dest"><div class="jd-dc"><span class="jd-flag-c">${flag}</span><div class="jd-di"><span class="jd-iata">${code}</span><span class="jd-cname">${ap.city}</span></div></div></td>
