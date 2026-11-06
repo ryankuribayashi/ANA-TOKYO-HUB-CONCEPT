@@ -416,8 +416,8 @@ const FLAGS = {
   'Qatar':'🇶🇦','UAE':'🇦🇪','Egypt':'🇪🇬','Ethiopia':'🇪🇹','South Africa':'🇿🇦',
   'Australia':'🇦🇺','New Zealand':'🇳🇿',
 };
-const ACFT_NAME = {1:'Boeing 777-9',2:'Airbus A350-1000',3:'Boeing 787-9',4:'Airbus A350-900',5:'Boeing 787-8',6:'Airbus A350-900',7:'Boeing 787-8'};
-const ACFT_SHORT = {1:'B777-9',2:'A350-1000',3:'B787-9',4:'A350-900',5:'B787-8',6:'A350-900',7:'B787-8'};
+const ACFT_NAME = {1:'Boeing 777-9',2:'Airbus A350-1000',3:'Boeing 787-9',4:'Airbus A350-900',5:'Boeing 787-8',6:'Airbus A350-900',7:'Boeing 787-8',8:'Boeing 777-9'};
+const ACFT_SHORT = {1:'B777-9',2:'A350-1000',3:'B787-9',4:'A350-900',5:'B787-8',6:'A350-900',7:'B787-8',8:'B777-9'};
 
 function toHH(m) { const n=((m%1440)+1440)%1440; return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0'); }
 function bankLabel(mins) {
@@ -508,8 +508,7 @@ function showDestInfo(code, color) {
 
   let html='';
   if(s){
-    const WEEKLY_4_5=new Set(['PHL','LAS','SLC','PHX','CLT','PDX','MTY','SJC','PTY','IND','STL','MCI','ANC','AUS','TAE','KWJ','CJU','HKT','KHH','RGN','KTM','MLE','CMB','ULN','PNH','VTE','CNS']);
-    const freq=s.outDeps.length>=3?s.outDeps.length+'× Daily':s.outDeps.length===2?'2× Daily':WEEKLY_4_5.has(code)?'4–5× Weekly':'Daily';
+    const freq=freqLabel(s,code);
     html+=`<div class="dp-section"><div class="dp-section-label">Service Frequency</div><div class="dp-section-val">${freq}</div></div>`;
     html+=`<div class="dp-section"><div class="dp-section-label">NRT Departures</div><div class="dp-banks">`;
     s.outDeps.forEach(dep=>{const[cls,lbl]=bankLabel(dep);html+=`<span class="dp-bank-chip ${cls}">${lbl} ${toHH(dep)} JST</span>`;});
@@ -556,7 +555,7 @@ function showDestInfo(code, color) {
   if(ks||kpo){
     html+=`<div class="dp-kix-section"><div class="dp-kix-label">✦ Also served from Osaka Hub (KIX)</div>`;
     if(ks){
-      const kFreq=ks.days?'4–5× Weekly':ks.outDeps.length>=3?ks.outDeps.length+'× Daily':ks.outDeps.length===2?'2× Daily':'Daily';
+      const kFreq=freqLabel(ks,code);
       html+=`<div class="dp-section" style="background:transparent;border-color:rgba(11,61,145,0.1);"><div class="dp-section-label">KIX Frequency</div><div class="dp-section-val">${kFreq}</div></div>`;
       html+=`<div class="dp-section" style="background:transparent;border-color:rgba(11,61,145,0.1);"><div class="dp-section-label">KIX Departures</div><div class="dp-banks">`;
       ks.outDeps.forEach(dep=>{const[cls,lbl]=bankLabel(dep);html+=`<span class="dp-bank-chip ${cls}">${lbl} ${toHH(dep)} JST</span>`;});

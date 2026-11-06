@@ -261,7 +261,7 @@ const JD_REGIONS = {
   asia:    ['HKG','BKK','SIN','ICN','KUL','PEK','PVG','PUS','HAN','SGN','CGK','MNL','GMP','TPE','DEL','CEB','CAN','MFM','TSN','HGH','CTU',
             'TAE','KWJ','SUB','DAD','PNH','RGN','ISB','KHI','DVO','CMB','KHH','DLC','XIY','FOC','CKG','WUH','CGO'],
   na:      ['ORD','LAX','SFO','HNL','JFK','DFW','SEA','YVR','BOS','SAN','CLT','PHL','MIA','YYZ','LAS','MEX','PHX'],
-  europe:  ['LHR','CDG','HEL','MAD','BCN','FRA'],
+  europe:  ['LHR','CDG','HEL','MAD','BCN','FRA','AMS','CPH'],
   me:      ['DOH'],
   oceania: ['SYD','MEL','AKL','BNE','PER','NAN','DRW'],
 };
@@ -270,6 +270,7 @@ const JD_FLAGS = {
   'USA':'🇺🇸','Canada':'🇨🇦','Mexico':'🇲🇽','China':'🇨🇳','Hong Kong':'🇭🇰','Macau':'🇲🇴','South Korea':'🇰🇷','Taiwan':'🇹🇼',
   'Singapore':'🇸🇬','Thailand':'🇹🇭','Philippines':'🇵🇭','Indonesia':'🇮🇩','Malaysia':'🇲🇾','Vietnam':'🇻🇳','India':'🇮🇳','Sri Lanka':'🇱🇰',
   'UK':'🇬🇧','France':'🇫🇷','Germany':'🇩🇪','Finland':'🇫🇮','Spain':'🇪🇸','Qatar':'🇶🇦','Australia':'🇦🇺','New Zealand':'🇳🇿','Fiji':'🇫🇯',
+  'Netherlands':'🇳🇱','Denmark':'🇩🇰',
   'Cambodia':'🇰🇭','Myanmar':'🇲🇲','Pakistan':'🇵🇰',
 };
 const JD_ACFT_NAME = {2:'Airbus A350-1000',3:'Boeing 787-9',4:'Airbus A350-900',5:'Boeing 787-8',11:'Airbus A321XLR'};
@@ -402,6 +403,7 @@ const JDT_CATEGORIES = [
 ];
 
 function jdFreqLabel(s) {
+  if (s.days) return `${s.days.length}× Weekly`;
   if (s.outDeps.length >= 3) return `${s.outDeps.length}× Daily`;
   if (s.outDeps.length === 2) return '2× Daily';
   return '1× Daily';
