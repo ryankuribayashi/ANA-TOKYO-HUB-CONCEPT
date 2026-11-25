@@ -416,8 +416,10 @@ const FLAGS = {
   'Qatar':'🇶🇦','UAE':'🇦🇪','Egypt':'🇪🇬','Ethiopia':'🇪🇹','South Africa':'🇿🇦',
   'Australia':'🇦🇺','New Zealand':'🇳🇿',
 };
-const ACFT_NAME = {1:'Boeing 777-9',2:'Airbus A350-1000',3:'Boeing 787-9',4:'Airbus A350-900',5:'Boeing 787-8',6:'Airbus A350-900',7:'Boeing 787-8',8:'Boeing 777-9'};
-const ACFT_SHORT = {1:'B777-9',2:'A350-1000',3:'B787-9',4:'A350-900',5:'B787-8',6:'A350-900',7:'B787-8',8:'B777-9'};
+// Covers every ACFT code reachable from this page, including the KIX main-trunk
+// variants 9 and 10 — these were missing before, which left 15 Osaka rows blank.
+const ACFT_NAME = {1:'Boeing 777-9',2:'Airbus A350-1000',3:'Boeing 787-9',4:'Airbus A350-900',5:'Boeing 787-8',6:'Boeing 787-10',7:'Boeing 787-8',8:'Boeing 777-9',9:'Boeing 777-8',10:'Boeing 787-10',11:'Airbus A321XLR',12:'Boeing 777-8',13:'Boeing 787-10'};
+const ACFT_SHORT = {1:'B777-9',2:'A350-1000',3:'B787-9',4:'A350-900',5:'B787-8',6:'B787-10',7:'B787-8',8:'B777-9',9:'B777-8',10:'B787-10',11:'A321XLR',12:'B777-8',13:'B787-10'};
 
 function toHH(m) { const n=((m%1440)+1440)%1440; return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0'); }
 function bankLabel(mins) {

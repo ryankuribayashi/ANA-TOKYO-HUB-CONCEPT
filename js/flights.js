@@ -1,22 +1,30 @@
 // ── Aircraft ────────────────────────────────────────────────────────────────
+// ANA flies an all-Boeing fleet (777-9, 777-8, 787-10, 787-9, 787-8);
+// JAL flies the Airbus side (A350-1000, A350-900, A321XLR) plus the 787-9/787-8.
+// Codes 3, 5 (787-9, 787-8) are the only types both carriers share.
 const ACFT = {
+  // ── ANA ───────────────────────────────────────────────────────────────────
   1: { name: 'Boeing 777-9',      hasFc: true,  hasPe: false }, // B777-9 Premium Trunk: FC 8 / BC 48 / EC 300
-  2: { name: 'Airbus A350-1000',  hasFc: true,  hasPe: true  }, // A350-1000 Premium: FC 6 / BC 40 / PE 32 / EC 207
-  3: { name: 'Boeing 787-9',      hasFc: false, hasPe: true  },
-  4: { name: 'Airbus A350-900',   hasFc: true,  hasPe: true  }, // A350-900 Premium: FC 3 / BC 48 / PE 40 / EC 180
-  5: { name: 'Boeing 787-8',      hasFc: false, hasPe: true  },
-  6: { name: 'Airbus A350-900',   hasFc: true,  hasPe: false }, // A350-900 Domestic: FC 6 / Premium Class 40 / EC 270
-  7: { name: 'Boeing 787-8',      hasFc: false, hasPe: false }, // B787-8 Domestic: Premium Class 35 / EC 243
   8: { name: 'Boeing 777-9',      hasFc: true,  hasPe: false }, // B777-9 Main Trunk: FC 4 / BC 54 / EC 320
-  9: { name: 'Airbus A350-1000',  hasFc: true,  hasPe: true  }, // A350-1000 Main Trunk: FC 3 / BC 44 / PE 32 / EC 225
-  10: { name: 'Airbus A350-900',  hasFc: true,  hasPe: true  }, // A350-900 Main Trunk: FC 3 / BC 42 / PE 32 / EC 198
+  12: { name: 'Boeing 777-8',     hasFc: true,  hasPe: true  }, // B777-8 Premium: FC 6 / BC 48 / PE 36 / EC 220
+  9: { name: 'Boeing 777-8',      hasFc: true,  hasPe: true  }, // B777-8 Main Trunk (KIX): FC 3 / BC 46 / PE 32 / EC 244
+  13: { name: 'Boeing 787-10',    hasFc: true,  hasPe: true  }, // B787-10 Flagship Asia: FC 3 / BC 44 / PE 36 / EC 207
+  10: { name: 'Boeing 787-10',    hasFc: true,  hasPe: true  }, // B787-10 Main Trunk (KIX): FC 3 / BC 40 / PE 32 / EC 220
+  6: { name: 'Boeing 787-10',     hasFc: true,  hasPe: false }, // B787-10 Domestic: FC 6 / Premium Class 42 / EC 282
+  7: { name: 'Boeing 787-8',      hasFc: false, hasPe: false }, // B787-8 Domestic: Premium Class 35 / EC 243
+  // ── Shared ANA + JAL ──────────────────────────────────────────────────────
+  3: { name: 'Boeing 787-9',      hasFc: false, hasPe: true  },
+  5: { name: 'Boeing 787-8',      hasFc: false, hasPe: true  },
+  // ── JAL ───────────────────────────────────────────────────────────────────
+  2: { name: 'Airbus A350-1000',  hasFc: true,  hasPe: true  }, // JAL flagship long-haul: FC 8 / BC 40 / PE 24 / EC 195
+  4: { name: 'Airbus A350-900',   hasFc: true,  hasPe: true  }, // JAL flagship Asia: BC 40 / PE 24 / EC 186
   11: { name: 'Airbus A321XLR',   hasFc: false, hasPe: false }, // JAL narrowbody tier — Turkish-style thin-route breadth, Business + Economy only
 };
 
 function cabinStr(ac) {
-  if (ac === 1) return 'First Class · Business · Economy';
-  if (ac === 2) return 'First Class · Business · Premium Economy · Economy';
-  if (ac === 4) return 'First Class · Business · Premium Economy · Economy';
+  if (ac === 1 || ac === 8) return 'First Class · Business · Economy';
+  if (ac === 2 || ac === 4) return 'First Class · Business · Premium Economy · Economy';
+  if (ac === 9 || ac === 10 || ac === 12 || ac === 13) return 'First Class · Business · Premium Economy · Economy';
   if (ac === 6) return 'First Class · ANA Premium Class · Economy';
   if (ac === 7) return 'ANA Premium Class · Economy';
   if (ac === 11) return 'Business · Economy';
@@ -72,18 +80,18 @@ function m(h, min) { return h * 60 + (min || 0); }
 // First Class presence across the premium-tier aircraft. Thin weekly leisure
 // routes dropped in favor of depth on routes that matter.
 const SCHEDULE = {
-  ORD: { ac:[1,8,2], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:750, nos:['NH 1','NH 3','NH 5'], partner:null, prices:{e:138000, pe:278000, bc:698000, fc:1680000} },
-  SFO: { ac:[1,8,2], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:600, nos:['NH 7','NH 9','NH 11'], partner:null, prices:{e:145000, pe:295000, bc:748000, fc:1820000} },
-  LAX: { ac:[1,8,2], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:600, nos:['NH 13','NH 15','NH 17'], partner:null, prices:{e:145000, pe:295000, bc:748000, fc:1820000} },
-  JFK: { ac:[1,8,2], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:810, nos:['NH 19','NH 21','NH 23'], partner:null, prices:{e:158000, pe:318000, bc:798000, fc:1980000} },
-  IAH: { ac:[2,3], outDeps:[m(11,0),m(21,30)], inArrs:[m(9,0),m(19,0)], dur:845, nos:['NH 25','NH 27'], partner:null, prices:{e:138000, pe:278000, bc:698000, fc:1698000} },
-  SEA: { ac:[2,3], outDeps:[m(11,0),m(21,30)], inArrs:[m(9,0),m(19,0)], dur:540, nos:['NH 29','NH 31'], partner:null, prices:{e:138000, pe:278000, bc:698000, fc:1520000} },
-  YYZ: { ac:[2,3], outDeps:[m(11,0),m(21,30)], inArrs:[m(9,0),m(19,0)], dur:810, nos:['NH 33','NH 35'], partner:null, prices:{e:148000, pe:298000, bc:748000, fc:1820000} },
-  YVR: { ac:[2,3], outDeps:[m(11,0),m(21,30)], inArrs:[m(9,0),m(19,0)], dur:570, nos:['NH 37','NH 39'], partner:null, prices:{e:135000, pe:272000, bc:678000, fc:1498000} },
-  HNL: { ac:[2,2], outDeps:[m(11,0),m(21,30)], inArrs:[m(9,0),m(19,0)], dur:450, nos:['NH 41','NH 43'], partner:null, prices:{e:92000, pe:185000, bc:468000, fc:1198000} },
-  YUL: { ac:[2], outDeps:[m(15,0)], inArrs:[m(17,0)], dur:870, nos:['NH 45'], partner:null, prices:{e:148000, pe:298000, bc:748000, fc:1820000} },
-  IAD: { ac:[2], outDeps:[m(15,0)], inArrs:[m(17,0)], dur:840, nos:['NH 47'], partner:null, prices:{e:148000, pe:298000, bc:748000, fc:1820000} },
-  EWR: { ac:[2], outDeps:[m(15,0)], inArrs:[m(17,0)], dur:810, nos:['NH 49'], partner:null, prices:{e:150000, pe:302000, bc:760000, fc:1860000} },
+  ORD: { ac:[1,8,12], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:750, nos:['NH 1','NH 3','NH 5'], partner:null, prices:{e:138000, pe:278000, bc:698000, fc:1680000} },
+  SFO: { ac:[1,8,12], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:600, nos:['NH 7','NH 9','NH 11'], partner:null, prices:{e:145000, pe:295000, bc:748000, fc:1820000} },
+  LAX: { ac:[1,8,12], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:600, nos:['NH 13','NH 15','NH 17'], partner:null, prices:{e:145000, pe:295000, bc:748000, fc:1820000} },
+  JFK: { ac:[1,8,12], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:810, nos:['NH 19','NH 21','NH 23'], partner:null, prices:{e:158000, pe:318000, bc:798000, fc:1980000} },
+  IAH: { ac:[12,3], outDeps:[m(11,0),m(21,30)], inArrs:[m(9,0),m(19,0)], dur:845, nos:['NH 25','NH 27'], partner:null, prices:{e:138000, pe:278000, bc:698000, fc:1698000} },
+  SEA: { ac:[12,3], outDeps:[m(11,0),m(21,30)], inArrs:[m(9,0),m(19,0)], dur:540, nos:['NH 29','NH 31'], partner:null, prices:{e:138000, pe:278000, bc:698000, fc:1520000} },
+  YYZ: { ac:[12,3], outDeps:[m(11,0),m(21,30)], inArrs:[m(9,0),m(19,0)], dur:810, nos:['NH 33','NH 35'], partner:null, prices:{e:148000, pe:298000, bc:748000, fc:1820000} },
+  YVR: { ac:[12,3], outDeps:[m(11,0),m(21,30)], inArrs:[m(9,0),m(19,0)], dur:570, nos:['NH 37','NH 39'], partner:null, prices:{e:135000, pe:272000, bc:678000, fc:1498000} },
+  HNL: { ac:[12,12], outDeps:[m(11,0),m(21,30)], inArrs:[m(9,0),m(19,0)], dur:450, nos:['NH 41','NH 43'], partner:null, prices:{e:92000, pe:185000, bc:468000, fc:1198000} },
+  YUL: { ac:[12], outDeps:[m(15,0)], inArrs:[m(17,0)], dur:870, nos:['NH 45'], partner:null, prices:{e:148000, pe:298000, bc:748000, fc:1820000} },
+  IAD: { ac:[12], outDeps:[m(15,0)], inArrs:[m(17,0)], dur:840, nos:['NH 47'], partner:null, prices:{e:148000, pe:298000, bc:748000, fc:1820000} },
+  EWR: { ac:[12], outDeps:[m(15,0)], inArrs:[m(17,0)], dur:810, nos:['NH 49'], partner:null, prices:{e:150000, pe:302000, bc:760000, fc:1860000} },
   DEN: { ac:[3], outDeps:[m(15,0)], inArrs:[m(17,0)], dur:660, nos:['NH 51'], partner:null, prices:{e:132000, pe:268000, bc:668000, fc:null} },
   MEX: { ac:[3], outDeps:[m(15,0)], inArrs:[m(17,0)], dur:900, nos:['NH 53'], partner:null, prices:{e:148000, pe:298000, bc:748000, fc:null} },
   ATL: { ac:[3], outDeps:[m(15,0)], inArrs:[m(17,0)], dur:810, nos:['NH 227'], partner:null, prices:{e:145000, pe:292000, bc:738000, fc:null} },
@@ -91,11 +99,11 @@ const SCHEDULE = {
   MSP: { ac:[3], outDeps:[m(15,0)], inArrs:[m(17,0)], dur:720, nos:['NH 231'], partner:null, prices:{e:138000, pe:278000, bc:698000, fc:null} },
   SLC: { ac:[3], outDeps:[m(15,0)], inArrs:[m(17,0)], dur:660, nos:['NH 233'], partner:null, prices:{e:135000, pe:272000, bc:678000, fc:null} },
   BOS: { ac:[3], outDeps:[m(15,0)], inArrs:[m(17,0)], dur:840, nos:['NH 235'], partner:null, prices:{e:142000, pe:285000, bc:718000, fc:null} },
-  CDG: { ac:[1,2], outDeps:[m(10,30),m(22,0)], inArrs:[m(13,30),m(1,0)], dur:735, nos:['NH 55','NH 57'], partner:null, prices:{e:165000, pe:328000, bc:828000, fc:2080000} },
-  LHR: { ac:[1,2], outDeps:[m(10,30),m(22,0)], inArrs:[m(13,30),m(1,0)], dur:750, nos:['NH 59','NH 61'], partner:null, prices:{e:168000, pe:335000, bc:848000, fc:2180000} },
-  FRA: { ac:[2,2], outDeps:[m(10,30),m(22,0)], inArrs:[m(13,30),m(1,0)], dur:720, nos:['NH 63','NH 65'], partner:null, prices:{e:162000, pe:325000, bc:818000, fc:2050000} },
-  IST: { ac:[2], outDeps:[m(22,0)], inArrs:[m(1,0)], dur:720, nos:['NH 67'], partner:null, prices:{e:158000, pe:315000, bc:798000, fc:1980000} },
-  MUC: { ac:[2], outDeps:[m(22,0)], inArrs:[m(1,0)], dur:735, nos:['NH 69'], partner:null, prices:{e:162000, pe:325000, bc:818000, fc:2050000} },
+  CDG: { ac:[1,12], outDeps:[m(10,30),m(22,0)], inArrs:[m(13,30),m(1,0)], dur:735, nos:['NH 55','NH 57'], partner:null, prices:{e:165000, pe:328000, bc:828000, fc:2080000} },
+  LHR: { ac:[1,12], outDeps:[m(10,30),m(22,0)], inArrs:[m(13,30),m(1,0)], dur:750, nos:['NH 59','NH 61'], partner:null, prices:{e:168000, pe:335000, bc:848000, fc:2180000} },
+  FRA: { ac:[12,12], outDeps:[m(10,30),m(22,0)], inArrs:[m(13,30),m(1,0)], dur:720, nos:['NH 63','NH 65'], partner:null, prices:{e:162000, pe:325000, bc:818000, fc:2050000} },
+  IST: { ac:[12], outDeps:[m(22,0)], inArrs:[m(1,0)], dur:720, nos:['NH 67'], partner:null, prices:{e:158000, pe:315000, bc:798000, fc:1980000} },
+  MUC: { ac:[12], outDeps:[m(22,0)], inArrs:[m(1,0)], dur:735, nos:['NH 69'], partner:null, prices:{e:162000, pe:325000, bc:818000, fc:2050000} },
   BRU: { ac:[3], outDeps:[m(22,0)], inArrs:[m(1,0)], dur:750, nos:['NH 71'], partner:null, prices:{e:158000, pe:315000, bc:798000, fc:null} },
   ARN: { ac:[3], outDeps:[m(22,0)], inArrs:[m(1,0)], dur:690, nos:['NH 73'], partner:null, prices:{e:158000, pe:315000, bc:798000, fc:null} },
   FCO: { ac:[3], outDeps:[m(22,0)], inArrs:[m(1,0)], dur:750, nos:['NH 75'], partner:null, prices:{e:158000, pe:315000, bc:798000, fc:null}, days:[1,3,5,6] },
@@ -104,20 +112,20 @@ const SCHEDULE = {
   GVA: { ac:[3], outDeps:[m(22,0)], inArrs:[m(1,0)], dur:750, nos:['NH 81'], partner:null, prices:{e:158000, pe:315000, bc:798000, fc:null}, days:[1,3,5,0] },
   VIE: { ac:[3], outDeps:[m(22,0)], inArrs:[m(1,0)], dur:720, nos:['NH 83'], partner:null, prices:{e:155000, pe:308000, bc:778000, fc:null}, days:[2,3,5,6] },
   WAW: { ac:[3], outDeps:[m(22,0)], inArrs:[m(1,0)], dur:690, nos:['NH 85'], partner:null, prices:{e:152000, pe:305000, bc:768000, fc:null}, days:[2,4,5,0] },
-  HKG: { ac:[4,4,4,4,5], outDeps:[m(7,15),m(9,45),m(13,10),m(16,35),m(20,15)], inArrs:[m(10,10),m(12,40),m(17,25),m(21,5),m(0,40)], dur:270, nos:['NH 87','NH 89','NH 91','NH 93','NH 95'], partner:null, prices:{e:42000, pe:82000, bc:225000, fc:528000} },
-  ICN: { ac:[4,4,4,4,4], outDeps:[m(7,15),m(9,45),m(13,10),m(16,35),m(20,15)], inArrs:[m(10,10),m(12,40),m(17,25),m(21,5),m(0,40)], dur:150, nos:['NH 97','NH 99','NH 101','NH 103','NH 105'], partner:null, prices:{e:28000, pe:52000, bc:158000, fc:368000} },
-  SIN: { ac:[4,4,4,4,5], outDeps:[m(7,15),m(9,45),m(13,10),m(16,35),m(20,15)], inArrs:[m(10,10),m(12,40),m(17,25),m(21,5),m(0,40)], dur:450, nos:['NH 107','NH 109','NH 111','NH 113','NH 115'], partner:null, prices:{e:55000, pe:108000, bc:288000, fc:698000} },
-  TPE: { ac:[4,4,4,5], outDeps:[m(7,30),m(11,30),m(15,30),m(22,30)], inArrs:[m(10,30),m(14,0),m(18,30),m(1,30)], dur:180, nos:['NH 117','NH 119','NH 121','NH 123'], partner:null, prices:{e:32000, pe:62000, bc:185000, fc:448000} },
-  BKK: { ac:[4,4,4,5], outDeps:[m(7,30),m(11,30),m(15,30),m(22,30)], inArrs:[m(10,30),m(14,0),m(18,30),m(1,30)], dur:390, nos:['NH 125','NH 127','NH 129','NH 131'], partner:null, prices:{e:48000, pe:92000, bc:258000, fc:618000} },
-  PEK: { ac:[4,4,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:210, nos:['NH 133','NH 135','NH 137'], partner:null, prices:{e:32000, pe:62000, bc:185000, fc:448000} },
-  PVG: { ac:[4,4,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:170, nos:['NH 139','NH 141','NH 143'], partner:null, prices:{e:28000, pe:55000, bc:168000, fc:398000} },
-  PUS: { ac:[4,4,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:120, nos:['NH 145','NH 147','NH 149'], partner:null, prices:{e:22000, pe:42000, bc:125000, fc:null} },
-  HAN: { ac:[4,5,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:300, nos:['NH 151','NH 153','NH 155'], partner:null, prices:{e:42000, pe:82000, bc:218000, fc:null} },
-  SGN: { ac:[4,5,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:330, nos:['NH 157','NH 159','NH 161'], partner:null, prices:{e:45000, pe:88000, bc:235000, fc:null} },
-  CGK: { ac:[4,5,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:450, nos:['NH 163','NH 165','NH 167'], partner:null, prices:{e:52000, pe:98000, bc:268000, fc:638000} },
-  KUL: { ac:[4,5,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:440, nos:['NH 169','NH 171','NH 173'], partner:null, prices:{e:52000, pe:98000, bc:268000, fc:638000} },
-  MNL: { ac:[4,5,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:280, nos:['NH 175','NH 177','NH 179'], partner:null, prices:{e:38000, pe:72000, bc:198000, fc:478000} },
-  GMP: { ac:[4,5,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:120, nos:['NH 181','NH 183','NH 185'], partner:null, prices:{e:22000, pe:42000, bc:125000, fc:null} },
+  HKG: { ac:[13,13,13,13,5], outDeps:[m(7,15),m(9,45),m(13,10),m(16,35),m(20,15)], inArrs:[m(10,10),m(12,40),m(17,25),m(21,5),m(0,40)], dur:270, nos:['NH 87','NH 89','NH 91','NH 93','NH 95'], partner:null, prices:{e:42000, pe:82000, bc:225000, fc:528000} },
+  ICN: { ac:[13,13,13,13,13], outDeps:[m(7,15),m(9,45),m(13,10),m(16,35),m(20,15)], inArrs:[m(10,10),m(12,40),m(17,25),m(21,5),m(0,40)], dur:150, nos:['NH 97','NH 99','NH 101','NH 103','NH 105'], partner:null, prices:{e:28000, pe:52000, bc:158000, fc:368000} },
+  SIN: { ac:[13,13,13,13,5], outDeps:[m(7,15),m(9,45),m(13,10),m(16,35),m(20,15)], inArrs:[m(10,10),m(12,40),m(17,25),m(21,5),m(0,40)], dur:450, nos:['NH 107','NH 109','NH 111','NH 113','NH 115'], partner:null, prices:{e:55000, pe:108000, bc:288000, fc:698000} },
+  TPE: { ac:[13,13,13,5], outDeps:[m(7,30),m(11,30),m(15,30),m(22,30)], inArrs:[m(10,30),m(14,0),m(18,30),m(1,30)], dur:180, nos:['NH 117','NH 119','NH 121','NH 123'], partner:null, prices:{e:32000, pe:62000, bc:185000, fc:448000} },
+  BKK: { ac:[13,13,13,5], outDeps:[m(7,30),m(11,30),m(15,30),m(22,30)], inArrs:[m(10,30),m(14,0),m(18,30),m(1,30)], dur:390, nos:['NH 125','NH 127','NH 129','NH 131'], partner:null, prices:{e:48000, pe:92000, bc:258000, fc:618000} },
+  PEK: { ac:[13,13,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:210, nos:['NH 133','NH 135','NH 137'], partner:null, prices:{e:32000, pe:62000, bc:185000, fc:448000} },
+  PVG: { ac:[13,13,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:170, nos:['NH 139','NH 141','NH 143'], partner:null, prices:{e:28000, pe:55000, bc:168000, fc:398000} },
+  PUS: { ac:[13,13,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:120, nos:['NH 145','NH 147','NH 149'], partner:null, prices:{e:22000, pe:42000, bc:125000, fc:null} },
+  HAN: { ac:[13,5,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:300, nos:['NH 151','NH 153','NH 155'], partner:null, prices:{e:42000, pe:82000, bc:218000, fc:null} },
+  SGN: { ac:[13,5,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:330, nos:['NH 157','NH 159','NH 161'], partner:null, prices:{e:45000, pe:88000, bc:235000, fc:null} },
+  CGK: { ac:[13,5,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:450, nos:['NH 163','NH 165','NH 167'], partner:null, prices:{e:52000, pe:98000, bc:268000, fc:638000} },
+  KUL: { ac:[13,5,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:440, nos:['NH 169','NH 171','NH 173'], partner:null, prices:{e:52000, pe:98000, bc:268000, fc:638000} },
+  MNL: { ac:[13,5,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:280, nos:['NH 175','NH 177','NH 179'], partner:null, prices:{e:38000, pe:72000, bc:198000, fc:478000} },
+  GMP: { ac:[13,5,5], outDeps:[m(8,0),m(13,30),m(20,30)], inArrs:[m(11,0),m(17,0),m(0,30)], dur:120, nos:['NH 181','NH 183','NH 185'], partner:null, prices:{e:22000, pe:42000, bc:125000, fc:null} },
   CEB: { ac:[5,5], outDeps:[m(9,0),m(15,30)], inArrs:[m(12,30),m(19,0)], dur:280, nos:['NH 187','NH 189'], partner:null, prices:{e:42000, pe:82000, bc:215000, fc:null} },
   CTU: { ac:[5,5], outDeps:[m(9,0),m(15,30)], inArrs:[m(12,30),m(19,0)], dur:270, nos:['NH 191','NH 193'], partner:null, prices:{e:38000, pe:72000, bc:198000, fc:null} },
   CAN: { ac:[5,5], outDeps:[m(9,0),m(15,30)], inArrs:[m(12,30),m(19,0)], dur:245, nos:['NH 195','NH 197'], partner:null, prices:{e:38000, pe:72000, bc:198000, fc:null} },
@@ -125,11 +133,11 @@ const SCHEDULE = {
   MFM: { ac:[5,5], outDeps:[m(9,0),m(15,30)], inArrs:[m(12,30),m(19,0)], dur:235, nos:['NH 203','NH 205'], partner:null, prices:{e:38000, pe:72000, bc:198000, fc:null} },
   TSA: { ac:[5,5], outDeps:[m(9,0),m(15,30)], inArrs:[m(12,30),m(19,0)], dur:165, nos:['NH 207','NH 209'], partner:null, prices:{e:32000, pe:62000, bc:185000, fc:null} },
   TSN: { ac:[5,5], outDeps:[m(9,0),m(15,30)], inArrs:[m(12,30),m(19,0)], dur:185, nos:['NH 211','NH 213'], partner:null, prices:{e:28000, pe:55000, bc:162000, fc:null} },
-  DEL: { ac:[4,4], outDeps:[m(9,0),m(15,30)], inArrs:[m(12,30),m(19,0)], dur:540, nos:['NH 215','NH 217'], partner:null, prices:{e:65000, pe:125000, bc:338000, fc:798000} },
-  HYD: { ac:[4], outDeps:[m(9,30)], inArrs:[m(18,0)], dur:600, nos:['NH 219'], partner:null, prices:{e:65000, pe:125000, bc:338000, fc:null} },
-  BOM: { ac:[4], outDeps:[m(9,30)], inArrs:[m(18,0)], dur:600, nos:['NH 221'], partner:null, prices:{e:68000, pe:132000, bc:348000, fc:null} },
-  AKL: { ac:[4], outDeps:[m(10,30)], inArrs:[m(9,0)], dur:690, nos:['NH 223'], partner:null, prices:{e:125000, pe:248000, bc:628000, fc:null} },
-  SYD: { ac:[4], outDeps:[m(10,30)], inArrs:[m(9,0)], dur:570, nos:['NH 225'], partner:null, prices:{e:118000, pe:235000, bc:598000, fc:1480000} },
+  DEL: { ac:[13,13], outDeps:[m(9,0),m(15,30)], inArrs:[m(12,30),m(19,0)], dur:540, nos:['NH 215','NH 217'], partner:null, prices:{e:65000, pe:125000, bc:338000, fc:798000} },
+  HYD: { ac:[13], outDeps:[m(9,30)], inArrs:[m(18,0)], dur:600, nos:['NH 219'], partner:null, prices:{e:65000, pe:125000, bc:338000, fc:null} },
+  BOM: { ac:[13], outDeps:[m(9,30)], inArrs:[m(18,0)], dur:600, nos:['NH 221'], partner:null, prices:{e:68000, pe:132000, bc:348000, fc:null} },
+  AKL: { ac:[13], outDeps:[m(10,30)], inArrs:[m(9,0)], dur:690, nos:['NH 223'], partner:null, prices:{e:125000, pe:248000, bc:628000, fc:null} },
+  SYD: { ac:[13], outDeps:[m(10,30)], inArrs:[m(9,0)], dur:570, nos:['NH 225'], partner:null, prices:{e:118000, pe:235000, bc:598000, fc:1480000} },
   // ── Domestic ──────────────────────────────────────────────────────────────────
   // ac 6 = A350-900 Domestic (FC 6 / Premium Class 40 / EC 270), ac 7 = B787-8 Domestic (Premium Class 35 / EC 243)
   OKA: { ac:[6,6,6,7,6,6,7,7], outDeps:[m(6,0),m(8,0),m(10,0),m(12,0),m(14,0),m(16,0),m(18,0),m(20,0)], inArrs:[m(12,15),m(14,15),m(16,15),m(18,15),m(20,15),m(22,15),m(0,15),m(2,15)], dur:165, nos:['NH 3001','NH 3003','NH 3005','NH 3007','NH 3009','NH 3011','NH 3013','NH 3015'], partner:null, prices:{e:22000,pe:null,bc:42000,fc:58000}, domestic:true },
